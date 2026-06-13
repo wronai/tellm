@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
     name="tellm",
-    version="4.0.0",
+    version="4.0.2",
     packages=["tellm"],
     package_dir={"tellm": "."},
     install_requires=[

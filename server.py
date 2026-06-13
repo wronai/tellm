@@ -1,8 +1,13 @@
 """tellm v4 server"""
-import json
 import asyncio
+import json
+from http import HTTPStatus
+
 import websockets
-from .bot import TellmBot, Task, ViewData
+from websockets.datastructures import Headers
+from websockets.http11 import Response
+
+from .bot import TellmBot
 from .config import load_config
 from litellm import completion
 
@@ -15,7 +20,32 @@ class TellmServer:
     def register_function(self, name: str, func):
         self.bot.register_function(name, func)
 
-    async def handle(self, websocket, path):
+    def process_request(self, connection, request):
+        upgrade = request.headers.get("Upgrade", "").lower()
+        if upgrade == "websocket":
+            return None
+
+        if request.path == "/healthz":
+            body = b"ok\n"
+            content_type = "text/plain; charset=utf-8"
+        else:
+            host = request.headers.get("Host", f"{self.host}:{self.port}")
+            body = (
+                "<!doctype html><html><body>"
+                "<h1>tellm v4</h1>"
+                "<p>WebSocket endpoint: <code>ws://"
+                + host
+                + "</code></p>"
+                "</body></html>"
+            ).encode("utf-8")
+            content_type = "text/html; charset=utf-8"
+
+        headers = Headers()
+        headers["Content-Type"] = content_type
+        headers["Content-Length"] = str(len(body))
+        return Response(HTTPStatus.OK, "OK", headers, body)
+
+    async def handle(self, websocket, path=None):
         async for message in websocket:
             try:
                 data = json.loads(message)
@@ -39,8 +69,18 @@ class TellmServer:
                 print("Bqd:", e)
                 await websocket.send(json.dumps({"type": "error", "message": str(e)}))
 
-    def run(self):
+    async def serve_forever(self):
         print("tellm v4 na " + self.host + ":" + str(self.port))
-        start = websockets.serve(self.handle, self.host, self.port)
-        asyncio.get_event_loop().run_until_complete(start)
-        asyncio.get_event_loop().run_forever()
+        async with websockets.serve(
+            self.handle,
+            self.host,
+            self.port,
+            process_request=self.process_request,
+        ):
+            await asyncio.Future()
+
+    def run(self):
+        try:
+            asyncio.run(self.serve_forever())
+        except KeyboardInterrupt:
+            print("\ntellm stopped")

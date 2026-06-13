@@ -7,6 +7,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [4.0.2] - 2026-06-14
+
+### Docs
+- Update README.md
+
+### Test
+- Update tests/test_tellm.py
+
+### Other
+- Update .gitignore
+- Update MANIFEST.in
+- Update __init__.py
+- Update output/tellm-4.0.2-py3-none-any.whl
+- Update output/tellm-4.0.2.tar.gz
+- Update server.py
+
 ## [4.0.1] - 2026-06-14
 
 ### Docs
