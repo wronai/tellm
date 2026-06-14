@@ -1,0 +1,262 @@
+project: /home/tom/github/wronai/tellm
+generated_from: code2llm call graph analysis
+stats:
+  total_nodes: 19
+  total_edges: 15
+  modules_count: 6
+nodes:
+  scripts.protocol_smoke.audio_data_url:
+    name: audio_data_url
+    module: scripts.protocol_smoke
+    line: 54
+    cyclomatic_complexity: 1
+    calls_out: 4
+    calls_in: 1
+  scripts.protocol_smoke.mime_for_audio:
+    name: mime_for_audio
+    module: scripts.protocol_smoke
+    line: 48
+    cyclomatic_complexity: 3
+    calls_out: 1
+    calls_in: 1
+  scripts.protocol_smoke.check_ws_text:
+    name: check_ws_text
+    module: scripts.protocol_smoke
+    line: 80
+    cyclomatic_complexity: 3
+    calls_out: 7
+    calls_in: 1
+  scripts.generate_test_audio.main:
+    name: main
+    module: scripts.generate_test_audio
+    line: 91
+    cyclomatic_complexity: 4
+    calls_out: 9
+    calls_in: 0
+  scripts.generate_test_audio.run:
+    name: run
+    module: scripts.generate_test_audio
+    line: 36
+    cyclomatic_complexity: 1
+    calls_out: 1
+    calls_in: 2
+  scripts.generate_test_audio.generate_fixture:
+    name: generate_fixture
+    module: scripts.generate_test_audio
+    line: 47
+    cyclomatic_complexity: 2
+    calls_out: 13
+    calls_in: 1
+  server._websocket_logger:
+    name: _websocket_logger
+    module: server
+    line: 18
+    cyclomatic_complexity: 1
+    calls_out: 4
+    calls_in: 1
+  bot.TellmBot.__init__:
+    name: __init__
+    module: bot
+    line: 176
+    cyclomatic_complexity: 2
+    calls_out: 2
+    calls_in: 0
+  scripts.protocol_smoke.check_http:
+    name: check_http
+    module: scripts.protocol_smoke
+    line: 34
+    cyclomatic_complexity: 3
+    calls_out: 7
+    calls_in: 2
+  main.main:
+    name: main
+    module: main
+    line: 4
+    cyclomatic_complexity: 3
+    calls_out: 14
+    calls_in: 0
+  config.load_config:
+    name: load_config
+    module: config
+    line: 11
+    cyclomatic_complexity: 1
+    calls_out: 6
+    calls_in: 3
+  scripts.generate_test_audio.require_tool:
+    name: require_tool
+    module: scripts.generate_test_audio
+    line: 40
+    cyclomatic_complexity: 2
+    calls_out: 2
+    calls_in: 2
+  server.TellmServer.serve_forever:
+    name: serve_forever
+    module: server
+    line: 895
+    cyclomatic_complexity: 1
+    calls_out: 5
+    calls_in: 0
+  scripts.protocol_smoke.ws_ssl_context:
+    name: ws_ssl_context
+    module: scripts.protocol_smoke
+    line: 59
+    cyclomatic_complexity: 3
+    calls_out: 2
+    calls_in: 1
+  scripts.protocol_smoke.check_ws_audio:
+    name: check_ws_audio
+    module: scripts.protocol_smoke
+    line: 94
+    cyclomatic_complexity: 4
+    calls_out: 8
+    calls_in: 1
+  scripts.protocol_smoke.get_url:
+    name: get_url
+    module: scripts.protocol_smoke
+    line: 28
+    cyclomatic_complexity: 3
+    calls_out: 4
+    calls_in: 1
+  scripts.protocol_smoke.async_main:
+    name: async_main
+    module: scripts.protocol_smoke
+    line: 183
+    cyclomatic_complexity: 7
+    calls_out: 3
+    calls_in: 1
+  scripts.protocol_smoke.send_ws_payload:
+    name: send_ws_payload
+    module: scripts.protocol_smoke
+    line: 65
+    cyclomatic_complexity: 4
+    calls_out: 10
+    calls_in: 2
+  server.TellmServer._handle_transcription:
+    name: _handle_transcription
+    module: server
+    line: 801
+    cyclomatic_complexity: 2
+    calls_out: 15
+    calls_in: 0
+edges:
+- caller: server.TellmServer._handle_transcription
+  callee: config.load_config
+  call_type: resolved
+- caller: server.TellmServer.serve_forever
+  callee: server._websocket_logger
+  call_type: resolved
+- caller: bot.TellmBot.__init__
+  callee: config.load_config
+  call_type: resolved
+- caller: main.main
+  callee: config.load_config
+  call_type: resolved
+- caller: scripts.generate_test_audio.generate_fixture
+  callee: scripts.generate_test_audio.run
+  call_type: resolved
+- caller: scripts.generate_test_audio.generate_fixture
+  callee: scripts.generate_test_audio.require_tool
+  call_type: resolved
+- caller: scripts.generate_test_audio.main
+  callee: scripts.generate_test_audio.generate_fixture
+  call_type: resolved
+- caller: scripts.protocol_smoke.check_http
+  callee: scripts.protocol_smoke.get_url
+  call_type: resolved
+- caller: scripts.protocol_smoke.audio_data_url
+  callee: scripts.protocol_smoke.mime_for_audio
+  call_type: resolved
+- caller: scripts.protocol_smoke.send_ws_payload
+  callee: scripts.protocol_smoke.ws_ssl_context
+  call_type: resolved
+- caller: scripts.protocol_smoke.check_ws_text
+  callee: scripts.protocol_smoke.send_ws_payload
+  call_type: resolved
+- caller: scripts.protocol_smoke.check_ws_audio
+  callee: scripts.protocol_smoke.audio_data_url
+  call_type: resolved
+- caller: scripts.protocol_smoke.check_ws_audio
+  callee: scripts.protocol_smoke.send_ws_payload
+  call_type: resolved
+- caller: scripts.protocol_smoke.async_main
+  callee: scripts.protocol_smoke.check_ws_text
+  call_type: resolved
+- caller: scripts.protocol_smoke.async_main
+  callee: scripts.protocol_smoke.check_ws_audio
+  call_type: resolved
+modules:
+  bot:
+  - bot.TellmBot.__init__
+  config:
+  - config.load_config
+  main:
+  - main.main
+  scripts.generate_test_audio:
+  - scripts.generate_test_audio.generate_fixture
+  - scripts.generate_test_audio.main
+  - scripts.generate_test_audio.require_tool
+  - scripts.generate_test_audio.run
+  scripts.protocol_smoke:
+  - scripts.protocol_smoke.async_main
+  - scripts.protocol_smoke.audio_data_url
+  - scripts.protocol_smoke.check_http
+  - scripts.protocol_smoke.check_ws_audio
+  - scripts.protocol_smoke.check_ws_text
+  - scripts.protocol_smoke.get_url
+  - scripts.protocol_smoke.mime_for_audio
+  - scripts.protocol_smoke.send_ws_payload
+  - scripts.protocol_smoke.ws_ssl_context
+  server:
+  - server.TellmServer._handle_transcription
+  - server.TellmServer.serve_forever
+  - server._websocket_logger
+entry_points:
+- bot.TellmBot.__init__
+- bot.TellmBot._completion
+- bot.TellmBot._ensure_function_state
+- bot.TellmBot._execute_python_process
+- bot.TellmBot._execute_registered_function
+- bot.TellmBot._get_stt_model
+- bot.TellmBot._get_tts
+- bot.TellmBot._init_db
+- bot.TellmBot._normalize_processes
+- bot.TellmBot._parse_json_response
+- bot.TellmBot._process_globals
+- bot.TellmBot._restricted_import
+- bot.TellmBot.analyze_query
+- bot.TellmBot.evolve_function
+- bot.TellmBot.execute_processes
+- bot.TellmBot.execute_task
+- bot.TellmBot.generate_view
+- bot.TellmBot.get_tasks
+- bot.TellmBot.register_function
+- bot.TellmBot.save_evolution
+- bot.TellmBot.save_task
+- bot.TellmBot.save_view
+- bot.TellmBot.speak
+- bot.TellmBot.transcribe
+- bot.ViewData._render_block
+- bot.ViewData._render_dynamic
+- bot.ViewData._render_items
+- bot.ViewData._render_table
+- bot.ViewData._safe_json
+- bot.ViewData._safe_text
+- bot.ViewData.to_dict
+- bot.ViewData.to_html
+- main.main
+- scripts.generate_test_audio.main
+- scripts.protocol_smoke.main
+- server.TellmServer.__init__
+- server.TellmServer._audio_payload
+- server.TellmServer._call_maybe_async
+- server.TellmServer._handle_test_transcription
+- server.TellmServer._handle_transcription
+- server.TellmServer._http_response
+- server.TellmServer._run_blocking
+- server.TellmServer.handle
+- server.TellmServer.process_request
+- server.TellmServer.register_function
+- server.TellmServer.run
+- server.TellmServer.serve_forever
+- tellm.create_bot
+- tellm.run_server

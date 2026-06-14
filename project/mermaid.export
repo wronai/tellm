@@ -1,0 +1,109 @@
+flowchart TD
+%% generated in 0.00s
+    subgraph bot__TellmBot
+        bot__TellmBot____init__["__init__"]
+        bot__TellmBot___init_db["_init_db"]
+        bot__TellmBot__save_task["save_task"]
+        bot__TellmBot__save_evolution["save_evolution"]
+        bot__TellmBot__save_view["save_view"]
+        bot__TellmBot__get_tasks["get_tasks"]
+        bot__TellmBot__register_function["register_function"]
+        bot__TellmBot___completion["_completion"]
+        bot__TellmBot___parse_json_response("_parse_json_response CC=9")
+        bot__TellmBot___normalize_processes["_normalize_processes"]
+        bot__TellmBot___ensure_function_state["_ensure_function_state"]
+        bot__TellmBot___restricted_import["_restricted_import"]
+        bot__TellmBot___process_globals["_process_globals"]
+        bot__TellmBot___execute_registered_function["_execute_registered_function"]
+        bot__TellmBot___execute_python_process{{_execute_python_process CC=22}}
+        bot__TellmBot__execute_processes["execute_processes"]
+        bot__TellmBot___get_stt_model["_get_stt_model"]
+        bot__TellmBot___get_tts["_get_tts"]
+        bot__TellmBot__analyze_query("analyze_query CC=12")
+        bot__TellmBot__evolve_function["evolve_function"]
+        bot__TellmBot__execute_task["execute_task"]
+        bot__TellmBot__transcribe["transcribe"]
+        bot__TellmBot__speak["speak"]
+        bot__TellmBot__generate_view["generate_view"]
+    end
+    subgraph bot__ViewData
+        bot__ViewData__to_dict["to_dict"]
+        bot__ViewData___safe_json["_safe_json"]
+        bot__ViewData___safe_text["_safe_text"]
+        bot__ViewData___render_items["_render_items"]
+        bot__ViewData___render_table("_render_table CC=11")
+        bot__ViewData___render_block("_render_block CC=11")
+        bot__ViewData___render_dynamic["_render_dynamic"]
+        bot__ViewData__to_html["to_html"]
+    end
+    subgraph config
+        config__load_config["load_config"]
+    end
+    subgraph main
+        main__main["main"]
+    end
+    subgraph scripts__generate_test_audio
+        scripts__generate_test_audio__run["run"]
+        scripts__generate_test_audio__require_tool["require_tool"]
+        scripts__generate_test_audio__generate_fixture["generate_fixture"]
+        scripts__generate_test_audio__main["main"]
+    end
+    subgraph scripts__protocol_smoke
+        scripts__protocol_smoke__ws_url_from_http["ws_url_from_http"]
+        scripts__protocol_smoke__get_url["get_url"]
+        scripts__protocol_smoke__check_http["check_http"]
+        scripts__protocol_smoke__mime_for_audio["mime_for_audio"]
+        scripts__protocol_smoke__audio_data_url["audio_data_url"]
+        scripts__protocol_smoke__ws_ssl_context["ws_ssl_context"]
+        scripts__protocol_smoke__send_ws_payload["send_ws_payload"]
+        scripts__protocol_smoke__check_ws_text["check_ws_text"]
+        scripts__protocol_smoke__check_ws_audio["check_ws_audio"]
+        scripts__protocol_smoke__write_webrtc_html["write_webrtc_html"]
+        scripts__protocol_smoke__async_main["async_main"]
+        scripts__protocol_smoke__main["main"]
+    end
+    subgraph server
+        server___websocket_logger["_websocket_logger"]
+        server___browser_client_html["_browser_client_html"]
+        server___docs_html["_docs_html"]
+    end
+    subgraph server__TellmServer
+        server__TellmServer____init__["__init__"]
+        server__TellmServer__register_function["register_function"]
+        server__TellmServer___http_response["_http_response"]
+        server__TellmServer__process_request["process_request"]
+        server__TellmServer___call_maybe_async["_call_maybe_async"]
+        server__TellmServer___run_blocking["_run_blocking"]
+        server__TellmServer___handle_transcription["_handle_transcription"]
+        server__TellmServer___handle_test_transcription["_handle_test_transcription"]
+        server__TellmServer___audio_payload["_audio_payload"]
+        server__TellmServer__handle("handle CC=10")
+        server__TellmServer__serve_forever["serve_forever"]
+        server__TellmServer__run["run"]
+    end
+    subgraph tellm
+        tellm__create_bot["create_bot"]
+        tellm__run_server["run_server"]
+    end
+    server__TellmServer__process_request --> server___docs_html
+    server__TellmServer__process_request --> server___browser_client_html
+    server__TellmServer___handle_transcription --> config__load_config
+    server__TellmServer__serve_forever --> server___websocket_logger
+    bot__TellmBot____init__ --> config__load_config
+    main__main --> config__load_config
+    scripts__generate_test_audio__generate_fixture --> scripts__generate_test_audio__run
+    scripts__generate_test_audio__generate_fixture --> scripts__generate_test_audio__require_tool
+    scripts__generate_test_audio__main --> scripts__generate_test_audio__generate_fixture
+    scripts__protocol_smoke__check_http --> scripts__protocol_smoke__get_url
+    scripts__protocol_smoke__audio_data_url --> scripts__protocol_smoke__mime_for_audio
+    scripts__protocol_smoke__send_ws_payload --> scripts__protocol_smoke__ws_ssl_context
+    scripts__protocol_smoke__check_ws_text --> scripts__protocol_smoke__send_ws_payload
+    scripts__protocol_smoke__check_ws_audio --> scripts__protocol_smoke__audio_data_url
+    scripts__protocol_smoke__check_ws_audio --> scripts__protocol_smoke__send_ws_payload
+    scripts__protocol_smoke__async_main --> scripts__protocol_smoke__check_ws_text
+    scripts__protocol_smoke__async_main --> scripts__protocol_smoke__check_ws_audio
+
+    classDef highCC fill:#ff6b6b,stroke:#c92a2a,color:#fff
+    classDef medCC fill:#ffd43b,stroke:#f08c00,color:#000
+    class bot__TellmBot___execute_python_process highCC
+    class server__TellmServer__handle,bot__ViewData___render_table,bot__ViewData___render_block,bot__TellmBot___parse_json_response,bot__TellmBot__analyze_query medCC

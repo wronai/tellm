@@ -1,0 +1,59 @@
+# code2llm/evolution | 51 func | 5f | 2026-06-14
+# generated in 0.00s
+
+NEXT[4] (ranked by impact):
+  [1] !! SPLIT           bot.py
+      WHY: 553L, 4 classes, max CC=22
+      EFFORT: ~4h  IMPACT: 12166
+
+  [2] !! SPLIT           server.py
+      WHY: 910L, 1 classes, max CC=10
+      EFFORT: ~4h  IMPACT: 9100
+
+  [3] !  SPLIT-FUNC      TellmBot._execute_python_process  CC=22  fan=16
+      WHY: CC=22 exceeds 15
+      EFFORT: ~1h  IMPACT: 352
+
+  [4] !! SPLIT           goal.yaml
+      WHY: 511L, 0 classes, max CC=0
+      EFFORT: ~4h  IMPACT: 0
+
+
+RISKS[3]:
+  ⚠ Splitting server.py may break 15 import paths
+  ⚠ Splitting bot.py may break 32 import paths
+  ⚠ Splitting goal.yaml may break 0 import paths
+
+METRICS-TARGET:
+  CC̄:          3.5 → ≤2.4
+  max-CC:      22 → ≤11
+  god-modules: 3 → 0
+  high-CC(≥15): 1 → ≤0
+  hub-types:   0 → ≤0
+
+PATTERNS (language parser shared logic):
+  _extract_declarations() in base.py — unified extraction for:
+    - TypeScript: interfaces, types, classes, functions, arrow funcs
+    - PHP: namespaces, traits, classes, functions, includes
+    - Ruby: modules, classes, methods, requires
+    - C++: classes, structs, functions, #includes
+    - C#: classes, interfaces, methods, usings
+    - Java: classes, interfaces, methods, imports
+    - Go: packages, functions, structs
+    - Rust: modules, functions, traits, use statements
+
+  Shared regex patterns per language:
+    - import: language-specific import/require/using patterns
+    - class: class/struct/trait declarations with inheritance
+    - function: function/method signatures with visibility
+    - brace_tracking: for C-family languages ({ })
+    - end_keyword_tracking: for Ruby (module/class/def...end)
+
+  Benefits:
+    - Consistent extraction logic across all languages
+    - Reduced code duplication (~70% reduction in parser LOC)
+    - Easier maintenance: fix once, apply everywhere
+    - Standardized FunctionInfo/ClassInfo models
+
+HISTORY:
+  (first run — no previous data)

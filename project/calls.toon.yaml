@@ -1,0 +1,88 @@
+# code2llm call graph | /home/tom/github/wronai/tellm
+# generated in 0.01s
+# nodes: 19 | edges: 15 | modules: 6
+# CC̄=3.4
+
+HUBS[20]:
+  server.TellmServer._handle_transcription
+    CC=2  in:0  out:15  total:15
+  scripts.generate_test_audio.generate_fixture
+    CC=2  in:1  out:13  total:14
+  main.main
+    CC=3  in:0  out:14  total:14
+  scripts.protocol_smoke.send_ws_payload
+    CC=4  in:2  out:10  total:12
+  scripts.generate_test_audio.main
+    CC=4  in:0  out:9  total:9
+  scripts.protocol_smoke.check_http
+    CC=3  in:2  out:7  total:9
+  config.load_config
+    CC=1  in:3  out:6  total:9
+  scripts.protocol_smoke.check_ws_audio
+    CC=4  in:1  out:8  total:9
+  scripts.protocol_smoke.check_ws_text
+    CC=3  in:1  out:7  total:8
+  scripts.protocol_smoke.audio_data_url
+    CC=1  in:1  out:4  total:5
+  server._websocket_logger
+    CC=1  in:1  out:4  total:5
+  server.TellmServer.serve_forever
+    CC=1  in:0  out:5  total:5
+  scripts.protocol_smoke.get_url
+    CC=3  in:1  out:4  total:5
+  scripts.generate_test_audio.require_tool
+    CC=2  in:2  out:2  total:4
+  scripts.protocol_smoke.async_main
+    CC=7  in:1  out:3  total:4
+  scripts.generate_test_audio.run
+    CC=1  in:2  out:1  total:3
+  scripts.protocol_smoke.ws_ssl_context
+    CC=3  in:1  out:2  total:3
+  scripts.protocol_smoke.mime_for_audio
+    CC=3  in:1  out:1  total:2
+  bot.TellmBot.__init__
+    CC=2  in:0  out:2  total:2
+
+MODULES:
+  bot  [1 funcs]
+    __init__  CC=2  out:2
+  config  [1 funcs]
+    load_config  CC=1  out:6
+  main  [1 funcs]
+    main  CC=3  out:14
+  scripts.generate_test_audio  [4 funcs]
+    generate_fixture  CC=2  out:13
+    main  CC=4  out:9
+    require_tool  CC=2  out:2
+    run  CC=1  out:1
+  scripts.protocol_smoke  [9 funcs]
+    async_main  CC=7  out:3
+    audio_data_url  CC=1  out:4
+    check_http  CC=3  out:7
+    check_ws_audio  CC=4  out:8
+    check_ws_text  CC=3  out:7
+    get_url  CC=3  out:4
+    mime_for_audio  CC=3  out:1
+    send_ws_payload  CC=4  out:10
+    ws_ssl_context  CC=3  out:2
+  server  [3 funcs]
+    _handle_transcription  CC=2  out:15
+    serve_forever  CC=1  out:5
+    _websocket_logger  CC=1  out:4
+
+EDGES:
+  server.TellmServer._handle_transcription → config.load_config
+  server.TellmServer.serve_forever → server._websocket_logger
+  bot.TellmBot.__init__ → config.load_config
+  main.main → config.load_config
+  scripts.generate_test_audio.generate_fixture → scripts.generate_test_audio.run
+  scripts.generate_test_audio.generate_fixture → scripts.generate_test_audio.require_tool
+  scripts.generate_test_audio.main → scripts.generate_test_audio.generate_fixture
+  scripts.protocol_smoke.check_http → scripts.protocol_smoke.get_url
+  scripts.protocol_smoke.audio_data_url → scripts.protocol_smoke.mime_for_audio
+  scripts.protocol_smoke.send_ws_payload → scripts.protocol_smoke.ws_ssl_context
+  scripts.protocol_smoke.check_ws_text → scripts.protocol_smoke.send_ws_payload
+  scripts.protocol_smoke.check_ws_audio → scripts.protocol_smoke.audio_data_url
+  scripts.protocol_smoke.check_ws_audio → scripts.protocol_smoke.send_ws_payload
+  scripts.protocol_smoke.async_main → scripts.protocol_smoke.check_ws_text
+  scripts.protocol_smoke.async_main → scripts.protocol_smoke.check_ws_audio

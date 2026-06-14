@@ -1,0 +1,26 @@
+flowchart TD
+%% generated in 0.00s
+
+    %% Entry points (blue)
+    classDef entry fill:#4dabf7,stroke:#1971c2,color:#fff
+
+    subgraph Core
+        server___browser_client_html["_browser_client_html"]
+        server___docs_html["_docs_html"]
+        server__TellmServer__register_function["register_function"]
+        server__TellmServer___http_response["_http_response"]
+        server__TellmServer__process_request["process_request"]
+        server__TellmServer___call_maybe_async["_call_maybe_async"]
+        server__TellmServer___run_blocking["_run_blocking"]
+        server__TellmServer___handle_transcription["_handle_transcription"]
+        server__TellmServer___handle_test_transcription["_handle_test_transcription"]
+        server__TellmServer___audio_payload["_audio_payload"]
+        server__TellmServer__handle["handle"]
+        server__TellmServer__serve_forever["serve_forever"]
+        server__TellmServer__run["run"]
+        tellm__create_bot["create_bot"]
+        tellm__run_server["run_server"]
+        ...["+32 more"]
+    end
+
+    class server___browser_client_html,server__TellmServer__register_function,server__TellmServer___http_response,server__TellmServer__process_request,server__TellmServer___call_maybe_async,server__TellmServer___run_blocking,server__TellmServer___handle_transcription,server__TellmServer___handle_test_transcription,server__TellmServer___audio_payload,server__TellmServer__handle entry

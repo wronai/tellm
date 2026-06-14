@@ -1,0 +1,193 @@
+source: code2llm
+# generated in 0.01s
+schema: code2llm.planfile_tickets.v1
+project_root: /home/tom/github/wronai/tellm
+tickets:
+- signal: code2llm_god
+  title: 'Split god module: bot.py'
+  description: 'code2llm reports `bot.py` as a large module (553 lines, 4 classes).
+
+
+    Split it by responsibility, keep public imports stable, and add focused tests
+    around the moved behavior.'
+  priority: high
+  labels:
+  - llm-ready
+  - code2llm
+  - god-module
+  - refactor
+  files:
+  - bot.py
+  dedupe_key: code2llm:god:bot.py
+- signal: code2llm_cc
+  title: 'Reduce cyclomatic complexity: bot.TellmBot._execute_python_process (CC=22)'
+  description: 'code2llm reports `bot.TellmBot._execute_python_process` at `bot.py:327`
+    with cyclomatic complexity 22 (limit 15).
+
+
+    Extract smaller functions, flatten conditionals, or split strategy branches. Re-run
+    code2llm after the change and keep tests green.'
+  priority: normal
+  labels:
+  - llm-ready
+  - code2llm
+  - complexity
+  - refactor
+  files:
+  - bot.py
+  dedupe_key: code2llm:cc:bot.py:bot.TellmBot._execute_python_process
+- signal: code2llm_smell_data_clump
+  title: 'Address code smell: Data Clump: name, self, func'
+  description: 'code2llm reports `Data Clump: name, self, func` in `server.py:762`.
+
+
+    Arguments (name, self, func) are used together in multiple functions: server.TellmServer.register_function,
+    bot.TellmBot.register_function.
+
+
+    Make the smallest refactor that removes the smell and run local tests.'
+  priority: normal
+  labels:
+  - llm-ready
+  - code2llm
+  - code-smell
+  - data-clump
+  files:
+  - server.py
+  dedupe_key: 'code2llm:smell:data_clump:server.py:762:Data Clump: name, self, func'
+- signal: code2llm_smell_data_clump
+  title: 'Address code smell: Data Clump: name, self, func'
+  description: 'code2llm reports `Data Clump: name, self, func` in `bot.py:227`.
+
+
+    Arguments (name, self, func) are used together in multiple functions: server.TellmServer.register_function,
+    bot.TellmBot.register_function.
+
+
+    Make the smallest refactor that removes the smell and run local tests.'
+  priority: normal
+  labels:
+  - llm-ready
+  - code2llm
+  - code-smell
+  - data-clump
+  files:
+  - bot.py
+  dedupe_key: 'code2llm:smell:data_clump:bot.py:227:Data Clump: name, self, func'
+- signal: code2llm_smell_data_clump
+  title: 'Address code smell: Data Clump: task, result, transcription, self'
+  description: 'code2llm reports `Data Clump: task, result, transcription, self` in
+    `bot.py:196`.
+
+
+    Arguments (task, result, transcription, self) are used together in multiple functions:
+    bot.TellmBot.save_task, bot.TellmBot.generate_view.
+
+
+    Make the smallest refactor that removes the smell and run local tests.'
+  priority: normal
+  labels:
+  - llm-ready
+  - code2llm
+  - code-smell
+  - data-clump
+  files:
+  - bot.py
+  dedupe_key: 'code2llm:smell:data_clump:bot.py:196:Data Clump: task, result, transcription,
+    self'
+- signal: code2llm_smell_data_clump
+  title: 'Address code smell: Data Clump: task, result, transcription, self'
+  description: 'code2llm reports `Data Clump: task, result, transcription, self` in
+    `bot.py:538`.
+
+
+    Arguments (task, result, transcription, self) are used together in multiple functions:
+    bot.TellmBot.save_task, bot.TellmBot.generate_view.
+
+
+    Make the smallest refactor that removes the smell and run local tests.'
+  priority: normal
+  labels:
+  - llm-ready
+  - code2llm
+  - code-smell
+  - data-clump
+  files:
+  - bot.py
+  dedupe_key: 'code2llm:smell:data_clump:bot.py:538:Data Clump: task, result, transcription,
+    self'
+- signal: code2llm_smell_god_function
+  title: 'Address code smell: God Function: _render_block'
+  description: 'code2llm reports `God Function: _render_block` in `bot.py:99`.
+
+
+    Function ''_render_block'' is oversized: CC=11, fan-out=11, mutations=0.
+
+
+    Make the smallest refactor that removes the smell and run local tests.'
+  priority: normal
+  labels:
+  - llm-ready
+  - code2llm
+  - code-smell
+  - god-function
+  files:
+  - bot.py
+  dedupe_key: 'code2llm:smell:god_function:bot.py:99:God Function: _render_block'
+- signal: code2llm_smell_god_function
+  title: 'Address code smell: God Function: handle'
+  description: 'code2llm reports `God Function: handle` in `server.py:860`.
+
+
+    Function ''handle'' is oversized: CC=10, fan-out=12, mutations=0.
+
+
+    Make the smallest refactor that removes the smell and run local tests.'
+  priority: normal
+  labels:
+  - llm-ready
+  - code2llm
+  - code-smell
+  - god-function
+  files:
+  - server.py
+  dedupe_key: 'code2llm:smell:god_function:server.py:860:God Function: handle'
+- signal: code2llm_smell_god_function
+  title: 'Address code smell: God Function: main'
+  description: 'code2llm reports `God Function: main` in `main.py:4`.
+
+
+    Function ''main'' is oversized: CC=3, fan-out=8, mutations=7.
+
+
+    Make the smallest refactor that removes the smell and run local tests.'
+  priority: normal
+  labels:
+  - llm-ready
+  - code2llm
+  - code-smell
+  - god-function
+  files:
+  - main.py
+  dedupe_key: 'code2llm:smell:god_function:main.py:4:God Function: main'
+- signal: code2llm_smell_god_function
+  title: 'Address code smell: God Function: main'
+  description: 'code2llm reports `God Function: main` in `scripts/protocol_smoke.py:203`.
+
+
+    Function ''main'' is oversized: CC=5, fan-out=10, mutations=16.
+
+
+    Make the smallest refactor that removes the smell and run local tests.'
+  priority: normal
+  labels:
+  - llm-ready
+  - code2llm
+  - code-smell
+  - god-function
+  files:
+  - scripts/protocol_smoke.py
+  dedupe_key: 'code2llm:smell:god_function:scripts/protocol_smoke.py:203:God Function:
+    main'
+applied: []
+skipped: []

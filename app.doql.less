@@ -1,0 +1,22 @@
+// LESS format — define @variables here as needed
+
+app {
+  name: tellm;
+  version: 0.1.0;
+}
+
+env_vars {
+  keys: OPENROUTER_API_KEY, LLM_MODEL, HOST, PORT;
+}
+
+deploy {
+  target: docker-compose;
+}
+
+environment[name="local"] {
+  runtime: docker-compose;
+  env_file: .env;
+  template_file: .env.example;
+  vars: HOST, LLM_MODEL, OPENROUTER_API_KEY, PORT;
+  runtime_llm: OPENROUTER_API_KEY;
+}

@@ -1,0 +1,50 @@
+flowchart LR
+%% generated in 0.00s
+    subgraph bot__TellmBot
+        bot__TellmBot____init__["__init__"]
+    end
+    subgraph config
+        config__load_config["load_config"]
+    end
+    subgraph main
+        main__main["main"]
+    end
+    subgraph scripts__generate_test_audio
+        scripts__generate_test_audio__main["main"]
+        scripts__generate_test_audio__run["run"]
+        scripts__generate_test_audio__generate_fixture["generate_fixture"]
+        scripts__generate_test_audio__require_tool["require_tool"]
+    end
+    subgraph scripts__protocol_smoke
+        scripts__protocol_smoke__audio_data_url["audio_data_url"]
+        scripts__protocol_smoke__mime_for_audio["mime_for_audio"]
+        scripts__protocol_smoke__check_ws_text["check_ws_text"]
+        scripts__protocol_smoke__check_http["check_http"]
+        scripts__protocol_smoke__ws_ssl_context["ws_ssl_context"]
+        scripts__protocol_smoke__check_ws_audio["check_ws_audio"]
+        scripts__protocol_smoke__get_url["get_url"]
+        scripts__protocol_smoke__async_main["async_main"]
+        scripts__protocol_smoke__send_ws_payload["send_ws_payload"]
+    end
+    subgraph server
+        server___websocket_logger["_websocket_logger"]
+    end
+    subgraph server__TellmServer
+        server__TellmServer__serve_forever["serve_forever"]
+        server__TellmServer___handle_transcription["_handle_transcription"]
+    end
+    server__TellmServer___handle_transcription --> config__load_config
+    server__TellmServer__serve_forever --> server___websocket_logger
+    bot__TellmBot____init__ --> config__load_config
+    main__main --> config__load_config
+    scripts__generate_test_audio__generate_fixture --> scripts__generate_test_audio__run
+    scripts__generate_test_audio__generate_fixture --> scripts__generate_test_audio__require_tool
+    scripts__generate_test_audio__main --> scripts__generate_test_audio__generate_fixture
+    scripts__protocol_smoke__check_http --> scripts__protocol_smoke__get_url
+    scripts__protocol_smoke__audio_data_url --> scripts__protocol_smoke__mime_for_audio
+    scripts__protocol_smoke__send_ws_payload --> scripts__protocol_smoke__ws_ssl_context
+    scripts__protocol_smoke__check_ws_text --> scripts__protocol_smoke__send_ws_payload
+    scripts__protocol_smoke__check_ws_audio --> scripts__protocol_smoke__audio_data_url
+    scripts__protocol_smoke__check_ws_audio --> scripts__protocol_smoke__send_ws_payload
+    scripts__protocol_smoke__async_main --> scripts__protocol_smoke__check_ws_text
+    scripts__protocol_smoke__async_main --> scripts__protocol_smoke__check_ws_audio

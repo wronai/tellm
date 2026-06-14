@@ -1,0 +1,79 @@
+# tellm | 12f 2503L | python:9,shell:2,less:1 | 2026-06-14
+# stats: 36 func | 6 cls | 12 mod | CC̄=3.4 | critical:2 | cycles:0
+# alerts[5]: CC test_server_handles_plain_http_request=11; CC test_server_docs_describe_text_and_speech_api=11; CC async_main=7; CC test_view_html_renders_dynamic_json_structure=7; CC test_server_accepts_text_websocket_messages=7
+# hotspots[5]: test_server_accepts_text_websocket_messages fan=18; test_server_handles_plain_http_request fan=14; test_server_docs_describe_text_and_speech_api fan=14; test_server_test_mode_returns_echo_without_llm fan=11; main fan=10
+# evolution: baseline
+# Keys: M=modules, D=details, i=imports, e=exports, c=classes, f=functions, m=methods
+M[12]:
+  __init__.py,9
+  app.doql.less,23
+  bot.py,565
+  config.py,12
+  main.py,16
+  project.sh,59
+  scripts/generate_test_audio.py,110
+  scripts/protocol_smoke.py,234
+  server.py,1028
+  setup.py,18
+  tests/test_tellm.py,427
+  tree.sh,2
+D:
+  __init__.py:
+    e: create_bot,run_server
+    create_bot(db_path)
+    run_server(host;port;db_path)
+  bot.py:
+    e: TaskType,Task,ViewData,TellmBot
+    TaskType:
+    Task:
+    ViewData: to_dict(0),_safe_json(1),_safe_text(1),_render_items(1),_render_table(1),_render_block(1),_render_dynamic(0),to_html(0)
+    TellmBot: __init__(2),_init_db(0),save_task(3),save_evolution(2),save_view(1),get_view_html(1),get_tasks(1),register_function(2),_completion(1),_parse_json_response(1),_normalize_processes(1),_ensure_function_state(1),_restricted_import(5),_process_globals(0),_execute_registered_function(2),_execute_python_process(2),execute_processes(1),_get_stt_model(0),_get_tts(0),analyze_query(1),evolve_function(1),execute_task(1),transcribe(2),speak(1),generate_view(3)
+  config.py:
+    e: load_config,Config
+    Config:
+    load_config()
+  main.py:
+    e: main
+    main()
+  scripts/generate_test_audio.py:
+    e: run,require_tool,generate_fixture,main
+    run(cmd)
+    require_tool(name)
+    generate_fixture(output_dir;fixture)
+    main()
+  scripts/protocol_smoke.py:
+    e: ws_url_from_http,get_url,check_http,mime_for_audio,audio_data_url,ws_ssl_context,send_ws_payload,check_ws_text,check_ws_audio,write_webrtc_html,async_main,main
+    ws_url_from_http(base_url)
+    get_url(url;insecure)
+    check_http(base_url;insecure)
+    mime_for_audio(path)
+    audio_data_url(path)
+    ws_ssl_context(ws_url;insecure)
+    send_ws_payload(ws_url;payload;timeout;insecure)
+    check_ws_text(ws_url;text;timeout;insecure)
+    check_ws_audio(ws_url;audio_path;transcription;real_stt;timeout;insecure)
+    write_webrtc_html(path;ws_url;transcription)
+    async_main(args)
+    main()
+  server.py:
+    e: _websocket_logger,_browser_client_html,_docs_html,TellmServer
+    TellmServer: __init__(3),register_function(2),_http_response(3),process_request(2),_call_maybe_async(1),_run_blocking(1),_handle_transcription(3),_handle_test_transcription(4),_audio_payload(1),handle(2),serve_forever(0),run(0)
+    _websocket_logger()
+    _browser_client_html(host)
+    _docs_html(host)
+  setup.py:
+  tests/test_tellm.py:
+    e: test_import,test_sqlite_save_and_get_tasks,test_view_html_escapes_user_content,test_view_html_renders_dynamic_json_structure,test_execute_task_supports_sync_functions,test_analyze_query_reads_llm_json_view_and_processes,test_execute_task_runs_python_process,test_server_starts_inside_running_event_loop,test_server_handles_plain_http_request,test_server_docs_describe_text_and_speech_api,test_server_audio_payload_reads_data_url_suffix,test_server_test_mode_returns_echo_without_llm,test_server_accepts_text_websocket_messages
+    test_import()
+    test_sqlite_save_and_get_tasks(tmp_path)
+    test_view_html_escapes_user_content()
+    test_view_html_renders_dynamic_json_structure()
+    test_execute_task_supports_sync_functions(tmp_path)
+    test_analyze_query_reads_llm_json_view_and_processes(tmp_path;monkeypatch)
+    test_execute_task_runs_python_process(tmp_path)
+    test_server_starts_inside_running_event_loop(tmp_path)
+    test_server_handles_plain_http_request(tmp_path)
+    test_server_docs_describe_text_and_speech_api(tmp_path)
+    test_server_audio_payload_reads_data_url_suffix(tmp_path)
+    test_server_test_mode_returns_echo_without_llm(tmp_path)
+    test_server_accepts_text_websocket_messages(tmp_path;monkeypatch)

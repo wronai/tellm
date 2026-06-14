@@ -1,0 +1,46 @@
+# tellm | 67 func | 7f | 2494L | python | 2026-06-14
+# generated in 0.00s
+
+HEALTH:
+  CC̄=3.4  critical=5 (limit:10)  dup=0  cycles=0
+
+ALERTS[6]:
+  !!  cc_exceeded      TellmBot._execute_python_process = 22 (limit:15)
+  !!  high_fan_out     TellmBot._execute_python_process = 16 (limit:10)
+  !   high_fan_out     TellmServer.handle = 12 (limit:10)
+  !   high_fan_out     ViewData._render_block = 11 (limit:10)
+  !   high_fan_out     TellmBot.transcribe = 10 (limit:10)
+  !   high_fan_out     main = 10 (limit:10)
+
+MODULES[13] (top by size):
+  M[server.py] 910L C:1 F:15 CC↑10 D:0 (python)
+  M[bot.py] 553L C:4 F:32 CC↑22 D:0 (python)
+  M[goal.yaml] 511L C:0 F:0 CC↑0 D:0 (yaml)
+  M[scripts/protocol_smoke.py] 233L C:0 F:12 CC↑7 D:0 (python)
+  M[scripts/generate_test_audio.py] 109L C:0 F:4 CC↑4 D:0 (python)
+  M[output/test-audio/manifest.json] 60L C:0 F:0 CC↑0 D:0 (json)
+  M[project.sh] 59L C:0 F:0 CC↑0 D:0 (shell)
+  M[setup.py] 17L C:0 F:0 CC↑0 D:0 (python)
+  M[main.py] 16L C:0 F:1 CC↑3 D:0 (python)
+  M[config.py] 12L C:1 F:1 CC↑1 D:3 (python)
+  M[__init__.py] 8L C:0 F:2 CC↑1 D:0 (python)
+  M[requirements.txt] 5L C:0 F:0 CC↑0 D:0 (txt)
+  M[tree.sh] 1L C:0 F:0 CC↑0 D:0 (shell)
+  LANGS: python:8/shell:2/yaml:1/json:1/txt:1
+
+HOTSPOTS[5]:
+  ★ TellmBot._execute_python_process fan=16  // Analysis pipeline, 16 stages
+  ★ TellmServer.handle fan=12  // Orchestrates 12 calls
+  ★ ViewData._render_block fan=11  // Orchestrates 11 calls
+  ★ TellmBot.transcribe fan=10  // Orchestrates 10 calls
+  ★ main fan=10  // Orchestrates 10 calls
+
+REFACTOR[5]:
+  [1] H/H Split god module bot.py (553L, 4 classes)
+  [2] H/H Split god module server.py (910L, 1 classes)
+  [3] H/H Split god module goal.yaml (511L, 0 classes)
+  [4] M/L Split TellmBot._execute_python_process (CC=22)
+  [5] M/M Reduce TellmBot._execute_python_process fan-out (currently 16)
+
+EVOLUTION:
+  2026-06-14 CC̄=3.4 crit=5 2494L // Automated analysis

@@ -1,0 +1,140 @@
+# code2llm | 13f 2494L | python:8,shell:2,yaml:1,txt:1,json:1 | 2026-06-14
+# generated in 0.00s
+# CC̅=3.4 | critical:1/67 | dups:0 | cycles:0
+
+HEALTH[2]:
+  🔴 GOD   bot.py = 553L, 4 classes, 32m, max CC=22
+  🟡 CC    _execute_python_process CC=22 (limit:15)
+
+REFACTOR[2]:
+  1. split bot.py  (god module)
+  2. split 1 high-CC methods  (CC>15)
+
+PIPELINES[47]:
+  [1] Src [__init__]: __init__
+      PURITY: 100% pure
+  [2] Src [register_function]: register_function
+      PURITY: 100% pure
+  [3] Src [_http_response]: _http_response
+      PURITY: 100% pure
+  [4] Src [process_request]: process_request → _docs_html
+      PURITY: 100% pure
+  [5] Src [_call_maybe_async]: _call_maybe_async
+      PURITY: 100% pure
+  [6] Src [_run_blocking]: _run_blocking
+      PURITY: 100% pure
+  [7] Src [_handle_transcription]: _handle_transcription → load_config
+      PURITY: 100% pure
+  [8] Src [_handle_test_transcription]: _handle_test_transcription
+      PURITY: 100% pure
+  [9] Src [_audio_payload]: _audio_payload
+      PURITY: 100% pure
+  [10] Src [handle]: handle
+      PURITY: 100% pure
+  [11] Src [serve_forever]: serve_forever → _websocket_logger
+      PURITY: 100% pure
+  [12] Src [run]: run
+      PURITY: 100% pure
+  [13] Src [create_bot]: create_bot
+      PURITY: 100% pure
+  [14] Src [run_server]: run_server
+      PURITY: 100% pure
+  [15] Src [_safe_json]: _safe_json
+      PURITY: 100% pure
+  [16] Src [_safe_text]: _safe_text
+      PURITY: 100% pure
+  [17] Src [_render_items]: _render_items
+      PURITY: 100% pure
+  [18] Src [_render_table]: _render_table
+      PURITY: 100% pure
+  [19] Src [_render_block]: _render_block
+      PURITY: 100% pure
+  [20] Src [_render_dynamic]: _render_dynamic
+      PURITY: 100% pure
+  [21] Src [to_html]: to_html
+      PURITY: 100% pure
+  [22] Src [__init__]: __init__ → load_config
+      PURITY: 100% pure
+  [23] Src [_init_db]: _init_db
+      PURITY: 100% pure
+  [24] Src [save_task]: save_task
+      PURITY: 100% pure
+  [25] Src [save_evolution]: save_evolution
+      PURITY: 100% pure
+  [26] Src [save_view]: save_view
+      PURITY: 100% pure
+  [27] Src [get_tasks]: get_tasks
+      PURITY: 100% pure
+  [28] Src [_completion]: _completion
+      PURITY: 100% pure
+  [29] Src [_parse_json_response]: _parse_json_response
+      PURITY: 100% pure
+  [30] Src [_normalize_processes]: _normalize_processes
+      PURITY: 100% pure
+  [31] Src [_ensure_function_state]: _ensure_function_state
+      PURITY: 100% pure
+  [32] Src [_restricted_import]: _restricted_import
+      PURITY: 100% pure
+  [33] Src [_process_globals]: _process_globals
+      PURITY: 100% pure
+  [34] Src [_execute_registered_function]: _execute_registered_function
+      PURITY: 100% pure
+  [35] Src [_execute_python_process]: _execute_python_process
+      PURITY: 100% pure
+  [36] Src [execute_processes]: execute_processes
+      PURITY: 100% pure
+  [37] Src [_get_stt_model]: _get_stt_model
+      PURITY: 100% pure
+  [38] Src [_get_tts]: _get_tts
+      PURITY: 100% pure
+  [39] Src [analyze_query]: analyze_query
+      PURITY: 100% pure
+  [40] Src [evolve_function]: evolve_function
+      PURITY: 100% pure
+  [41] Src [execute_task]: execute_task
+      PURITY: 100% pure
+  [42] Src [transcribe]: transcribe
+      PURITY: 100% pure
+  [43] Src [speak]: speak
+      PURITY: 100% pure
+  [44] Src [generate_view]: generate_view
+      PURITY: 100% pure
+  [45] Src [main]: main → load_config
+      PURITY: 100% pure
+  [46] Src [main]: main → generate_fixture → run
+      PURITY: 100% pure
+  [47] Src [main]: main → check_http → get_url
+      PURITY: 100% pure
+
+LAYERS:
+  ./                              CC̄=3.5    ←in:0  →out:0
+  │ !! server                     910L  1C   15m  CC=10     ←0
+  │ !! bot                        553L  4C   32m  CC=22     ←0
+  │ !! goal.yaml                  511L  0C    0m  CC=0.0    ←0
+  │ project.sh                  59L  0C    0m  CC=0.0    ←0
+  │ setup                       17L  0C    0m  CC=0.0    ←0
+  │ main                        16L  0C    1m  CC=3      ←0
+  │ config                      12L  1C    1m  CC=1      ←3
+  │ __init__                     8L  0C    2m  CC=1      ←0
+  │ requirements.txt             5L  0C    0m  CC=0.0    ←0
+  │ tree.sh                      1L  0C    0m  CC=0.0    ←0
+  │
+  scripts/                        CC̄=3.0    ←in:0  →out:0
+  │ protocol_smoke             233L  0C   12m  CC=7      ←0
+  │ generate_test_audio        109L  0C    4m  CC=4      ←0
+  │
+  output/                         CC̄=0.0    ←in:0  →out:0
+  │ manifest.json               60L  0C    0m  CC=0.0    ←0
+  │
+
+COUPLING:
+          config     bot    main  server
+  config      ──      ←1      ←1      ←1
+     bot       1      ──                
+    main       1              ──        
+  server       1                      ──
+  CYCLES: none
+
+EXTERNAL:
+  validation: run `vallm batch .` → validation.toon
+  duplication: run `redup scan .` → duplication.toon

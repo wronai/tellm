@@ -1,5 +1,7 @@
 .env.example
 .idea
+output
+.code2llm_cache
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
