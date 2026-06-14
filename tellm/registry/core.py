@@ -156,6 +156,70 @@ def validate_schema(schema: Optional[Dict[str, Any]], value: Any, path: str = "$
             validate_schema(item_schema, item, "%s[%d]" % (path, index))
 
 
+def _issue_code_from_text(detail: str, default_code: str) -> str:
+    lowered = detail.lower()
+    if "network" in lowered and (
+        "not allowed" in lowered
+        or "denied" in lowered
+        or "cannot access" in lowered
+        or "requires network" in lowered
+    ):
+        return "NETWORK_ACCESS_NOT_ALLOWED"
+    if "file" in lowered and (
+        "not allowed" in lowered
+        or "denied" in lowered
+        or "cannot access" in lowered
+    ):
+        return "FILESYSTEM_ACCESS_NOT_ALLOWED"
+    return default_code
+
+
+def normalize_issue_list(
+    issues: Optional[List[Any]],
+    default_source: str = "",
+    default_code: str = "SERVICE_ERROR",
+    recoverable: bool = True,
+) -> List[Dict[str, Any]]:
+    normalized = []
+    for issue in issues or []:
+        if isinstance(issue, dict):
+            item = copy.deepcopy(issue)
+            detail = str(
+                item.get("detail")
+                or item.get("message")
+                or item.get("error")
+                or item.get("summary")
+                or ""
+            )
+            item["code"] = str(
+                item.get("code") or _issue_code_from_text(detail, default_code)
+            )
+            item["source"] = str(item.get("source") or default_source)
+            item["detail"] = detail or json_like(item)
+            item["recoverable"] = bool(item.get("recoverable", recoverable))
+            normalized.append(item)
+        else:
+            detail = str(issue)
+            normalized.append(
+                {
+                    "code": _issue_code_from_text(detail, default_code),
+                    "source": default_source,
+                    "detail": detail,
+                    "recoverable": bool(recoverable),
+                }
+            )
+    return normalized
+
+
+def json_like(value: Any) -> str:
+    try:
+        import json
+
+        return json.dumps(value, ensure_ascii=False, default=str)
+    except Exception:
+        return str(value)
+
+
 def service_result(
     ok: bool,
     result_type: str,
@@ -184,8 +248,8 @@ def service_result(
             "summary": summary,
             "details": details,
         },
-        "errors": errors or [],
-        "warnings": warnings or [],
+        "errors": normalize_issue_list(errors, uri, "SERVICE_ERROR", True),
+        "warnings": normalize_issue_list(warnings, uri, "SERVICE_WARNING", True),
         "meta": {
             "source": source,
             "fetched_at": data.get("fetched_at") if isinstance(data, dict) else None,
@@ -221,8 +285,34 @@ def service_result_schema() -> Dict[str, Any]:
                 },
                 "additionalProperties": True,
             },
-            "errors": {"type": "array"},
-            "warnings": {"type": "array"},
+            "errors": {
+                "type": "array",
+                "items": {
+                    "type": "object",
+                    "required": ["code", "source", "detail", "recoverable"],
+                    "properties": {
+                        "code": {"type": "string"},
+                        "source": {"type": "string"},
+                        "detail": {"type": "string"},
+                        "recoverable": {"type": "boolean"},
+                    },
+                    "additionalProperties": True,
+                },
+            },
+            "warnings": {
+                "type": "array",
+                "items": {
+                    "type": "object",
+                    "required": ["code", "source", "detail", "recoverable"],
+                    "properties": {
+                        "code": {"type": "string"},
+                        "source": {"type": "string"},
+                        "detail": {"type": "string"},
+                        "recoverable": {"type": "boolean"},
+                    },
+                    "additionalProperties": True,
+                },
+            },
             "meta": {"type": "object"},
             "render": {"type": "object"},
         },

@@ -14,7 +14,12 @@ from websockets.http11 import Response
 
 from .bot import TellmBot, Task, TaskType
 from .config import load_config
-from .registry import registry_manifest_schema, service_result_schema
+from .registry import (
+    RegistryValidationError,
+    registry_manifest_schema,
+    service_result_schema,
+    validate_schema,
+)
 from litellm import completion
 
 
@@ -542,7 +547,8 @@ def _browser_client_html(host: str) -> str:
       const empty = workflowLogEl.querySelector(".empty");
       if (empty) empty.remove();
       const entry = document.createElement("div");
-      entry.className = "entry workflow " + (status === "error" ? "error" : status === "repair" ? "warn" : "");
+      const warnStatuses = ["repair", "warning", "failed", "completed_with_warnings", "completed_with_service_error"];
+      entry.className = "entry workflow " + (status === "error" ? "error" : warnStatuses.includes(status) ? "warn" : "");
       const meta = document.createElement("div");
       meta.className = "meta";
       meta.textContent = stage + " / " + status;
@@ -840,6 +846,9 @@ def _docs_html(host: str) -> str:
             <tr><td><code>GET</code></td><td><code>/manifest</code></td><td>Pełny Tellm Resource Manifest 1.0 z JSON Schema 2020-12.</td></tr>
             <tr><td><code>GET</code></td><td><code>/openapi.json</code></td><td>OpenAPI 3.1 opis HTTP API.</td></tr>
             <tr><td><code>GET</code></td><td><code>/asyncapi.json</code></td><td>AsyncAPI 3.1 opis WebSocket/event contracts.</td></tr>
+            <tr><td><code>POST</code></td><td><code>/execute</code></td><td>Docelowy kontrakt HTTP execute; obecny transport zwraca JSON 501 i używa WebSocket <code>type=execute</code>.</td></tr>
+            <tr><td><code>POST</code></td><td><code>/query</code></td><td>Docelowy kontrakt HTTP query; obecny transport zwraca JSON 501.</td></tr>
+            <tr><td><code>POST</code></td><td><code>/autoimprovement/run</code></td><td>Docelowy kontrakt HTTP autoimprovement; obecny transport zwraca JSON 501.</td></tr>
             <tr><td><code>GET</code></td><td><code>/registry-ui</code></td><td>Techniczny widok zasobów registry.</td></tr>
             <tr><td><code>GET</code></td><td><code>/autoimprovement</code></td><td>Panel ręcznego uruchamiania audytu autoimprovement.</td></tr>
             <tr><td><code>GET</code></td><td><code>/autoimprovement/latest</code></td><td>Ostatni zapisany raport autoimprovement jako JSON + HTML.</td></tr>
@@ -1296,6 +1305,74 @@ def _openapi_document(host: str) -> dict:
                     "responses": {"200": {"description": "Registry entries"}},
                 }
             },
+            "/execute": {
+                "post": {
+                    "summary": "Execute a registry resource by URI.",
+                    "description": "Contract for HTTP adapters. The current WebSocket-backed server returns 501 and supports the same payload via WebSocket type=execute.",
+                    "requestBody": {
+                        "required": True,
+                        "content": {
+                            "application/json": {
+                                "schema": {"$ref": "#/components/schemas/ExecuteRequest"}
+                            }
+                        },
+                    },
+                    "responses": {
+                        "200": {
+                            "description": "Service result",
+                            "content": {
+                                "application/json": {
+                                    "schema": {"$ref": "#/components/schemas/TellmServiceResult"}
+                                }
+                            },
+                        },
+                        "501": {"description": "HTTP body transport not enabled"},
+                    },
+                }
+            },
+            "/query": {
+                "post": {
+                    "summary": "Submit a text query.",
+                    "description": "Contract for HTTP adapters. The current server accepts query execution over WebSocket.",
+                    "requestBody": {
+                        "required": True,
+                        "content": {
+                            "application/json": {
+                                "schema": {"$ref": "#/components/schemas/QueryRequest"}
+                            }
+                        },
+                    },
+                    "responses": {
+                        "200": {"description": "Rendered workflow result"},
+                        "501": {"description": "HTTP body transport not enabled"},
+                    },
+                }
+            },
+            "/autoimprovement/run": {
+                "post": {
+                    "summary": "Run autoimprovement audit.",
+                    "description": "Contract for HTTP adapters. The current server supports this through WebSocket type=execute with tellm://service/system/autoimprove.",
+                    "requestBody": {
+                        "required": False,
+                        "content": {
+                            "application/json": {
+                                "schema": {"type": "object"}
+                            }
+                        },
+                    },
+                    "responses": {
+                        "200": {
+                            "description": "Autoimprovement service result",
+                            "content": {
+                                "application/json": {
+                                    "schema": {"$ref": "#/components/schemas/TellmServiceResult"}
+                                }
+                            },
+                        },
+                        "501": {"description": "HTTP body transport not enabled"},
+                    },
+                }
+            },
             "/manifest": {
                 "get": {
                     "summary": "Return Tellm Resource Manifest 1.0.",
@@ -1364,6 +1441,26 @@ def _openapi_document(host: str) -> dict:
             "schemas": {
                 "TellmResourceManifest": registry_manifest_schema(),
                 "TellmServiceResult": service_result_schema(),
+                "ExecuteRequest": {
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
+                    "type": "object",
+                    "required": ["uri"],
+                    "properties": {
+                        "uri": {"type": "string", "format": "uri"},
+                        "input": {"type": "object"},
+                    },
+                    "additionalProperties": False,
+                },
+                "QueryRequest": {
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
+                    "type": "object",
+                    "required": ["text"],
+                    "properties": {
+                        "text": {"type": "string"},
+                        "speak": {"type": "boolean"},
+                    },
+                    "additionalProperties": False,
+                },
                 "TellmRegistryManifest": {
                     "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "type": "object",
@@ -1561,6 +1658,17 @@ class TellmServer:
             html = self.bot.get_latest_autoimprovement_html()
             return self._json_response(
                 {"ok": bool(report), "report": report or {}, "html": html or ""}
+            )
+        if path in {"/execute", "/query", "/autoimprovement/run"}:
+            return self._json_response(
+                {
+                    "ok": False,
+                    "error": {
+                        "code": "HTTP_BODY_TRANSPORT_NOT_ENABLED",
+                        "message": "This WebSocket-backed server cannot read HTTP request bodies. Use WebSocket JSON messages or an HTTP adapter.",
+                    },
+                },
+                HTTPStatus.NOT_IMPLEMENTED,
             )
         if path == "/manifest":
             return self._json_response(self.bot.registry.manifest())
@@ -1787,6 +1895,52 @@ class TellmServer:
                 return log.get("details", {})
         return {}
 
+    @staticmethod
+    def _result_business_ok(result) -> bool:
+        if not isinstance(result, dict):
+            return True
+        if isinstance(result.get("ok"), bool):
+            return bool(result["ok"])
+        if str(result.get("status", "")).lower() == "failed":
+            return False
+        processes = result.get("processes")
+        if isinstance(processes, list):
+            for item in processes:
+                if not isinstance(item, dict):
+                    continue
+                if item.get("ok") is False:
+                    return False
+                nested = item.get("result")
+                if isinstance(nested, dict) and nested.get("ok") is False:
+                    return False
+        return True
+
+    @classmethod
+    def _service_result_log(cls, result):
+        business_ok = cls._result_business_ok(result)
+        return {
+            "stage": "service_result",
+            "status": "ok" if business_ok else "failed",
+            "message": "Wynik usługi OK."
+            if business_ok
+            else "Usługa zwróciła błąd biznesowy.",
+            "details": {
+                "business_status": "ok" if business_ok else "failed",
+                "result_ok": result.get("ok") if isinstance(result, dict) else None,
+                "errors": result.get("errors", []) if isinstance(result, dict) else [],
+                "uri": result.get("uri", "") if isinstance(result, dict) else "",
+                "type": result.get("type", "") if isinstance(result, dict) else "",
+            },
+        }
+
+    @classmethod
+    def _workflow_history_status(cls, result, data_quality_findings) -> str:
+        if not cls._result_business_ok(result):
+            return "completed_with_service_error"
+        if data_quality_findings:
+            return "completed_with_warnings"
+        return "completed"
+
     def _render_logs(
         self,
         transcription: str,
@@ -1821,12 +1975,14 @@ class TellmServer:
             },
             {
                 "stage": "functions",
-                "status": "ok"
-                if not isinstance(result, dict) or result.get("status") != "failed"
-                else "error",
-                "message": "Procesy Python zakończone",
-                "details": result,
+                "status": "completed",
+                "message": "Warstwa wykonawcza zakończyła pracę.",
+                "details": {
+                    "execution_status": "completed",
+                    "result": result,
+                },
             },
+            self._service_result_log(result),
             {
                 "stage": "renderer",
                 "status": "ok" if html and "<html" in html.lower() else "error",
@@ -2044,7 +2200,21 @@ class TellmServer:
         )
         await self._send_log(websocket, "functions", "running", "Uruchamiam funkcje/procesy Python.")
         result = await self._run_blocking(self.bot.execute_task, task)
-        await self._send_log(websocket, "functions", "ok", "Funkcje/procesy zakończone.", {"result": result})
+        await self._send_log(
+            websocket,
+            "functions",
+            "completed",
+            "Warstwa wykonawcza zakończyła pracę.",
+            {"execution_status": "completed", "result": result},
+        )
+        service_log = self._service_result_log(result)
+        await self._send_log(
+            websocket,
+            service_log["stage"],
+            service_log["status"],
+            service_log["message"],
+            service_log["details"],
+        )
         await self._send_log(websocket, "renderer", "running", "Renderuję HTML z danych JSON.")
         view = await self._run_blocking(self.bot.generate_view, transcription, task, result)
         data_quality_findings = self._data_source_findings(transcription, task, result)
@@ -2089,23 +2259,35 @@ class TellmServer:
             and not task.function_name.startswith("tellm://")
             and not task.processes
         )
+        service_result_status = "ok" if self._result_business_ok(view.result) else "failed"
+        workflow_status = self._workflow_history_status(view.result, data_quality_findings)
         await self._run_blocking(
             self.bot.record_execution,
             uri=task.function_name,
             kind="workflow",
             ok=True,
-            status="completed_with_warnings" if data_quality_findings else "completed",
+            status=workflow_status,
             result=view.result,
             logs=render_logs,
             metadata={
                 "query": transcription,
                 "llm_direct_answer_violation": direct_answer_violation,
                 "data_quality_findings": data_quality_findings,
+                "execution_status": "completed",
+                "service_result_status": service_result_status,
                 "repair_count": self._repair_count(render_logs),
                 "view_id": view.view_id,
             },
         )
-        if data_quality_findings:
+        if service_result_status == "failed":
+            await self._send_log(
+                websocket,
+                "workflow",
+                "completed_with_service_error",
+                "Workflow zakończony, ale wynik usługi jest błędem.",
+                {"service_result_status": service_result_status},
+            )
+        elif data_quality_findings:
             await self._send_log(
                 websocket,
                 "workflow",
@@ -2153,9 +2335,17 @@ class TellmServer:
         await self._send_log(
             websocket,
             "registry",
-            "ok",
-            "Lokalny zasób zwrócił JSON.",
-            {"result": result},
+            "completed",
+            "Lokalny resolver zakończył pracę.",
+            {"execution_status": "completed", "result": result},
+        )
+        service_log = self._service_result_log(result)
+        await self._send_log(
+            websocket,
+            service_log["stage"],
+            service_log["status"],
+            service_log["message"],
+            service_log["details"],
         )
         view = await self._run_blocking(self.bot.generate_view, uri, task, result)
         data_quality_findings = self._data_source_findings(uri, task, result)
@@ -2204,27 +2394,35 @@ class TellmServer:
                     view.result,
                     html,
                 )
+        service_result_status = "ok" if self._result_business_ok(view.result) else "failed"
+        workflow_status = self._workflow_history_status(view.result, data_quality_findings)
         await self._run_blocking(
             self.bot.record_execution,
             uri=uri,
             kind="registry_workflow",
-            ok=bool(view.result.get("ok", True)) if isinstance(view.result, dict) else True,
-            status="completed_with_warnings"
-            if data_quality_findings
-            else str(view.result.get("type", "completed"))
-            if isinstance(view.result, dict)
-            else "completed",
+            ok=True,
+            status=workflow_status,
             result=view.result,
             logs=render_logs,
             metadata={
                 "query": uri,
                 "input": payload,
                 "data_quality_findings": data_quality_findings,
+                "execution_status": "completed",
+                "service_result_status": service_result_status,
                 "repair_count": self._repair_count(render_logs),
                 "view_id": view.view_id,
             },
         )
-        if data_quality_findings:
+        if service_result_status == "failed":
+            await self._send_log(
+                websocket,
+                "workflow",
+                "completed_with_service_error",
+                "Registry execute zakończony, ale wynik usługi jest błędem.",
+                {"service_result_status": service_result_status},
+            )
+        elif data_quality_findings:
             await self._send_log(
                 websocket,
                 "workflow",

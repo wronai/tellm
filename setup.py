@@ -2,7 +2,7 @@ from setuptools import find_packages, setup
 
 setup(
     name="tellm",
-    version="4.0.4",
+    version="4.0.5",
     packages=find_packages(),
     install_requires=[
         "litellm>=1.0.0",

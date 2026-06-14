@@ -47,6 +47,37 @@ class AutoimprovementRunner:
                 sources.extend(AutoimprovementRunner._collect_source_values(item))
         return sources
 
+    @staticmethod
+    def _collect_error_objects(value: Any) -> List[Dict[str, Any]]:
+        errors: List[Dict[str, Any]] = []
+        if isinstance(value, dict):
+            for key, item in value.items():
+                if str(key).lower() == "errors" and isinstance(item, list):
+                    for error in item:
+                        if isinstance(error, dict):
+                            errors.append(error)
+                        else:
+                            errors.append({"detail": str(error), "code": ""})
+                else:
+                    errors.extend(AutoimprovementRunner._collect_error_objects(item))
+        elif isinstance(value, list):
+            for item in value:
+                errors.extend(AutoimprovementRunner._collect_error_objects(item))
+        return errors
+
+    @staticmethod
+    def _looks_like_weather_identifier(uri: str, query: str) -> bool:
+        text = (uri + " " + query).lower()
+        return any(keyword in text for keyword in ["weather", "pogoda", "temperatura"])
+
+    @staticmethod
+    def _looks_like_ad_hoc_weather_function(uri: str, query: str) -> bool:
+        if uri.startswith("tellm://service/weather/current"):
+            return False
+        if uri.startswith("tellm://"):
+            return False
+        return AutoimprovementRunner._looks_like_weather_identifier(uri, query)
+
     def _schema_health(self, findings: List[Dict[str, Any]]) -> Dict[str, int]:
         invalid = 0
         missing = 0
@@ -150,13 +181,56 @@ class AutoimprovementRunner:
         direct_answer_violations = 0
         failed_validations = 0
         simulated_data_warnings = 0
+        missing_real_data_provider = 0
+        ad_hoc_function_generated = 0
         disallowed_sources = {"local_simulation", "mock", "test", "llm_generated", "generated"}
 
         for item in recent:
             uri = item.get("uri") or ""
-            if not item.get("ok"):
-                failures_by_uri[uri].append(item)
+            result = item.get("result")
             metadata = item.get("metadata") or {}
+            query = str(metadata.get("query") or "")
+            if not item.get("ok") or (
+                isinstance(result, dict) and result.get("ok") is False
+            ):
+                failures_by_uri[uri].append(item)
+            errors = self._collect_error_objects(result)
+            error_codes = {
+                str(error.get("code") or "").upper()
+                for error in errors
+                if error.get("code")
+            }
+            if (
+                "NETWORK_ACCESS_NOT_ALLOWED" in error_codes
+                and self._looks_like_weather_identifier(uri, query)
+            ):
+                missing_real_data_provider += 1
+                findings.append(
+                    self._finding(
+                        "warning",
+                        "missing_real_data_provider",
+                        "Zapytanie wymaga aktualnych danych pogodowych, ale system nie ma skonfigurowanej lokalnej usługi z dostępnym providerem.",
+                        "Dodać weather.current jako stałą usługę registry z providerem Open-Meteo/IMGW i kontrolowanym uprawnieniem network=true.",
+                        "tellm://service/weather/current",
+                        {
+                            "execution_id": item.get("id"),
+                            "uri": uri,
+                            "error_codes": sorted(error_codes),
+                        },
+                    )
+                )
+            if self._looks_like_ad_hoc_weather_function(uri, query):
+                ad_hoc_function_generated += 1
+                findings.append(
+                    self._finding(
+                        "info",
+                        "ad_hoc_function_generated",
+                        "LLM wygenerował funkcję pogodową ad hoc zamiast użyć generycznej usługi tellm://service/weather/current.",
+                        "Dodać routing intent weather.current do registry i zablokować tworzenie funkcji per lokalizacja.",
+                        uri,
+                        {"execution_id": item.get("id"), "query": query},
+                    )
+                )
             for finding in metadata.get("data_quality_findings", []) or []:
                 if finding.get("type") == "simulated_data_used_for_real_world_query":
                     simulated_data_warnings += 1
@@ -178,7 +252,7 @@ class AutoimprovementRunner:
                     )
             sources = [
                 source.strip().lower()
-                for source in self._collect_source_values(item.get("result"))
+                for source in self._collect_source_values(result)
             ]
             for source in sources:
                 if source in disallowed_sources:
@@ -266,6 +340,8 @@ class AutoimprovementRunner:
             "direct_answer_violations": direct_answer_violations,
             "failed_validations": failed_validations,
             "simulated_data_warnings": simulated_data_warnings,
+            "missing_real_data_provider": missing_real_data_provider,
+            "ad_hoc_function_generated": ad_hoc_function_generated,
         }
 
     @staticmethod
@@ -349,6 +425,8 @@ class AutoimprovementRunner:
             "direct_answer_violations": history["direct_answer_violations"],
             "failed_validations": history["failed_validations"],
             "simulated_data_warnings": history["simulated_data_warnings"],
+            "missing_real_data_provider": history["missing_real_data_provider"],
+            "ad_hoc_function_generated": history["ad_hoc_function_generated"],
             "suggested_patches": len(patches),
             "auto_applied": auto_applied,
         }

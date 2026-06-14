@@ -4,6 +4,7 @@ import inspect
 import html as html_lib
 import json
 import os
+import re
 import socket
 import sqlite3
 import tempfile
@@ -449,6 +450,7 @@ class TellmBot:
                 "type": "object",
                 "properties": {
                     "city": {"type": "string"},
+                    "location": {"type": "string"},
                     "country": {"type": "string"},
                     "latitude": {"type": "number"},
                     "longitude": {"type": "number"},
@@ -460,6 +462,7 @@ class TellmBot:
                 "llm_read": True,
                 "llm_execute": True,
                 "requires_confirmation": False,
+                "network": True,
                 "danger_level": "network",
             },
             tags=["service", "weather", "network", "real_world_data"],
@@ -734,7 +737,6 @@ class TellmBot:
         uri = "tellm://service/weather/current"
         city = str(params.get("city") or params.get("location") or "").strip()
         country = str(params.get("country") or "PL").strip().upper()
-        errors = []
         try:
             latitude = params.get("latitude")
             longitude = params.get("longitude")
@@ -799,31 +801,43 @@ class TellmBot:
                 view={"renderer": "auto", "template": "weather_current", "severity": "info"},
             )
         except Exception as exc:
-            errors.append(
-                {
-                    "code": "WEATHER_PROVIDER_UNAVAILABLE",
-                    "source": "weather.current",
-                    "detail": str(exc),
-                }
-            )
-            return service_result(
+            detail = str(exc)
+            lowered = detail.lower()
+            code = "WEATHER_PROVIDER_UNAVAILABLE"
+            if isinstance(exc, PermissionError) or (
+                "network" in lowered
+                and (
+                    "not allowed" in lowered
+                    or "denied" in lowered
+                    or "cannot access" in lowered
+                    or "requires network" in lowered
+                )
+            ):
+                code = "NETWORK_ACCESS_NOT_ALLOWED"
+            result = service_result(
                 ok=False,
                 result_type="weather.current.result",
                 uri=uri,
-                data={
-                    "city": city,
-                    "country": country,
-                    "available": None,
-                    "source": "open_meteo",
-                    "status": "unknown",
-                    "fetched_at": datetime.now(timezone.utc).isoformat(),
-                },
+                data=None,
                 title="Nie udało się pobrać pogody",
-                summary="Lokalna usługa weather.current nie pobrała danych pogodowych.",
-                details="To jest błąd lokalnej usługi pogodowej, nie odpowiedź LLM.",
-                errors=errors,
-                view={"renderer": "auto", "template": "weather_current", "severity": "error"},
+                summary="Usługa pogodowa wymaga dostępu do sieci lub providera, ale nie udało się pobrać realnych danych.",
+                details="Skonfiguruj provider pogody albo zezwól tej usłudze na kontrolowany dostęp HTTP.",
+                errors=[
+                    {
+                        "code": code,
+                        "source": uri,
+                        "detail": detail,
+                        "recoverable": True,
+                    }
+                ],
+                view={"renderer": "auto", "template": "status_card", "severity": "error"},
+                meta={"source": None, "fetched_at": None},
             )
+            result["input"] = {
+                "location": city,
+                "country": country,
+            }
+            return result
 
     @staticmethod
     def _normalize_domain(domain: str) -> str:
@@ -1132,6 +1146,91 @@ class TellmBot:
             self.tts.setProperty("rate", 150)
         return self.tts
 
+    @staticmethod
+    def _looks_like_weather_query(query: str) -> bool:
+        lowered = query.lower()
+        return any(
+            keyword in lowered
+            for keyword in [
+                "pogoda",
+                "pogodę",
+                "pogode",
+                "temperatura",
+                "temperaturę",
+                "temperature",
+                "weather",
+                "forecast",
+            ]
+        )
+
+    @staticmethod
+    def _normalize_weather_location(value: Any) -> str:
+        location = str(value or "").strip()
+        location = re.sub(r"^[\"'`]+|[\"'`.,?!:;]+$", "", location).strip()
+        if not location:
+            return ""
+        normalized = {
+            "wejherowie": "Wejherowo",
+            "warszawie": "Warszawa",
+            "gdansku": "Gdańsk",
+            "gdańsku": "Gdańsk",
+            "krakowie": "Kraków",
+            "poznaniu": "Poznań",
+            "wroclawiu": "Wrocław",
+            "wrocławiu": "Wrocław",
+        }.get(location.lower())
+        if normalized:
+            return normalized
+        if location.lower().endswith("owie") and len(location) > 5:
+            return location[:-4] + "owo"
+        return location[:1].upper() + location[1:]
+
+    def _weather_location_from_query(
+        self,
+        query: str,
+        parameters: Dict[str, Any],
+    ) -> str:
+        for key in ["city", "location", "place", "miejscowosc", "miasto"]:
+            if parameters.get(key):
+                return self._normalize_weather_location(parameters[key])
+        patterns = [
+            r"\b(?:pogoda|pogodę|pogode|temperatura|weather|forecast)\b[^?.!,\n]{0,80}\b(?:w|we|dla)\s+([^?.!,\n]+)",
+            r"\b(?:w|we|dla)\s+([A-ZĄĆĘŁŃÓŚŹŻ][A-Za-zĄĆĘŁŃÓŚŹŻąćęłńóśźż -]{1,60})",
+        ]
+        for pattern in patterns:
+            match = re.search(pattern, query, flags=re.IGNORECASE)
+            if match:
+                candidate = match.group(1).strip()
+                candidate = re.split(r"\s+(?:teraz|dzisiaj|dziś|jutro|aktualnie)\b", candidate, maxsplit=1, flags=re.IGNORECASE)[0]
+                return self._normalize_weather_location(candidate)
+        return ""
+
+    def _route_weather_task(self, query: str, task: Task) -> Task:
+        if not self._looks_like_weather_query(query):
+            return task
+        parameters = dict(task.parameters or {})
+        city = self._weather_location_from_query(query, parameters)
+        routed_parameters = {
+            "location": city,
+            "country": str(parameters.get("country") or "PL").strip().upper(),
+        }
+        for key in ["latitude", "longitude"]:
+            if key in parameters:
+                routed_parameters[key] = parameters[key]
+        task.type = TaskType.NOW
+        task.function_name = "tellm://service/weather/current"
+        task.parameters = routed_parameters
+        task.processes = []
+        task.code = ""
+        if not isinstance(task.view, dict):
+            task.view = {}
+        task.view.setdefault("title", "Pogoda")
+        task.view.setdefault(
+            "blocks",
+            [{"type": "text", "text": "Pobieram realny wynik z weather.current."}],
+        )
+        return task
+
     async def analyze_query(self, query: str) -> Task:
         registry_json = json.dumps(
             self.registry.discover_for_llm(),
@@ -1202,7 +1301,7 @@ Zapytanie: """ + query
                     "code": code,
                 }
             ]
-        return Task(
+        task = Task(
             task_type,
             function_name,
             parameters,
@@ -1211,6 +1310,7 @@ Zapytanie: """ + query
             view,
             processes,
         )
+        return self._route_weather_task(query, task)
 
     async def evolve_function(self, task: Task) -> Dict:
         func_name = task.function_name
@@ -1339,22 +1439,25 @@ Zapytanie: """ + query
             return {}
         message = result.get("message")
         data = result.get("data")
-        if not isinstance(message, dict) or not isinstance(data, dict):
+        if not isinstance(message, dict):
             return {}
-        if result.get("type") == "system.autoimprovement.report":
+        if result.get("type") == "system.autoimprovement.report" and isinstance(data, dict):
             return TellmBot._render_autoimprovement_data(data, message)
         blocks = []
         summary = message.get("summary")
         details = message.get("details")
         if summary:
             blocks.append({"type": "text", "text": summary})
-        blocks.append({"type": "key_value", "items": data})
+        if isinstance(data, dict):
+            blocks.append({"type": "key_value", "items": data})
         if result.get("uri"):
             blocks.append({"type": "text", "text": "Usługa: " + str(result["uri"])})
         if details:
             blocks.append({"type": "text", "text": details})
         if result.get("errors"):
             blocks.append({"type": "json", "data": {"errors": result["errors"]}})
+        if result.get("warnings"):
+            blocks.append({"type": "json", "data": {"warnings": result["warnings"]}})
         return {
             "title": str(message.get("title") or result.get("type") or "Wynik usługi"),
             "blocks": blocks,

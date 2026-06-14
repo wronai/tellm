@@ -49,6 +49,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [4.0.5] - 2026-06-14
+
+### Docs
+- Update README.md
+
+### Test
+- Update tests/test_tellm.py
+
+### Other
+- Update project/planfile-tickets.yaml
+- Update tellm/__init__.py
+- Update tellm/bot.py
+- Update tellm/improvement/runner.py
+- Update tellm/registry/core.py
+- Update tellm/server.py
+
 ## [4.0.4] - 2026-06-14
 
 ### Docs

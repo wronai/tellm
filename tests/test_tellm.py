@@ -178,6 +178,8 @@ def test_registry_manifest_uses_tellm_standards(tmp_path):
     assert weather["manifest_version"] == TRM_VERSION
     assert weather["schema_version"] == "2020-12"
     assert weather["input_schema"]["$schema"] == JSON_SCHEMA_DRAFT_2020_12
+    assert "location" in weather["input_schema"]["properties"]
+    assert weather["permissions"]["network"] is True
     assert weather["data_policy"]["requires_real_world_data"] is True
     assert weather["render"]["default_view"] == "tellm://view/weather/current"
 
@@ -186,6 +188,25 @@ def test_registry_manifest_uses_tellm_standards(tmp_path):
     assert envelope["meta"]["source"] == "unit_test"
     assert envelope["render"]["renderer"] == "auto"
     validate_schema(service_result_schema(), envelope)
+
+    error_envelope = service_result(
+        ok=False,
+        uri="tellm://service/weather/current",
+        result_type="weather.current.result",
+        data=None,
+        title="Błąd",
+        summary="Brak danych",
+        errors=["Function cannot access network or files"],
+    )
+    assert error_envelope["errors"] == [
+        {
+            "code": "NETWORK_ACCESS_NOT_ALLOWED",
+            "source": "tellm://service/weather/current",
+            "detail": "Function cannot access network or files",
+            "recoverable": True,
+        }
+    ]
+    validate_schema(service_result_schema(), error_envelope)
 
 
 def test_registry_masks_env_and_exposes_discovery(tmp_path, monkeypatch):
@@ -249,6 +270,33 @@ def test_weather_service_fetches_open_meteo_data(tmp_path, monkeypatch):
     assert result["data"]["temperature_c"] == 15.0
     assert result["data"]["source"] == "open_meteo"
     assert "deszcz" in result["data"]["description"]
+
+
+def test_weather_service_returns_standard_error_when_network_denied(tmp_path, monkeypatch):
+    from tellm import create_bot
+
+    bot = create_bot(db_path=str(tmp_path / "tellm.db"))
+
+    def fake_http_json(url, timeout=8):
+        raise PermissionError("Network access is required but not allowed.")
+
+    monkeypatch.setattr(bot, "_http_json", fake_http_json)
+
+    result = asyncio.run(
+        bot.execute_resource(
+            "tellm://service/weather/current",
+            {"city": "Wejherowo", "country": "PL"},
+        )
+    )
+
+    assert result["ok"] is False
+    assert result["uri"] == "tellm://service/weather/current"
+    assert result["type"] == "weather.current.result"
+    assert result["data"] is None
+    assert result["input"] == {"location": "Wejherowo", "country": "PL"}
+    assert result["errors"][0]["code"] == "NETWORK_ACCESS_NOT_ALLOWED"
+    assert result["errors"][0]["source"] == "tellm://service/weather/current"
+    assert result["errors"][0]["recoverable"] is True
 
 
 def test_autoimprove_service_returns_and_saves_schema_valid_report(tmp_path):
@@ -391,6 +439,51 @@ def test_autoimprove_finds_simulated_data_for_real_world_query(tmp_path):
     assert result["data"]["summary"]["simulated_data_warnings"] >= 1
 
 
+def test_autoimprove_finds_missing_weather_provider_and_ad_hoc_function(tmp_path):
+    from tellm import create_bot
+
+    bot = create_bot(db_path=str(tmp_path / "tellm.db"))
+    bot.record_execution(
+        uri="weather_wejherowo",
+        kind="workflow",
+        ok=True,
+        status="completed_with_service_error",
+        result={
+            "ok": False,
+            "uri": "tellm://service/weather/current",
+            "type": "weather.current.result",
+            "data": None,
+            "message": {
+                "title": "Nie udało się pobrać pogody",
+                "summary": "Brak sieci",
+            },
+            "errors": [
+                {
+                    "code": "NETWORK_ACCESS_NOT_ALLOWED",
+                    "source": "tellm://service/weather/current",
+                    "detail": "Network access is required but not allowed.",
+                    "recoverable": True,
+                }
+            ],
+        },
+        metadata={
+            "query": "Jaka jest pogoda w Wejherowie",
+            "execution_status": "completed",
+            "service_result_status": "failed",
+        },
+    )
+
+    result = asyncio.run(
+        bot.execute_resource("tellm://service/system/autoimprove", {"dry_run": True})
+    )
+    finding_types = {item["type"] for item in result["data"]["findings"]}
+
+    assert "missing_real_data_provider" in finding_types
+    assert "ad_hoc_function_generated" in finding_types
+    assert result["data"]["summary"]["missing_real_data_provider"] == 1
+    assert result["data"]["summary"]["ad_hoc_function_generated"] == 1
+
+
 def test_autoimprovement_report_renders_as_html(tmp_path):
     from tellm import Task, TaskType, create_bot
 
@@ -458,6 +551,48 @@ def test_analyze_query_reads_llm_json_view_and_processes(tmp_path, monkeypatch):
     assert task.parameters == {"x": 2}
     assert task.view["title"] == "Dynamic"
     assert task.processes[0]["name"] == "calc"
+
+
+def test_analyze_query_routes_weather_to_registry_service(tmp_path, monkeypatch):
+    from tellm import create_bot
+
+    bot = create_bot(db_path=str(tmp_path / "tellm.db"))
+
+    def fake_completion(messages):
+        class Message:
+            content = json.dumps(
+                {
+                    "type": "now",
+                    "function_name": "weather_wejherowo",
+                    "parameters": {},
+                    "processes": [
+                        {
+                            "name": "weather_wejherowo",
+                            "language": "python",
+                            "entrypoint": "run",
+                            "code": "def run(params):\n    return {'source': 'local_simulation'}",
+                        }
+                    ],
+                    "code": "def weather_wejherowo(params):\n    return {}",
+                }
+            )
+
+        class Choice:
+            message = Message()
+
+        class Response:
+            choices = [Choice()]
+
+        return Response()
+
+    monkeypatch.setattr(bot, "_completion", fake_completion)
+
+    task = asyncio.run(bot.analyze_query("Jaka jest pogoda w Wejherowie?"))
+
+    assert task.function_name == "tellm://service/weather/current"
+    assert task.parameters == {"location": "Wejherowo", "country": "PL"}
+    assert task.processes == []
+    assert task.code == ""
 
 
 def test_execute_task_runs_python_process(tmp_path):
@@ -615,6 +750,14 @@ def test_server_docs_describe_text_and_speech_api(tmp_path):
     assert b"dry_run" in response
     assert b"tellm://service/weather/current" in response
     assert b"data_source" in response
+    assert b"/manifest" in response
+    assert b"/openapi.json" in response
+    assert b"/asyncapi.json" in response
+    assert b"/execute" in response
+    assert b"/query" in response
+    assert b"/autoimprovement/run" in response
+    assert b"Tellm Resource Manifest 1.0" in response
+    assert b"Tellm Service Result 1.0" in response
 
 
 def test_server_registry_http_endpoints(tmp_path):
@@ -651,6 +794,10 @@ def test_server_registry_http_endpoints(tmp_path):
             return response
 
     registry_response = asyncio.run(request("/registry"))
+    manifest_response = asyncio.run(request("/manifest"))
+    openapi_response = asyncio.run(request("/openapi.json"))
+    asyncapi_response = asyncio.run(request("/asyncapi.json"))
+    execute_response = asyncio.run(request("/execute"))
     resource_response = asyncio.run(
         request("/resource?uri=tellm://function/system/now")
     )
@@ -663,6 +810,25 @@ def test_server_registry_http_endpoints(tmp_path):
     assert b"tellm://service/domain/check" in registry_response
     assert b"OPENROUTER_API_KEY" in registry_response
     assert b"secret-value" not in registry_response
+
+    assert manifest_response.startswith(b"HTTP/1.1 200 OK")
+    assert b'"manifest_version": "1.0.0"' in manifest_response
+    assert b'"$schema": "https://json-schema.org/draft/2020-12/schema"' in manifest_response
+    assert b"tellm://schema/tellm/service-result" in manifest_response
+
+    assert openapi_response.startswith(b"HTTP/1.1 200 OK")
+    assert b'"openapi": "3.1.0"' in openapi_response
+    assert b'TellmServiceResult' in openapi_response
+    assert b'"/execute"' in openapi_response
+    assert b'"post"' in openapi_response
+    assert b"ExecuteRequest" in openapi_response
+
+    assert asyncapi_response.startswith(b"HTTP/1.1 200 OK")
+    assert b'"asyncapi": "3.1.0"' in asyncapi_response
+    assert b"ClientExecute" in asyncapi_response
+
+    assert execute_response.startswith(b"HTTP/1.1 501 Not Implemented")
+    assert b"HTTP_BODY_TRANSPORT_NOT_ENABLED" in execute_response
 
     assert resource_response.startswith(b"HTTP/1.1 200 OK")
     assert b"tellm://function/system/now" in resource_response
@@ -928,6 +1094,60 @@ def test_server_flags_simulated_weather_source(tmp_path):
     )
     assert "Ostrzeżenie" in html
     assert "local_simulation" in html
+
+
+def test_server_logs_execution_and_service_result_separately(tmp_path):
+    from tellm import Task, TaskType
+    from tellm.server import TellmServer
+
+    server = TellmServer(
+        host="127.0.0.1",
+        port=0,
+        db_path=str(tmp_path / "tellm.db"),
+    )
+    task = Task(
+        TaskType.NOW,
+        "tellm://service/weather/current",
+        {"city": "Wejherowo", "country": "PL"},
+    )
+    result = {
+        "ok": False,
+        "uri": "tellm://service/weather/current",
+        "type": "weather.current.result",
+        "data": None,
+        "message": {
+            "title": "Nie udało się pobrać pogody",
+            "summary": "Brak sieci",
+        },
+        "errors": [
+            {
+                "code": "NETWORK_ACCESS_NOT_ALLOWED",
+                "source": "tellm://service/weather/current",
+                "detail": "Network access is required but not allowed.",
+                "recoverable": True,
+            }
+        ],
+    }
+    view = server.bot.generate_view("Jaka jest pogoda w Wejherowie", task, result)
+    html = view.to_html()
+    logs = server._render_logs(
+        "Jaka jest pogoda w Wejherowie",
+        task,
+        result,
+        view,
+        html,
+    )
+
+    assert any(
+        log["stage"] == "functions" and log["status"] == "completed"
+        for log in logs
+    )
+    assert any(
+        log["stage"] == "service_result" and log["status"] == "failed"
+        for log in logs
+    )
+    assert server._workflow_history_status(result, []) == "completed_with_service_error"
+    assert "NETWORK_ACCESS_NOT_ALLOWED" in html
 
 
 def test_server_blocks_parallel_query_and_accepts_cancel(tmp_path, monkeypatch):
