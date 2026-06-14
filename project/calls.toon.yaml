@@ -1,51 +1,51 @@
 # code2llm call graph | /home/tom/github/wronai/tellm
-# generated in 0.01s
-# nodes: 19 | edges: 15 | modules: 6
-# CC̄=3.4
+# generated in 0.02s
+# nodes: 47 | edges: 39 | modules: 7
+# CC̄=5.5
 
 HUBS[20]:
-  server.TellmServer._handle_transcription
-    CC=2  in:0  out:15  total:15
+  tellm.server.TellmServer._validate_and_repair
+    CC=12  in:0  out:40  total:40
+  tellm.registry.core.validate_schema
+    CC=23  in:9  out:27  total:36
+  tellm.registry.core.normalize_issue_list
+    CC=11  in:2  out:20  total:22
+  tellm.bot.TellmBot._registry_domain_check
+    CC=14  in:0  out:22  total:22
+  tellm.server.TellmServer._local_validation_verdict
+    CC=23  in:0  out:17  total:17
+  tellm.registry.core.service_result
+    CC=6  in:8  out:7  total:15
   scripts.generate_test_audio.generate_fixture
     CC=2  in:1  out:13  total:14
   main.main
     CC=3  in:0  out:14  total:14
   scripts.protocol_smoke.send_ws_payload
     CC=4  in:2  out:10  total:12
+  tellm.registry.core.RegistryEntry.__post_init__
+    CC=17  in:0  out:12  total:12
   scripts.generate_test_audio.main
     CC=4  in:0  out:9  total:9
-  scripts.protocol_smoke.check_http
-    CC=3  in:2  out:7  total:9
   config.load_config
     CC=1  in:3  out:6  total:9
+  scripts.protocol_smoke.check_http
+    CC=3  in:2  out:7  total:9
+  tellm.registry.core.validate_tellm_uri
+    CC=9  in:2  out:7  total:9
+  tellm.registry.core.ResourceRegistry.execute
+    CC=5  in:0  out:9  total:9
   scripts.protocol_smoke.check_ws_audio
     CC=4  in:1  out:8  total:9
+  tellm.bot.TellmBot._price_relevance_tokens
+    CC=6  in:0  out:9  total:9
+  tellm.registry.core.ResourceRegistry._call
+    CC=4  in:0  out:8  total:8
   scripts.protocol_smoke.check_ws_text
     CC=3  in:1  out:7  total:8
-  scripts.protocol_smoke.audio_data_url
-    CC=1  in:1  out:4  total:5
-  server._websocket_logger
-    CC=1  in:1  out:4  total:5
-  server.TellmServer.serve_forever
-    CC=1  in:0  out:5  total:5
-  scripts.protocol_smoke.get_url
-    CC=3  in:1  out:4  total:5
-  scripts.generate_test_audio.require_tool
-    CC=2  in:2  out:2  total:4
-  scripts.protocol_smoke.async_main
-    CC=7  in:1  out:3  total:4
-  scripts.generate_test_audio.run
-    CC=1  in:2  out:1  total:3
-  scripts.protocol_smoke.ws_ssl_context
-    CC=3  in:1  out:2  total:3
-  scripts.protocol_smoke.mime_for_audio
-    CC=3  in:1  out:1  total:2
-  bot.TellmBot.__init__
-    CC=2  in:0  out:2  total:2
+  tellm.registry.core.ResourceRegistry.list
+    CC=4  in:3  out:4  total:7
 
 MODULES:
-  bot  [1 funcs]
-    __init__  CC=2  out:2
   config  [1 funcs]
     load_config  CC=1  out:6
   main  [1 funcs]
@@ -65,16 +65,34 @@ MODULES:
     mime_for_audio  CC=3  out:1
     send_ws_payload  CC=4  out:10
     ws_ssl_context  CC=3  out:2
-  server  [3 funcs]
-    _handle_transcription  CC=2  out:15
+  tellm.bot  [6 funcs]
+    __init__  CC=2  out:5
+    _price_error_result  CC=3  out:2
+    _price_relevance_tokens  CC=6  out:9
+    _registry_domain_check  CC=14  out:22
+    _registry_echo  CC=1  out:1
+    _registry_now  CC=1  out:3
+  tellm.registry.core  [19 funcs]
+    __post_init__  CC=17  out:12
+    _call  CC=4  out:8
+    execute  CC=5  out:9
+    list  CC=4  out:4
+    manifest  CC=2  out:4
+    read  CC=3  out:5
+    register_alias  CC=11  out:2
+    _schema_types  CC=4  out:3
+    json_like  CC=2  out:2
+    normalize_issue_list  CC=11  out:20
+  tellm.server  [7 funcs]
+    _local_validation_verdict  CC=23  out:17
+    _validate_and_repair  CC=12  out:40
+    _validate_payload  CC=4  out:6
     serve_forever  CC=1  out:5
+    _asyncapi_document  CC=1  out:1
+    _openapi_document  CC=1  out:2
     _websocket_logger  CC=1  out:4
 
 EDGES:
-  server.TellmServer._handle_transcription → config.load_config
-  server.TellmServer.serve_forever → server._websocket_logger
-  bot.TellmBot.__init__ → config.load_config
-  main.main → config.load_config
   scripts.generate_test_audio.generate_fixture → scripts.generate_test_audio.run
   scripts.generate_test_audio.generate_fixture → scripts.generate_test_audio.require_tool
   scripts.generate_test_audio.main → scripts.generate_test_audio.generate_fixture
@@ -86,3 +104,31 @@ EDGES:
   scripts.protocol_smoke.check_ws_audio → scripts.protocol_smoke.send_ws_payload
   scripts.protocol_smoke.async_main → scripts.protocol_smoke.check_ws_text
   scripts.protocol_smoke.async_main → scripts.protocol_smoke.check_ws_audio
+  tellm.server._openapi_document → tellm.registry.core.registry_manifest_schema
+  tellm.server._openapi_document → tellm.registry.core.service_result_schema
+  tellm.server._asyncapi_document → tellm.registry.core.registry_manifest_schema
+  tellm.server.TellmServer._validate_payload → tellm.registry.core.validate_schema
+  tellm.server.TellmServer._local_validation_verdict → tellm.registry.core.validate_schema
+  tellm.server.TellmServer._validate_and_repair → config.load_config
+  tellm.server.TellmServer.serve_forever → tellm.server._websocket_logger
+  tellm.bot.TellmBot.__init__ → config.load_config
+  tellm.bot.TellmBot._registry_now → tellm.registry.core.service_result
+  tellm.bot.TellmBot._registry_echo → tellm.registry.core.service_result
+  tellm.bot.TellmBot._registry_domain_check → tellm.registry.core.service_result
+  tellm.bot.TellmBot._price_relevance_tokens → tellm.registry.core.ResourceRegistry.list
+  tellm.bot.TellmBot._price_error_result → tellm.registry.core.service_result
+  main.main → config.load_config
+  tellm.registry.core.uri_domain → tellm.registry.core.uri_parts
+  tellm.registry.core.uri_name → tellm.registry.core.uri_parts
+  tellm.registry.core.validate_schema → tellm.registry.core._schema_types
+  tellm.registry.core.normalize_issue_list → tellm.registry.core.json_like
+  tellm.registry.core.service_result → tellm.registry.core.normalize_issue_list
+  tellm.registry.core.RegistryEntry.__post_init__ → tellm.registry.core.normalize_schema
+  tellm.registry.core.RegistryEntry.__post_init__ → tellm.registry.core.validate_tellm_uri
+  tellm.registry.core.RegistryEntry.__post_init__ → tellm.registry.core.uri_domain
+  tellm.registry.core.ResourceRegistry.register_alias → tellm.registry.core.uri_name
+  tellm.registry.core.ResourceRegistry.manifest → tellm.registry.core.registry_manifest_schema
+  tellm.registry.core.ResourceRegistry.manifest → tellm.registry.core.service_result_schema
+  tellm.registry.core.ResourceRegistry.read → tellm.registry.core.validate_schema
+  tellm.registry.core.ResourceRegistry.execute → tellm.registry.core.validate_schema
+  tellm.registry.core.ResourceRegistry._call → tellm.registry.core.ResourceRegistry.list

@@ -155,6 +155,15 @@ def test_registry_manifest_uses_tellm_standards(tmp_path):
     bot = create_bot(db_path=str(tmp_path / "tellm.db"))
     manifest = bot.registry.manifest()
     weather = bot.registry.get("tellm://service/weather/current").to_dict()
+    weather_alias = bot.registry.get("tellm://function/weather_wejherowo").to_dict()
+    weather_tombstone = bot.registry.get("tellm://service/old/weather").to_dict()
+    audio_artifact = bot.registry.get("tellm://artifact/audio/weather-query-sample").to_dict()
+    audio_media = bot.registry.get("tellm://media/audio/weather-query-sample").to_dict()
+    project_file = bot.registry.get("tellm://file/project/tellm/server.py").to_dict()
+    pytest_command = bot.registry.get("tellm://command/shell/pytest").to_dict()
+    litellm_package = bot.registry.get("tellm://package/python/litellm").to_dict()
+    jsonschema_package = bot.registry.get("tellm://package/python/jsonschema").to_dict()
+    validator_prompt = bot.registry.get("tellm://prompt/validator/workflow-result").to_dict()
     envelope = service_result(
         ok=True,
         uri="tellm://service/test/example",
@@ -165,6 +174,16 @@ def test_registry_manifest_uses_tellm_standards(tmp_path):
     )
 
     validate_tellm_uri("tellm://service/weather/current", "service")
+    validate_tellm_uri("tellm://artifact/audio/weather-query-sample", "artifact")
+    validate_tellm_uri("tellm://media/audio/weather-query-sample", "media")
+    validate_tellm_uri("tellm://command/shell/pytest", "command")
+    validate_tellm_uri("tellm://package/python/litellm", "package")
+    validate_tellm_uri("tellm://package/python/jsonschema", "package")
+    validate_tellm_uri("tellm://python/module/tellm.bot", "python")
+    validate_tellm_uri("tellm://workflow/run/000001", "workflow")
+    validate_tellm_uri("tellm://log/workflow/000001", "log")
+    validate_tellm_uri("tellm://alias/weather/wejherowo", "alias")
+    validate_tellm_uri("tellm://tombstone/weather/old", "tombstone")
     with pytest.raises(RegistryValidationError):
         validate_tellm_uri("http://localhost:8008/weather", "service")
 
@@ -177,11 +196,58 @@ def test_registry_manifest_uses_tellm_standards(tmp_path):
     )
     assert weather["manifest_version"] == TRM_VERSION
     assert weather["schema_version"] == "2020-12"
+    assert weather["canonical_uri"] == "tellm://service/weather/current"
+    assert weather["domain"] == "weather"
+    assert weather["input_schema_uri"] == "tellm://schema/weather/current/input"
+    assert "weather.current" in weather["capabilities"]
     assert weather["input_schema"]["$schema"] == JSON_SCHEMA_DRAFT_2020_12
     assert "location" in weather["input_schema"]["properties"]
+    assert weather["input_schema"]["required"] == ["location"]
     assert weather["permissions"]["network"] is True
     assert weather["data_policy"]["requires_real_world_data"] is True
     assert weather["render"]["default_view"] == "tellm://view/weather/current"
+    assert bot.registry.find_capability("weather.current") == "tellm://service/weather/current"
+    assert bot.registry.canonicalize("tellm://function/weather_wejherowo") == "tellm://service/weather/current"
+    alias_resolution = bot.registry.resolve_uri("tellm://function/weather_wejherowo", {})
+    assert alias_resolution["canonical_uri"] == "tellm://service/weather/current"
+    assert alias_resolution["input"] == {"location": "Wejherowo", "country": "PL"}
+    assert alias_resolution["warnings"][0]["code"] == "DEPRECATED_URI"
+    mapped_resolution = bot.registry.resolve_uri(
+        "tellm://service/weather/get",
+        {"city": "Gdańsk", "country_code": "PL"},
+    )
+    assert mapped_resolution["input"] == {"location": "Gdańsk", "country": "PL"}
+    assert weather_alias["kind"] == "alias"
+    assert weather_alias["canonical_uri"] == "tellm://service/weather/current"
+    assert weather_alias["default_input"]["location"] == "Wejherowo"
+    assert weather_tombstone["kind"] == "tombstone"
+    assert weather_tombstone["status"] == "removed"
+    assert weather_tombstone["replacement"] == "tellm://service/weather/current"
+    assert audio_artifact["kind"] == "artifact"
+    assert audio_artifact["storage"] == {
+        "type": "local_file",
+        "base": "project",
+        "path": "output/test-audio/tellm-pl-pogoda.webm",
+    }
+    assert audio_artifact["media_type"] == "audio/webm"
+    assert "tellm://file/output/test-audio/tellm-pl-pogoda.webm" in audio_artifact["relations"]["physical_file"]
+    assert audio_media["kind"] == "media"
+    assert audio_media["relations"]["same_as"] == ["tellm://artifact/audio/weather-query-sample"]
+    assert project_file["kind"] == "file"
+    assert project_file["storage"]["path"] == "tellm/server.py"
+    assert pytest_command["kind"] == "command"
+    assert pytest_command["command_template"] == "python -m pytest -q {path}"
+    assert pytest_command["permissions"]["shell"] is True
+    assert pytest_command["permissions"]["llm_execute"] is False
+    assert litellm_package["kind"] == "package"
+    assert litellm_package["ecosystem"] == "python"
+    assert "llm_client" in litellm_package["capabilities"]
+    assert jsonschema_package["kind"] == "package"
+    assert jsonschema_package["import_name"] == "jsonschema"
+    assert "validate_json_schema" in jsonschema_package["capabilities"]
+    assert validator_prompt["kind"] == "prompt"
+    assert validator_prompt["storage"]["type"] == "inline"
+    assert validator_prompt["input_schema"]["required"] == ["result_json", "html"]
 
     assert envelope["envelope_version"] == TSR_VERSION
     assert envelope["warnings"] == []
@@ -259,7 +325,7 @@ def test_weather_service_fetches_open_meteo_data(tmp_path, monkeypatch):
     result = asyncio.run(
         bot.execute_resource(
             "tellm://service/weather/current",
-            {"city": "Wejherowo", "country": "PL"},
+            {"location": "Wejherowo", "country": "PL"},
         )
     )
 
@@ -270,6 +336,131 @@ def test_weather_service_fetches_open_meteo_data(tmp_path, monkeypatch):
     assert result["data"]["temperature_c"] == 15.0
     assert result["data"]["source"] == "open_meteo"
     assert "deszcz" in result["data"]["description"]
+    assert result["data"]["timings"]["geocoding_ms"] >= 0
+    assert result["data"]["timings"]["forecast_ms"] >= 0
+    assert result["data"]["timings"]["provider_total_ms"] >= 0
+
+
+def test_weather_service_normalizes_country_and_falls_back_geocoding(tmp_path, monkeypatch):
+    from urllib import parse
+    from tellm import create_bot
+
+    bot = create_bot(db_path=str(tmp_path / "tellm.db"))
+    geocoding_queries = []
+
+    def fake_http_json(url, timeout=8):
+        if "geocoding-api.open-meteo.com" in url:
+            query = parse.parse_qs(parse.urlparse(url).query)
+            geocoding_queries.append(query)
+            if query.get("countryCode") == ["PL"]:
+                return {"results": []}
+            assert "countryCode" not in query
+            return {
+                "results": [
+                    {
+                        "name": "Wejherowo",
+                        "country_code": "PL",
+                        "latitude": 54.6057,
+                        "longitude": 18.2356,
+                        "population": 46820,
+                    }
+                ]
+            }
+        if "api.open-meteo.com" in url:
+            return {
+                "current": {
+                    "time": "2026-06-14T12:00",
+                    "temperature_2m": 16.5,
+                    "relative_humidity_2m": 70,
+                    "apparent_temperature": 15.9,
+                    "weather_code": 2,
+                    "wind_speed_10m": 8.0,
+                    "wind_direction_10m": 200,
+                }
+            }
+        raise AssertionError(url)
+
+    monkeypatch.setattr(bot, "_http_json", fake_http_json)
+
+    result = asyncio.run(
+        bot.execute_resource(
+            "tellm://service/weather/current",
+            {"location": "Wejherowo", "country": "POLAND"},
+        )
+    )
+
+    assert result["ok"] is True
+    assert result["data"]["country"] == "PL"
+    assert result["data"]["source"] == "open_meteo"
+    assert result["data"]["geocoding"]["query"] == {
+        "name": "Wejherowo",
+        "country": "POLAND",
+        "normalized_country": "PL",
+    }
+    assert geocoding_queries[0]["countryCode"] == ["PL"]
+    assert "countryCode" not in geocoding_queries[1]
+    assert len(result["data"]["geocoding"]["attempts"]) == 2
+
+
+def test_weather_service_returns_location_not_found_diagnostics(tmp_path, monkeypatch):
+    from tellm import create_bot
+
+    bot = create_bot(db_path=str(tmp_path / "tellm.db"))
+
+    def fake_http_json(url, timeout=8):
+        if "geocoding-api.open-meteo.com" in url:
+            return {"results": []}
+        raise AssertionError(url)
+
+    monkeypatch.setattr(bot, "_http_json", fake_http_json)
+
+    result = asyncio.run(
+        bot.execute_resource(
+            "tellm://service/weather/current",
+            {"location": "Wejherowo", "country": "POLAND"},
+        )
+    )
+
+    assert result["ok"] is False
+    assert result["errors"][0]["code"] == "LOCATION_NOT_FOUND"
+    assert result["errors"][0]["provider"] == "open_meteo_geocoding"
+    assert "Location not found" in result["errors"][0]["detail"]
+    assert result["errors"][0]["query"] == {
+        "name": "Wejherowo",
+        "country": "POLAND",
+        "normalized_country": "PL",
+    }
+    assert len(result["errors"][0]["attempts"]) == 2
+    assert result["input"]["geocoding"]["query"]["normalized_country"] == "PL"
+
+
+def test_weather_service_rejects_country_level_location(tmp_path, monkeypatch):
+    from tellm import create_bot
+
+    bot = create_bot(db_path=str(tmp_path / "tellm.db"))
+
+    def fail_http_json(url, timeout=8):
+        raise AssertionError("country-level location should not call Open-Meteo: " + url)
+
+    monkeypatch.setattr(bot, "_http_json", fail_http_json)
+
+    result = asyncio.run(
+        bot.execute_resource(
+            "tellm://service/weather/current",
+            {"location": "Polska", "country": "PL"},
+        )
+    )
+
+    assert result["ok"] is False
+    assert result["errors"][0]["code"] == "LOCATION_TOO_BROAD"
+    assert result["errors"][0]["provider"] == "tellm_location_normalizer"
+    assert result["errors"][0]["query"] == {
+        "name": "Polska",
+        "country": "PL",
+        "normalized_country": "PL",
+    }
+    assert result["input"]["location"] == "Polska"
+    assert result["render"]["severity"] == "error"
 
 
 def test_weather_service_returns_standard_error_when_network_denied(tmp_path, monkeypatch):
@@ -285,7 +476,7 @@ def test_weather_service_returns_standard_error_when_network_denied(tmp_path, mo
     result = asyncio.run(
         bot.execute_resource(
             "tellm://service/weather/current",
-            {"city": "Wejherowo", "country": "PL"},
+            {"location": "Wejherowo", "country": "PL"},
         )
     )
 
@@ -293,10 +484,148 @@ def test_weather_service_returns_standard_error_when_network_denied(tmp_path, mo
     assert result["uri"] == "tellm://service/weather/current"
     assert result["type"] == "weather.current.result"
     assert result["data"] is None
-    assert result["input"] == {"location": "Wejherowo", "country": "PL"}
+    assert result["input"]["location"] == "Wejherowo"
+    assert result["input"]["country"] == "PL"
     assert result["errors"][0]["code"] == "NETWORK_ACCESS_NOT_ALLOWED"
     assert result["errors"][0]["source"] == "tellm://service/weather/current"
     assert result["errors"][0]["recoverable"] is True
+
+
+def test_price_service_extracts_visible_prices_from_supported_source(tmp_path, monkeypatch):
+    from tellm import create_bot
+
+    bot = create_bot(db_path=str(tmp_path / "tellm.db"))
+    requested_urls = []
+
+    def fake_http_text(url, timeout=8):
+        requested_urls.append(url)
+        return """
+        <html><body>
+          <h1>Cukier biały</h1>
+          <span>Oferta 1: 4,99 zł</span>
+          <span>Oferta 2: 5.49 PLN</span>
+        </body></html>
+        """
+
+    monkeypatch.setattr(bot, "_http_text", fake_http_text)
+
+    result = asyncio.run(
+        bot.execute_resource(
+            "tellm://service/price/search",
+            {"query": "cukier", "site": "skapiec.pl"},
+        )
+    )
+
+    assert result["ok"] is True
+    assert result["uri"] == "tellm://service/price/search"
+    assert result["type"] == "price.search.result"
+    assert result["data"]["source"] == "skapiec.pl"
+    assert result["data"]["price_count"] == 2
+    assert result["data"]["min_price"] == 4.99
+    assert result["data"]["max_price"] == 5.49
+    assert result["data"]["timings"]["provider_total_ms"] >= 0
+    assert requested_urls == ["https://www.skapiec.pl/szukaj/w_calym_serwisie/cukier"]
+
+
+def test_price_service_rejects_prices_unrelated_to_requested_product(tmp_path, monkeypatch):
+    from tellm import create_bot
+
+    bot = create_bot(db_path=str(tmp_path / "tellm.db"))
+
+    monkeypatch.setattr(
+        bot,
+        "_http_text",
+        lambda url, timeout=8: """
+        <html><body>
+          <h1>Wyniki wyszukiwania</h1>
+          <article>Taśma TZ-FX751 flexi, czarny druk / zielony podkład od 47 ,01 zł</article>
+          <article>Uchwyt meblowy podłużny drewniany brzoza od 20 ,00 zł</article>
+          <article>Epson T2431 XL czarny tusz zamiennik od 9 ,80 zł</article>
+        </body></html>
+        """,
+    )
+
+    result = asyncio.run(
+        bot.execute_resource(
+            "tellm://service/price/search",
+            {"query": "cukier", "site": "skapiec.pl"},
+        )
+    )
+
+    assert result["ok"] is False
+    assert result["errors"][0]["code"] == "PRICE_RESULT_NOT_RELEVANT"
+    diagnostics = result["input"]["candidate_diagnostics"]
+    assert diagnostics["raw_candidate_count"] == 3
+    assert diagnostics["irrelevant_candidate_count"] == 3
+    assert diagnostics["matched_candidate_count"] == 0
+    assert diagnostics["relevance_tokens"] == ["cukier"]
+
+
+def test_price_service_uses_skapiec_category_fallback(tmp_path, monkeypatch):
+    from tellm import create_bot
+
+    bot = create_bot(db_path=str(tmp_path / "tellm.db"))
+    requested_urls = []
+
+    def fake_http_text(url, timeout=8):
+        requested_urls.append(url)
+        if url.endswith("/cat/4235-cukier-i-slodziki.html"):
+            return """
+            <html><body>
+              <article>Diamant CUKIER ŻELUJĄCY 3:1 500 G Brak opinii od 7 ,83 zł w Allegro.pl</article>
+              <article>Cukier Królewski biały kryształ 1 kg Brak opinii od 5 ,81 zł w Allegro.pl</article>
+            </body></html>
+            """
+        return """
+        <html><body>
+          <nav><a href="/cat/4235-cukier-i-slodziki.html">Cukier</a></nav>
+          <article>Taśma TZ-FX751 flexi, czarny druk / zielony podkład od 47 ,01 zł</article>
+          <article>Uchwyt meblowy podłużny drewniany brzoza od 20 ,00 zł</article>
+        </body></html>
+        """
+
+    monkeypatch.setattr(bot, "_http_text", fake_http_text)
+
+    result = asyncio.run(
+        bot.execute_resource(
+            "tellm://service/price/search",
+            {"query": "cukier", "site": "skapiec.pl"},
+        )
+    )
+
+    assert result["ok"] is True
+    assert result["data"]["price_count"] == 2
+    assert result["data"]["min_price"] == 5.81
+    assert result["data"]["max_price"] == 7.83
+    assert result["data"]["url"] == "https://www.skapiec.pl/cat/4235-cukier-i-slodziki.html"
+    assert result["data"]["requested_url"] == "https://www.skapiec.pl/szukaj/w_calym_serwisie/cukier"
+    assert result["data"]["source_discovery"]["provider"] == "skapiec_category"
+    assert requested_urls == [
+        "https://www.skapiec.pl/szukaj/w_calym_serwisie/cukier",
+        "https://www.skapiec.pl/cat/4235-cukier-i-slodziki.html",
+    ]
+
+
+def test_price_service_returns_structured_not_found_error(tmp_path, monkeypatch):
+    from tellm import create_bot
+
+    bot = create_bot(db_path=str(tmp_path / "tellm.db"))
+
+    monkeypatch.setattr(bot, "_http_text", lambda url, timeout=8: "<html>brak ceny</html>")
+
+    result = asyncio.run(
+        bot.execute_resource(
+            "tellm://service/price/search",
+            {"query": "cukier", "site": "allegro.pl"},
+        )
+    )
+
+    assert result["ok"] is False
+    assert result["errors"][0]["code"] == "PRICE_NOT_FOUND"
+    assert result["errors"][0]["provider"] == "allegro.pl"
+    assert result["input"]["query"] == "cukier"
+    assert result["input"]["site"] == "allegro.pl"
+    assert result["render"]["severity"] == "error"
 
 
 def test_autoimprove_service_returns_and_saves_schema_valid_report(tmp_path):
@@ -484,6 +813,56 @@ def test_autoimprove_finds_missing_weather_provider_and_ad_hoc_function(tmp_path
     assert result["data"]["summary"]["ad_hoc_function_generated"] == 1
 
 
+def test_autoimprove_finds_provider_location_resolution_failure(tmp_path):
+    from tellm import create_bot
+
+    bot = create_bot(db_path=str(tmp_path / "tellm.db"))
+    bot.record_execution(
+        uri="tellm://service/weather/current",
+        kind="workflow",
+        ok=True,
+        status="completed_with_service_error",
+        result={
+            "ok": False,
+            "uri": "tellm://service/weather/current",
+            "type": "weather.current.result",
+            "data": None,
+            "message": {
+                "title": "Nie udało się pobrać pogody",
+                "summary": "Nie znaleziono lokalizacji",
+            },
+            "errors": [
+                {
+                    "code": "LOCATION_NOT_FOUND",
+                    "source": "tellm://service/weather/current",
+                    "provider": "open_meteo_geocoding",
+                    "detail": {
+                        "query": {
+                            "name": "Wejherowo",
+                            "country": "POLAND",
+                            "normalized_country": "PL",
+                        }
+                    },
+                    "recoverable": True,
+                }
+            ],
+        },
+        metadata={
+            "query": "Jaka jest pogoda w Wejherowie",
+            "execution_status": "completed",
+            "service_result_status": "failed",
+        },
+    )
+
+    result = asyncio.run(
+        bot.execute_resource("tellm://service/system/autoimprove", {"dry_run": True})
+    )
+    finding_types = {item["type"] for item in result["data"]["findings"]}
+
+    assert "provider_location_resolution_failed" in finding_types
+    assert result["data"]["summary"]["provider_location_resolution_failed"] == 1
+
+
 def test_autoimprovement_report_renders_as_html(tmp_path):
     from tellm import Task, TaskType, create_bot
 
@@ -540,6 +919,7 @@ def test_analyze_query_reads_llm_json_view_and_processes(tmp_path, monkeypatch):
         assert "processes" in messages[0]["content"]
         assert "tellm://service/domain/check" in messages[0]["content"]
         assert "tellm://service/weather/current" in messages[0]["content"]
+        assert "tellm://service/price/search" in messages[0]["content"]
         return Response()
 
     monkeypatch.setattr(bot, "_completion", fake_completion)
@@ -554,6 +934,48 @@ def test_analyze_query_reads_llm_json_view_and_processes(tmp_path, monkeypatch):
 
 
 def test_analyze_query_routes_weather_to_registry_service(tmp_path, monkeypatch):
+    from tellm import create_bot
+
+    bot = create_bot(db_path=str(tmp_path / "tellm.db"))
+
+    def fake_completion(messages):
+        raise AssertionError("weather query should use local registry router")
+
+    monkeypatch.setattr(bot, "_completion", fake_completion)
+
+    task = asyncio.run(bot.analyze_query("Jaka jest pogoda w Wejherowie?"))
+
+    assert task.function_name == "tellm://service/weather/current"
+    assert task.parameters == {"location": "Wejherowo", "country": "PL"}
+    assert task.processes == []
+    assert task.code == ""
+    assert task.view["_router"] == "local_weather"
+
+
+def test_analyze_query_routes_price_to_registry_service(tmp_path, monkeypatch):
+    from tellm import create_bot
+
+    bot = create_bot(db_path=str(tmp_path / "tellm.db"))
+
+    def fake_completion(messages):
+        raise AssertionError("price query should use local registry router")
+
+    monkeypatch.setattr(bot, "_completion", fake_completion)
+
+    task = asyncio.run(bot.analyze_query("jaka jest cena cukru na skapiec.pl"))
+
+    assert task.function_name == "tellm://service/price/search"
+    assert task.parameters == {
+        "query": "cukier",
+        "site": "skapiec.pl",
+        "original_query": "jaka jest cena cukru na skapiec.pl",
+    }
+    assert task.processes == []
+    assert task.code == ""
+    assert task.view["_router"] == "local_price"
+
+
+def test_analyze_query_can_still_rewrite_ad_hoc_weather_llm_response(tmp_path, monkeypatch):
     from tellm import create_bot
 
     bot = create_bot(db_path=str(tmp_path / "tellm.db"))
@@ -587,12 +1009,43 @@ def test_analyze_query_routes_weather_to_registry_service(tmp_path, monkeypatch)
 
     monkeypatch.setattr(bot, "_completion", fake_completion)
 
-    task = asyncio.run(bot.analyze_query("Jaka jest pogoda w Wejherowie?"))
+    task = asyncio.run(bot.analyze_query("pogoda"))
 
     assert task.function_name == "tellm://service/weather/current"
-    assert task.parameters == {"location": "Wejherowo", "country": "PL"}
+    assert task.parameters == {"location": "", "country": "PL"}
     assert task.processes == []
     assert task.code == ""
+
+
+def test_analyze_query_reads_json_from_reasoning_when_content_is_empty(tmp_path, monkeypatch):
+    from tellm import create_bot
+
+    bot = create_bot(db_path=str(tmp_path / "tellm.db"))
+
+    def fake_completion(messages):
+        class Message:
+            content = None
+            reasoning_content = (
+                "Model notes {\"ignored\": true}\n"
+                "{\"type\":\"now\",\"function_name\":\"run\",\"parameters\":{\"x\":1},"
+                "\"processes\":[],\"code\":\"\"}"
+            )
+
+        class Choice:
+            message = Message()
+
+        class Response:
+            choices = [Choice()]
+
+        return Response()
+
+    monkeypatch.setattr(bot, "_completion", fake_completion)
+
+    task = asyncio.run(bot.analyze_query("policz"))
+
+    assert task.function_name == "run"
+    assert task.parameters == {"x": 1}
+    assert task.processes == []
 
 
 def test_execute_task_runs_python_process(tmp_path):
@@ -662,7 +1115,7 @@ def test_server_handles_plain_http_request(tmp_path):
                 b"\r\n"
             )
             await writer.drain()
-            response = await reader.read(20000)
+            response = await reader.read(50000)
             writer.close()
             await writer.wait_closed()
             return response
@@ -681,6 +1134,10 @@ def test_server_handles_plain_http_request(tmp_path):
     assert b'localStorage.setItem("tellm-theme"' in response
     assert b'id="copyQuery"' in response
     assert b'id="copyResult"' in response
+    assert b'id="copyWorkflowLogs"' in response
+    assert b"workflowLogsText" in response
+    assert b"restoreWorkflowLogs" in response
+    assert b"tellm://artifact/json/workflow-result/" in response
     assert b'id="workflowLog"' in response
     assert b'id="cancel"' in response
     assert b"URLSearchParams" in response
@@ -714,7 +1171,7 @@ def test_server_docs_describe_text_and_speech_api(tmp_path):
                 b"\r\n"
             )
             await writer.drain()
-            response = await reader.read(50000)
+            response = await reader.read(200000)
             writer.close()
             await writer.wait_closed()
             return response
@@ -756,12 +1213,42 @@ def test_server_docs_describe_text_and_speech_api(tmp_path):
     assert b"/execute" in response
     assert b"/query" in response
     assert b"/autoimprovement/run" in response
+    assert b"/schema?uri=tellm://..." in response
+    assert b"/schema/input?uri=tellm://..." in response
+    assert b"/schema/output?uri=tellm://..." in response
+    assert b"/describe?uri=tellm://..." in response
+    assert b"/permissions?uri=tellm://..." in response
+    assert b"/health?uri=tellm://..." in response
+    assert b"/history?uri=tellm://..." in response
+    assert b"/validate-input?uri=" in response
+    assert b"/validate-output?uri=" in response
+    assert b"Adresowalne artefakty" in response
+    assert b"tellm://artifact/audio/weather-query-sample" in response
+    assert b"tellm://command/shell/pytest" in response
+    assert b"tellm://package/python/litellm" in response
+    assert b"tellm://package/python/jsonschema" in response
+    assert b"tellm://workflow/run/35" in response
+    assert b"tellm://view/workflow/35" in response
+    assert b"tellm://log/workflow/35" in response
+    assert b"include_value=true" in response
+    assert b"tellm://function/weather_wejherowo" in response
+    assert b"capability=weather.current" in response
+    assert b"status=deprecated" in response
     assert b"Tellm Resource Manifest 1.0" in response
     assert b"Tellm Service Result 1.0" in response
 
 
 def test_server_registry_http_endpoints(tmp_path):
+    from tellm import Task, TaskType, create_bot
     from tellm.server import TellmServer
+
+    bot = create_bot(db_path=str(tmp_path / "tellm.db"))
+    saved_view = bot.generate_view(
+        "runtime view",
+        Task(TaskType.NOW, "tellm://function/system/echo", {"text": "runtime"}),
+        {"ok": True, "value": "runtime"},
+    )
+    view_id = saved_view.view_id
 
     async def request(path):
         server = TellmServer(
@@ -794,6 +1281,17 @@ def test_server_registry_http_endpoints(tmp_path):
             return response
 
     registry_response = asyncio.run(request("/registry"))
+    weather_registry_response = asyncio.run(
+        request("/registry?kind=service&tag=weather")
+    )
+    weather_domain_registry_response = asyncio.run(request("/registry?domain=weather"))
+    weather_capability_registry_response = asyncio.run(
+        request("/registry?capability=weather.current")
+    )
+    deprecated_registry_response = asyncio.run(request("/registry?status=deprecated"))
+    artifact_registry_response = asyncio.run(request("/registry?kind=artifact"))
+    command_registry_response = asyncio.run(request("/registry?kind=command"))
+    package_registry_response = asyncio.run(request("/registry?kind=package"))
     manifest_response = asyncio.run(request("/manifest"))
     openapi_response = asyncio.run(request("/openapi.json"))
     asyncapi_response = asyncio.run(request("/asyncapi.json"))
@@ -801,8 +1299,86 @@ def test_server_registry_http_endpoints(tmp_path):
     resource_response = asyncio.run(
         request("/resource?uri=tellm://function/system/now")
     )
+    weather_resource_response = asyncio.run(
+        request("/resource?uri=tellm://service/weather/current")
+    )
+    weather_alias_resource_response = asyncio.run(
+        request("/resource?uri=tellm://function/weather_wejherowo")
+    )
+    weather_input_schema_resource_response = asyncio.run(
+        request("/resource?uri=tellm://schema/service/weather.current/input")
+    )
+    audio_artifact_response = asyncio.run(
+        request("/resource?uri=tellm://artifact/audio/weather-query-sample")
+    )
+    pytest_command_response = asyncio.run(
+        request("/resource?uri=tellm://command/shell/pytest")
+    )
+    litellm_package_response = asyncio.run(
+        request("/resource?uri=tellm://package/python/litellm")
+    )
+    workflow_run_response = asyncio.run(
+        request("/resource?uri=tellm://workflow/run/%d" % view_id)
+    )
+    runtime_view_response = asyncio.run(
+        request("/resource?uri=tellm://view/workflow/%d" % view_id)
+    )
+    workflow_log_response = asyncio.run(
+        request("/resource?uri=tellm://log/workflow/%d" % view_id)
+    )
+    runtime_json_artifact_response = asyncio.run(
+        request("/resource?uri=tellm://artifact/json/workflow-result/%d" % view_id)
+    )
+    schema_response = asyncio.run(
+        request("/schema?uri=tellm://service/weather/current")
+    )
+    input_schema_response = asyncio.run(
+        request("/schema/input?uri=tellm://service/weather/current")
+    )
+    output_schema_response = asyncio.run(
+        request("/schema/output?uri=tellm://service/weather/current")
+    )
+    describe_response = asyncio.run(
+        request("/describe?uri=tellm://service/weather/current")
+    )
+    permissions_response = asyncio.run(
+        request("/permissions?uri=tellm://service/weather/current")
+    )
+    health_response = asyncio.run(
+        request("/health?uri=tellm://service/weather/current")
+    )
+    history_response = asyncio.run(
+        request("/history?uri=tellm://service/weather/current")
+    )
+    valid_input_response = asyncio.run(
+        request(
+            "/validate-input?uri=tellm://service/weather/current&input=%7B%22location%22%3A%22Wejherowo%22%2C%22country%22%3A%22PL%22%7D"
+        )
+    )
+    invalid_input_response = asyncio.run(
+        request(
+            "/validate-input?uri=tellm://service/weather/current&input=%7B%22country%22%3A%22PL%22%7D"
+        )
+    )
     resolve_response = asyncio.run(
         request("/resolve?uri=tellm://service/domain/check")
+    )
+    resolve_audio_response = asyncio.run(
+        request("/resolve?uri=tellm://artifact/audio/weather-query-sample")
+    )
+    resolve_alias_response = asyncio.run(
+        request("/resolve?uri=tellm://function/weather_wejherowo")
+    )
+    resolve_legacy_input_response = asyncio.run(
+        request(
+            "/resolve?uri=tellm://service/weather/get&input=%7B%22city%22%3A%22Wejherowo%22%2C%22country_code%22%3A%22PL%22%7D"
+        )
+    )
+    resolve_prompt_value_response = asyncio.run(
+        request("/resolve?uri=tellm://prompt/validator/workflow-result&include_value=true")
+    )
+    resolve_view_value_response = asyncio.run(
+        request("/resolve?uri=tellm://view/workflow/%d&include_value=true" % view_id)
     )
 
     assert registry_response.startswith(b"HTTP/1.1 200 OK")
@@ -810,6 +1386,36 @@ def test_server_registry_http_endpoints(tmp_path):
     assert b"tellm://service/domain/check" in registry_response
     assert b"OPENROUTER_API_KEY" in registry_response
     assert b"secret-value" not in registry_response
+
+    assert weather_registry_response.startswith(b"HTTP/1.1 200 OK")
+    assert b'"items"' in weather_registry_response
+    assert b"tellm://service/weather/current" in weather_registry_response
+    assert b"tellm://service/domain/check" not in weather_registry_response
+
+    assert weather_domain_registry_response.startswith(b"HTTP/1.1 200 OK")
+    assert b"tellm://service/weather/current" in weather_domain_registry_response
+    assert b"tellm://function/weather_wejherowo" in weather_domain_registry_response
+
+    assert weather_capability_registry_response.startswith(b"HTTP/1.1 200 OK")
+    assert b"tellm://service/weather/current" in weather_capability_registry_response
+    assert b"weather.current" in weather_capability_registry_response
+    assert b"tellm://service/domain/check" not in weather_capability_registry_response
+
+    assert deprecated_registry_response.startswith(b"HTTP/1.1 200 OK")
+    assert b"tellm://function/weather_wejherowo" in deprecated_registry_response
+    assert b"tellm://service/weather/get" in deprecated_registry_response
+
+    assert artifact_registry_response.startswith(b"HTTP/1.1 200 OK")
+    assert b"tellm://artifact/audio/weather-query-sample" in artifact_registry_response
+    assert b'"storage_type": "local_file"' in artifact_registry_response
+
+    assert command_registry_response.startswith(b"HTTP/1.1 200 OK")
+    assert b"tellm://command/shell/pytest" in command_registry_response
+    assert b'"run_tests"' in command_registry_response
+
+    assert package_registry_response.startswith(b"HTTP/1.1 200 OK")
+    assert b"tellm://package/python/litellm" in package_registry_response
+    assert b'"llm_client"' in package_registry_response
 
     assert manifest_response.startswith(b"HTTP/1.1 200 OK")
     assert b'"manifest_version": "1.0.0"' in manifest_response
@@ -820,6 +1426,8 @@ def test_server_registry_http_endpoints(tmp_path):
     assert b'"openapi": "3.1.0"' in openapi_response
     assert b'TellmServiceResult' in openapi_response
     assert b'"/execute"' in openapi_response
+    assert b'"/schema/input"' in openapi_response
+    assert b'"/validate-input"' in openapi_response
     assert b'"post"' in openapi_response
     assert b"ExecuteRequest" in openapi_response
 
@@ -833,8 +1441,120 @@ def test_server_registry_http_endpoints(tmp_path):
     assert resource_response.startswith(b"HTTP/1.1 200 OK")
     assert b"tellm://function/system/now" in resource_response
 
+    assert weather_resource_response.startswith(b"HTTP/1.1 200 OK")
+    assert b'"canonical_uri": "tellm://service/weather/current"' in weather_resource_response
+    assert b'"domain": "weather"' in weather_resource_response
+    assert b'"weather.current"' in weather_resource_response
+    assert b'"location"' in weather_resource_response
+    assert b'"required": ["location"]' in weather_resource_response
+
+    assert weather_alias_resource_response.startswith(b"HTTP/1.1 200 OK")
+    assert b'"kind": "alias"' in weather_alias_resource_response
+    assert b'"target": "tellm://service/weather/current"' in weather_alias_resource_response
+    assert b'"default_input": {"location": "Wejherowo", "country": "PL"}' in weather_alias_resource_response
+
+    assert weather_input_schema_resource_response.startswith(b"HTTP/1.1 200 OK")
+    assert b'"kind": "schema"' in weather_input_schema_resource_response
+    assert b'"resource_uri": "tellm://service/weather/current"' in weather_input_schema_resource_response
+    assert b'"required": ["location"]' in weather_input_schema_resource_response
+
+    assert audio_artifact_response.startswith(b"HTTP/1.1 200 OK")
+    assert b'"kind": "artifact"' in audio_artifact_response
+    assert b'"media_type": "audio/webm"' in audio_artifact_response
+    assert b'"path": "output/test-audio/tellm-pl-pogoda.webm"' in audio_artifact_response
+
+    assert pytest_command_response.startswith(b"HTTP/1.1 200 OK")
+    assert b'"kind": "command"' in pytest_command_response
+    assert b'"command_template": "python -m pytest -q {path}"' in pytest_command_response
+
+    assert litellm_package_response.startswith(b"HTTP/1.1 200 OK")
+    assert b'"kind": "package"' in litellm_package_response
+    assert b'"ecosystem": "python"' in litellm_package_response
+
+    assert workflow_run_response.startswith(b"HTTP/1.1 200 OK")
+    assert b'"uri": "tellm://workflow/run/' in workflow_run_response
+    assert b'"kind": "workflow"' in workflow_run_response
+    assert b'"output_artifacts"' in workflow_run_response
+    assert b'"tellm://log/workflow/' in workflow_run_response
+
+    assert runtime_view_response.startswith(b"HTTP/1.1 200 OK")
+    assert b'"uri": "tellm://view/workflow/' in runtime_view_response
+    assert b'"storage": {"type": "sqlite", "table": "views"' in runtime_view_response
+    assert b'"content_type": "text/html"' in runtime_view_response
+
+    assert workflow_log_response.startswith(b"HTTP/1.1 200 OK")
+    assert b'"uri": "tellm://log/workflow/' in workflow_log_response
+    assert b'"kind": "log"' in workflow_log_response
+    assert b'"describes"' in workflow_log_response
+
+    assert runtime_json_artifact_response.startswith(b"HTTP/1.1 200 OK")
+    assert b'"uri": "tellm://artifact/json/workflow-result/' in runtime_json_artifact_response
+    assert b'"rendered_as"' in runtime_json_artifact_response
+
+    assert schema_response.startswith(b"HTTP/1.1 200 OK")
+    assert b'"schemas"' in schema_response
+    assert b'"input"' in schema_response
+    assert b'"output"' in schema_response
+
+    assert input_schema_response.startswith(b"HTTP/1.1 200 OK")
+    assert b'"schema": "input"' in input_schema_response
+    assert b'"required": ["location"]' in input_schema_response
+
+    assert output_schema_response.startswith(b"HTTP/1.1 200 OK")
+    assert b'"schema": "output"' in output_schema_response
+    assert b'"required": ["ok", "type", "data", "message", "errors"]' in output_schema_response
+
+    assert describe_response.startswith(b"HTTP/1.1 200 OK")
+    assert b'"can_execute": true' in describe_response
+    assert b'"input_required": ["location"]' in describe_response
+    assert b"weather.current.result" in describe_response
+
+    assert permissions_response.startswith(b"HTTP/1.1 200 OK")
+    assert b'"network": true' in permissions_response
+
+    assert health_response.startswith(b"HTTP/1.1 200 OK")
+    assert b'"recent_executions"' in health_response
+
+    assert history_response.startswith(b"HTTP/1.1 200 OK")
+    assert b'"history"' in history_response
+
+    assert valid_input_response.startswith(b"HTTP/1.1 200 OK")
+    assert b'"valid": true' in valid_input_response
+
+    assert invalid_input_response.startswith(b"HTTP/1.1 400 Bad Request")
+    assert b'"valid": false' in invalid_input_response
+    assert b"$.location" in invalid_input_response
+
     assert resolve_response.startswith(b"HTTP/1.1 200 OK")
     assert b'"has_callable": true' in resolve_response
+    assert b'"resolved"' in resolve_response
+
+    assert resolve_audio_response.startswith(b"HTTP/1.1 200 OK")
+    assert b'"storage_type": "local_file"' in resolve_audio_response
+    assert b'"base": "project"' in resolve_audio_response
+    assert b'"path": "output/test-audio/tellm-pl-pogoda.webm"' in resolve_audio_response
+    assert b'"binary_or_non_text_content"' in resolve_audio_response or b'"value_included": false' in resolve_audio_response
+
+    assert resolve_alias_response.startswith(b"HTTP/1.1 200 OK")
+    assert b'"requested_uri": "tellm://function/weather_wejherowo"' in resolve_alias_response
+    assert b'"canonical_uri": "tellm://service/weather/current"' in resolve_alias_response
+    assert b'"DEPRECATED_URI"' in resolve_alias_response
+    assert b'"location": "Wejherowo"' in resolve_alias_response
+
+    assert resolve_legacy_input_response.startswith(b"HTTP/1.1 200 OK")
+    assert b'"canonical_uri": "tellm://service/weather/current"' in resolve_legacy_input_response
+    assert b'"location": "Wejherowo"' in resolve_legacy_input_response
+    assert b'"country": "PL"' in resolve_legacy_input_response
+
+    assert resolve_prompt_value_response.startswith(b"HTTP/1.1 200 OK")
+    assert b'"storage_type": "inline"' in resolve_prompt_value_response
+    assert b'"value_included": true' in resolve_prompt_value_response
+    assert b"Sprawd" in resolve_prompt_value_response
+
+    assert resolve_view_value_response.startswith(b"HTTP/1.1 200 OK")
+    assert b'"storage_type": "sqlite"' in resolve_view_value_response
+    assert b'"value_included": true' in resolve_view_value_response
+    assert b"runtime view" in resolve_view_value_response
 
 
 def test_server_registry_ui_and_autoimprovement_pages(tmp_path):
@@ -1034,6 +1754,146 @@ def test_server_validation_can_repair_render_data(tmp_path, monkeypatch):
     assert repaired_view.render_data["title"] == "Poprawione"
     assert any(event["status"] == "repair" for event in websocket.events)
     assert render_logs[-1]["stage"] == "renderer"
+
+
+def test_server_local_validation_skips_llm_for_trusted_registry_result(tmp_path, monkeypatch):
+    from tellm import Task, TaskType
+    from tellm.server import TellmServer
+
+    class DummyWebSocket:
+        def __init__(self):
+            self.events = []
+
+        async def send(self, raw):
+            self.events.append(json.loads(raw))
+
+    def fail_completion(*args, **kwargs):
+        raise AssertionError("trusted registry result should not call LLM validation")
+
+    server = TellmServer(
+        host="127.0.0.1",
+        port=0,
+        db_path=str(tmp_path / "tellm.db"),
+    )
+    monkeypatch.setattr("tellm.server.completion", fail_completion)
+    task = Task(
+        TaskType.NOW,
+        "tellm://service/weather/current",
+        {"location": "Szemud", "country": "PL"},
+    )
+    result = {
+        "ok": True,
+        "uri": "tellm://service/weather/current",
+        "type": "weather.current.result",
+        "data": {
+            "city": "Szemud",
+            "country": "PL",
+            "temperature_c": 11.8,
+            "description": "lekki deszcz",
+            "source": "open_meteo",
+            "provider": "open_meteo",
+        },
+        "message": {
+            "title": "Pogoda w Szemud",
+            "summary": "Aktualnie 11.8°C, lekki deszcz.",
+            "details": "Realny provider.",
+        },
+        "errors": [],
+        "warnings": [],
+        "render": {"renderer": "auto", "template": "weather_current"},
+    }
+    view = server.bot.generate_view("Jaka jest pogoda w Szemud", task, result)
+    logs = server._render_logs("Jaka jest pogoda w Szemud", task, result, view, view.to_html())
+    websocket = DummyWebSocket()
+
+    validated_view, answer, render_logs = asyncio.run(
+        server._validate_and_repair(
+            websocket,
+            "Jaka jest pogoda w Szemud",
+            task,
+            result,
+            view,
+            logs,
+            client_logs=[],
+        )
+    )
+
+    assert validated_view is view
+    assert answer == "Aktualnie 11.8°C, lekki deszcz."
+    assert render_logs == logs
+    assert any(event["stage"] == "local_validation" and event["status"] == "ok" for event in websocket.events)
+    assert not any(event["stage"] == "llm_validation" for event in websocket.events)
+
+
+def test_server_local_validation_skips_llm_for_structured_service_error(tmp_path, monkeypatch):
+    from tellm import Task, TaskType
+    from tellm.server import TellmServer
+
+    class DummyWebSocket:
+        def __init__(self):
+            self.events = []
+
+        async def send(self, raw):
+            self.events.append(json.loads(raw))
+
+    def fail_completion(*args, **kwargs):
+        raise AssertionError("schema-valid service error should not call LLM validation")
+
+    server = TellmServer(
+        host="127.0.0.1",
+        port=0,
+        db_path=str(tmp_path / "tellm.db"),
+    )
+    monkeypatch.setattr("tellm.server.completion", fail_completion)
+    task = Task(
+        TaskType.NOW,
+        "tellm://service/weather/current",
+        {"location": "Polska", "country": "PL"},
+    )
+    result = {
+        "ok": False,
+        "uri": "tellm://service/weather/current",
+        "type": "weather.current.result",
+        "data": None,
+        "message": {
+            "title": "Podaj konkretną lokalizację",
+            "summary": "Zapytanie wskazuje zbyt szeroki obszar.",
+            "details": "Podaj miasto albo współrzędne.",
+        },
+        "errors": [
+            {
+                "code": "LOCATION_TOO_BROAD",
+                "source": "tellm://service/weather/current",
+                "detail": "Location is too broad for current weather: Polska",
+                "provider": "tellm_location_normalizer",
+                "recoverable": True,
+            }
+        ],
+        "warnings": [],
+        "meta": {"source": None, "fetched_at": None},
+        "render": {"renderer": "auto", "template": "status_card", "severity": "error"},
+    }
+    view = server.bot.generate_view("Jaka jest pogoda w Polska", task, result)
+    logs = server._render_logs("Jaka jest pogoda w Polska", task, result, view, view.to_html())
+    websocket = DummyWebSocket()
+
+    validated_view, answer, render_logs = asyncio.run(
+        server._validate_and_repair(
+            websocket,
+            "Jaka jest pogoda w Polska",
+            task,
+            result,
+            view,
+            logs,
+            client_logs=[],
+        )
+    )
+
+    assert validated_view is view
+    assert answer == "Zapytanie wskazuje zbyt szeroki obszar."
+    assert render_logs == logs
+    assert any(event["stage"] == "local_validation" and event["status"] == "ok" for event in websocket.events)
+    assert not any(event["stage"] == "llm_validation" for event in websocket.events)
 
 
 def test_server_flags_simulated_weather_source(tmp_path):

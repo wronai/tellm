@@ -2,8 +2,10 @@ from setuptools import find_packages, setup
 
 setup(
     name="tellm",
-    version="4.0.5",
+    version="4.0.6",
     packages=find_packages(),
+    include_package_data=True,
+    package_data={"tellm": ["registry/*.yaml"]},
     install_requires=[
         "litellm>=1.0.0",
         "websockets>=12.0",

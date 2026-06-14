@@ -5,22 +5,22 @@ flowchart TD
     classDef entry fill:#4dabf7,stroke:#1971c2,color:#fff
 
     subgraph Core
-        server___browser_client_html["_browser_client_html"]
-        server___docs_html["_docs_html"]
-        server__TellmServer__register_function["register_function"]
-        server__TellmServer___http_response["_http_response"]
-        server__TellmServer__process_request["process_request"]
-        server__TellmServer___call_maybe_async["_call_maybe_async"]
-        server__TellmServer___run_blocking["_run_blocking"]
-        server__TellmServer___handle_transcription["_handle_transcription"]
-        server__TellmServer___handle_test_transcription["_handle_test_transcription"]
-        server__TellmServer___audio_payload["_audio_payload"]
-        server__TellmServer__handle["handle"]
-        server__TellmServer__serve_forever["serve_forever"]
-        server__TellmServer__run["run"]
         tellm__create_bot["create_bot"]
         tellm__run_server["run_server"]
-        ...["+32 more"]
+        tellm__improvement__history__ExecutionHistoryStore__now["now"]
+        tellm__improvement__history__ExecutionHistoryStore__init_db["init_db"]
+        tellm__improvement__history__ExecutionHistoryStore__record["record"]
+        tellm__improvement__history__ExecutionHistoryStore___decode_row["_decode_row"]
+        tellm__improvement__history__ExecutionHistoryStore__recent["recent"]
+        tellm__improvement__history__ExecutionHistoryStore__count_since_id["count_since_id"]
+        tellm__improvement__history__ExecutionHistoryStore__latest_id["latest_id"]
+        tellm__server___browser_client_html["_browser_client_html"]
+        tellm__server__TellmServer__register_function["register_function"]
+        tellm__server__TellmServer___http_response["_http_response"]
+        tellm__server__TellmServer___json_response["_json_response"]
+        tellm__server__TellmServer___resource_entry_response["_resource_entry_response"]
+        tellm__server__TellmServer___registry_item_summary["_registry_item_summary"]
+        ...["+164 more"]
     end
 
-    class server___browser_client_html,server__TellmServer__register_function,server__TellmServer___http_response,server__TellmServer__process_request,server__TellmServer___call_maybe_async,server__TellmServer___run_blocking,server__TellmServer___handle_transcription,server__TellmServer___handle_test_transcription,server__TellmServer___audio_payload,server__TellmServer__handle entry
+    class tellm__create_bot,tellm__run_server,tellm__improvement__history__ExecutionHistoryStore__now,tellm__improvement__history__ExecutionHistoryStore__init_db,tellm__improvement__history__ExecutionHistoryStore__record,tellm__improvement__history__ExecutionHistoryStore___decode_row,tellm__improvement__history__ExecutionHistoryStore__recent,tellm__improvement__history__ExecutionHistoryStore__count_since_id,tellm__improvement__history__ExecutionHistoryStore__latest_id,tellm__server___browser_client_html entry

@@ -182,6 +182,7 @@ class AutoimprovementRunner:
         failed_validations = 0
         simulated_data_warnings = 0
         missing_real_data_provider = 0
+        provider_location_resolution_failed = 0
         ad_hoc_function_generated = 0
         disallowed_sources = {"local_simulation", "mock", "test", "llm_generated", "generated"}
 
@@ -216,6 +217,26 @@ class AutoimprovementRunner:
                             "execution_id": item.get("id"),
                             "uri": uri,
                             "error_codes": sorted(error_codes),
+                        },
+                    )
+                )
+            if (
+                "LOCATION_NOT_FOUND" in error_codes
+                and self._looks_like_weather_identifier(uri, query)
+            ):
+                provider_location_resolution_failed += 1
+                findings.append(
+                    self._finding(
+                        "warning",
+                        "provider_location_resolution_failed",
+                        "Usługa weather.current użyła realnego providera, ale geocoding nie znalazł lokalizacji mimo że zapytanie wygląda na poprawne.",
+                        "Dodać normalizację country do ISO-3166 alpha-2, fallback geocoding bez kraju oraz cache znanych lokalizacji.",
+                        "tellm://service/weather/current",
+                        {
+                            "execution_id": item.get("id"),
+                            "uri": uri,
+                            "error_codes": sorted(error_codes),
+                            "errors": errors,
                         },
                     )
                 )
@@ -341,6 +362,7 @@ class AutoimprovementRunner:
             "failed_validations": failed_validations,
             "simulated_data_warnings": simulated_data_warnings,
             "missing_real_data_provider": missing_real_data_provider,
+            "provider_location_resolution_failed": provider_location_resolution_failed,
             "ad_hoc_function_generated": ad_hoc_function_generated,
         }
 
@@ -426,6 +448,9 @@ class AutoimprovementRunner:
             "failed_validations": history["failed_validations"],
             "simulated_data_warnings": history["simulated_data_warnings"],
             "missing_real_data_provider": history["missing_real_data_provider"],
+            "provider_location_resolution_failed": history[
+                "provider_location_resolution_failed"
+            ],
             "ad_hoc_function_generated": history["ad_hoc_function_generated"],
             "suggested_patches": len(patches),
             "auto_applied": auto_applied,

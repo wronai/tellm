@@ -69,58 +69,6 @@ sprints:
     model_hints:
       planning: balanced
       implementation: balanced
-  - id: ticket-7a82e4a6
-    name: Fix relative-imports issues
-    description: Resolve 6 relative-imports issues in __init__.py
-    task_type: prefactor
-    priority: high
-    estimate: 2d
-    files:
-    - __init__.py
-    rule_id: relative-imports
-    count: 6
-    model_hints:
-      planning: balanced
-      implementation: balanced
-  - id: ticket-6d6bc20b
-    name: Fix smart-return-type issues
-    description: Resolve 2 smart-return-type issues in __init__.py
-    task_type: prefactor
-    priority: medium
-    estimate: 1d
-    files:
-    - __init__.py
-    rule_id: smart-return-type
-    count: 2
-    model_hints:
-      planning: balanced
-      implementation: balanced
-  - id: ticket-24a95ab4
-    name: Fix unused-imports issues
-    description: Resolve 16 unused-imports issues in __init__.py
-    task_type: prefactor
-    priority: high
-    estimate: 3d
-    files:
-    - __init__.py
-    rule_id: unused-imports
-    count: 16
-    model_hints:
-      planning: balanced
-      implementation: balanced
-  - id: ticket-6511e0b7
-    name: Fix magic-numbers issues
-    description: Resolve 1 magic-numbers issues in __init__.py
-    task_type: prefactor
-    priority: medium
-    estimate: 1d
-    files:
-    - __init__.py
-    rule_id: magic-numbers
-    count: 1
-    model_hints:
-      planning: balanced
-      implementation: balanced
   - id: ticket-0536866c
     name: Fix smart-return-type issues
     description: Resolve 1 smart-return-type issues in build/lib/tellm/main.py
@@ -199,136 +147,6 @@ sprints:
     model_hints:
       planning: balanced
       implementation: balanced
-  - id: ticket-47889804
-    name: Fix relative-imports issues
-    description: Resolve 1 relative-imports issues in bot.py
-    task_type: prefactor
-    priority: medium
-    estimate: 1d
-    files:
-    - bot.py
-    rule_id: relative-imports
-    count: 1
-    model_hints:
-      planning: balanced
-      implementation: balanced
-  - id: ticket-2d50e46e
-    name: Fix smart-return-type issues
-    description: Resolve 4 smart-return-type issues in bot.py
-    task_type: prefactor
-    priority: medium
-    estimate: 2d
-    files:
-    - bot.py
-    rule_id: smart-return-type
-    count: 4
-    model_hints:
-      planning: balanced
-      implementation: balanced
-  - id: ticket-35e9bf44
-    name: Fix string-concat issues
-    description: Resolve 45 string-concat issues in bot.py
-    task_type: prefactor
-    priority: high
-    estimate: 3d
-    files:
-    - bot.py
-    rule_id: string-concat
-    count: 45
-    model_hints:
-      planning: balanced
-      implementation: balanced
-  - id: ticket-c8620ed3
-    name: Fix magic-numbers issues
-    description: Resolve 0 magic-numbers issues in bot.py
-    task_type: prefactor
-    priority: medium
-    estimate: 1d
-    files:
-    - bot.py
-    rule_id: magic-numbers
-    count: 0
-    model_hints:
-      planning: balanced
-      implementation: balanced
-  - id: ticket-8a485558
-    name: Fix relative-imports issues
-    description: Resolve 4 relative-imports issues in build/lib/tellm/server.py
-    task_type: prefactor
-    priority: medium
-    estimate: 2d
-    files:
-    - build/lib/tellm/server.py
-    rule_id: relative-imports
-    count: 4
-    model_hints:
-      planning: balanced
-      implementation: balanced
-  - id: ticket-93a398fe
-    name: Fix smart-return-type issues
-    description: Resolve 3 smart-return-type issues in build/lib/tellm/server.py
-    task_type: prefactor
-    priority: medium
-    estimate: 1d
-    files:
-    - build/lib/tellm/server.py
-    rule_id: smart-return-type
-    count: 3
-    model_hints:
-      planning: balanced
-      implementation: balanced
-  - id: ticket-e2694c99
-    name: Fix string-concat issues
-    description: Resolve 8 string-concat issues in build/lib/tellm/server.py
-    task_type: prefactor
-    priority: high
-    estimate: 2d
-    files:
-    - build/lib/tellm/server.py
-    rule_id: string-concat
-    count: 8
-    model_hints:
-      planning: balanced
-      implementation: balanced
-  - id: ticket-d54afc1f
-    name: Fix magic-numbers issues
-    description: Resolve 1 magic-numbers issues in build/lib/tellm/server.py
-    task_type: prefactor
-    priority: medium
-    estimate: 1d
-    files:
-    - build/lib/tellm/server.py
-    rule_id: magic-numbers
-    count: 1
-    model_hints:
-      planning: balanced
-      implementation: balanced
-  - id: ticket-6ebb860f
-    name: Fix smart-return-type issues
-    description: Resolve 1 smart-return-type issues in main.py
-    task_type: prefactor
-    priority: medium
-    estimate: 1d
-    files:
-    - main.py
-    rule_id: smart-return-type
-    count: 1
-    model_hints:
-      planning: balanced
-      implementation: balanced
-  - id: ticket-09e26591
-    name: Fix ai-boilerplate issues
-    description: Resolve 2 ai-boilerplate issues in main.py
-    task_type: prefactor
-    priority: medium
-    estimate: 1d
-    files:
-    - main.py
-    rule_id: ai-boilerplate
-    count: 2
-    model_hints:
-      planning: balanced
-      implementation: balanced
   - id: ticket-c3b8cc69
     name: Fix string-concat issues
     description: Resolve 2 string-concat issues in scripts/generate_test_audio.py
@@ -364,58 +182,6 @@ sprints:
     files:
     - scripts/generate_test_audio.py
     rule_id: ai-boilerplate
-    count: 1
-    model_hints:
-      planning: balanced
-      implementation: balanced
-  - id: ticket-7e46915d
-    name: Fix relative-imports issues
-    description: Resolve 4 relative-imports issues in server.py
-    task_type: prefactor
-    priority: medium
-    estimate: 2d
-    files:
-    - server.py
-    rule_id: relative-imports
-    count: 4
-    model_hints:
-      planning: balanced
-      implementation: balanced
-  - id: ticket-6e14f63f
-    name: Fix smart-return-type issues
-    description: Resolve 3 smart-return-type issues in server.py
-    task_type: prefactor
-    priority: medium
-    estimate: 1d
-    files:
-    - server.py
-    rule_id: smart-return-type
-    count: 3
-    model_hints:
-      planning: balanced
-      implementation: balanced
-  - id: ticket-c1d0f305
-    name: Fix string-concat issues
-    description: Resolve 9 string-concat issues in server.py
-    task_type: prefactor
-    priority: high
-    estimate: 2d
-    files:
-    - server.py
-    rule_id: string-concat
-    count: 9
-    model_hints:
-      planning: balanced
-      implementation: balanced
-  - id: ticket-860ab996
-    name: Fix magic-numbers issues
-    description: Resolve 1 magic-numbers issues in server.py
-    task_type: prefactor
-    priority: medium
-    estimate: 1d
-    files:
-    - server.py
-    rule_id: magic-numbers
     count: 1
     model_hints:
       planning: balanced
@@ -508,6 +274,214 @@ sprints:
     - tests/test_tellm.py
     rule_id: llm-hallucinations
     count: 3
+    model_hints:
+      planning: balanced
+      implementation: balanced
+  - id: ticket-920d651c
+    name: Fix relative-imports issues
+    description: Resolve 5 relative-imports issues in tellm/__init__.py
+    task_type: prefactor
+    priority: medium
+    estimate: 2d
+    files:
+    - tellm/__init__.py
+    rule_id: relative-imports
+    count: 5
+    model_hints:
+      planning: balanced
+      implementation: balanced
+  - id: ticket-26f50f26
+    name: Fix smart-return-type issues
+    description: Resolve 2 smart-return-type issues in tellm/__init__.py
+    task_type: prefactor
+    priority: medium
+    estimate: 1d
+    files:
+    - tellm/__init__.py
+    rule_id: smart-return-type
+    count: 2
+    model_hints:
+      planning: balanced
+      implementation: balanced
+  - id: ticket-78f9b30f
+    name: Fix unused-imports issues
+    description: Resolve 43 unused-imports issues in tellm/__init__.py
+    task_type: prefactor
+    priority: high
+    estimate: 3d
+    files:
+    - tellm/__init__.py
+    rule_id: unused-imports
+    count: 43
+    model_hints:
+      planning: balanced
+      implementation: balanced
+  - id: ticket-9ef11828
+    name: Fix magic-numbers issues
+    description: Resolve 0 magic-numbers issues in tellm/__init__.py
+    task_type: prefactor
+    priority: medium
+    estimate: 1d
+    files:
+    - tellm/__init__.py
+    rule_id: magic-numbers
+    count: 0
+    model_hints:
+      planning: balanced
+      implementation: balanced
+  - id: ticket-1c7db970
+    name: Fix relative-imports issues
+    description: Resolve 4 relative-imports issues in tellm/improvement/__init__.py
+    task_type: prefactor
+    priority: medium
+    estimate: 2d
+    files:
+    - tellm/improvement/__init__.py
+    rule_id: relative-imports
+    count: 4
+    model_hints:
+      planning: balanced
+      implementation: balanced
+  - id: ticket-6d603cca
+    name: Fix smart-return-type issues
+    description: Resolve 1 smart-return-type issues in tellm/main.py
+    task_type: prefactor
+    priority: medium
+    estimate: 1d
+    files:
+    - tellm/main.py
+    rule_id: smart-return-type
+    count: 1
+    model_hints:
+      planning: balanced
+      implementation: balanced
+  - id: ticket-ef74b6ca
+    name: Fix ai-boilerplate issues
+    description: Resolve 2 ai-boilerplate issues in tellm/main.py
+    task_type: prefactor
+    priority: medium
+    estimate: 1d
+    files:
+    - tellm/main.py
+    rule_id: ai-boilerplate
+    count: 2
+    model_hints:
+      planning: balanced
+      implementation: balanced
+  - id: ticket-c9fdf3eb
+    name: Fix relative-imports issues
+    description: Resolve 2 relative-imports issues in tellm/improvement/runner.py
+    task_type: prefactor
+    priority: medium
+    estimate: 1d
+    files:
+    - tellm/improvement/runner.py
+    rule_id: relative-imports
+    count: 2
+    model_hints:
+      planning: balanced
+      implementation: balanced
+  - id: ticket-fc4cbc1e
+    name: Fix string-concat issues
+    description: Resolve 9 string-concat issues in tellm/improvement/runner.py
+    task_type: prefactor
+    priority: high
+    estimate: 2d
+    files:
+    - tellm/improvement/runner.py
+    rule_id: string-concat
+    count: 9
+    model_hints:
+      planning: balanced
+      implementation: balanced
+  - id: ticket-04b93bfd
+    name: Fix relative-imports issues
+    description: Resolve 2 relative-imports issues in tellm/registry/__init__.py
+    task_type: prefactor
+    priority: medium
+    estimate: 1d
+    files:
+    - tellm/registry/__init__.py
+    rule_id: relative-imports
+    count: 2
+    model_hints:
+      planning: balanced
+      implementation: balanced
+  - id: ticket-742e2d66
+    name: Fix string-concat issues
+    description: Resolve 35 string-concat issues in tellm/registry/core.py
+    task_type: prefactor
+    priority: high
+    estimate: 3d
+    files:
+    - tellm/registry/core.py
+    rule_id: string-concat
+    count: 35
+    model_hints:
+      planning: balanced
+      implementation: balanced
+  - id: ticket-9d339d03
+    name: Fix relative-imports issues
+    description: Resolve 4 relative-imports issues in build/lib/tellm/improvement/__init__.py
+    task_type: prefactor
+    priority: medium
+    estimate: 2d
+    files:
+    - build/lib/tellm/improvement/__init__.py
+    rule_id: relative-imports
+    count: 4
+    model_hints:
+      planning: balanced
+      implementation: balanced
+  - id: ticket-8878cd9a
+    name: Fix relative-imports issues
+    description: Resolve 2 relative-imports issues in build/lib/tellm/improvement/runner.py
+    task_type: prefactor
+    priority: medium
+    estimate: 1d
+    files:
+    - build/lib/tellm/improvement/runner.py
+    rule_id: relative-imports
+    count: 2
+    model_hints:
+      planning: balanced
+      implementation: balanced
+  - id: ticket-6b812730
+    name: Fix string-concat issues
+    description: Resolve 9 string-concat issues in build/lib/tellm/improvement/runner.py
+    task_type: prefactor
+    priority: high
+    estimate: 2d
+    files:
+    - build/lib/tellm/improvement/runner.py
+    rule_id: string-concat
+    count: 9
+    model_hints:
+      planning: balanced
+      implementation: balanced
+  - id: ticket-4c4369af
+    name: Fix relative-imports issues
+    description: Resolve 2 relative-imports issues in build/lib/tellm/registry/__init__.py
+    task_type: prefactor
+    priority: medium
+    estimate: 1d
+    files:
+    - build/lib/tellm/registry/__init__.py
+    rule_id: relative-imports
+    count: 2
+    model_hints:
+      planning: balanced
+      implementation: balanced
+  - id: ticket-19757ea1
+    name: Fix string-concat issues
+    description: Resolve 50 string-concat issues in build/lib/tellm/registry/core.py
+    task_type: prefactor
+    priority: high
+    estimate: 3d
+    files:
+    - build/lib/tellm/registry/core.py
+    rule_id: string-concat
+    count: 50
     model_hints:
       planning: balanced
       implementation: balanced

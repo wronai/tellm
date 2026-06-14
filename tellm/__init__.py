@@ -13,7 +13,7 @@ from .registry import (
     service_result_schema,
     validate_tellm_uri,
 )
-__version__ = "4.0.5"
+__version__ = "4.0.6"
 def create_bot(db_path="tellm.db"): return TellmBot(db_path=db_path)
 def run_server(host="localhost", port=8000, db_path="tellm.db"):
     server = TellmServer(host, port, db_path)

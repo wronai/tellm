@@ -1,23 +1,184 @@
 project: /home/tom/github/wronai/tellm
 generated_from: code2llm call graph analysis
 stats:
-  total_nodes: 19
-  total_edges: 15
-  modules_count: 6
+  total_nodes: 47
+  total_edges: 39
+  modules_count: 7
 nodes:
-  scripts.protocol_smoke.audio_data_url:
-    name: audio_data_url
-    module: scripts.protocol_smoke
-    line: 54
-    cyclomatic_complexity: 1
-    calls_out: 4
-    calls_in: 1
+  scripts.generate_test_audio.require_tool:
+    name: require_tool
+    module: scripts.generate_test_audio
+    line: 40
+    cyclomatic_complexity: 2
+    calls_out: 2
+    calls_in: 2
   scripts.protocol_smoke.mime_for_audio:
     name: mime_for_audio
     module: scripts.protocol_smoke
     line: 48
     cyclomatic_complexity: 3
     calls_out: 1
+    calls_in: 1
+  scripts.protocol_smoke.send_ws_payload:
+    name: send_ws_payload
+    module: scripts.protocol_smoke
+    line: 65
+    cyclomatic_complexity: 4
+    calls_out: 10
+    calls_in: 2
+  tellm.registry.core.registry_manifest_schema:
+    name: registry_manifest_schema
+    module: tellm.registry.core
+    line: 347
+    cyclomatic_complexity: 1
+    calls_out: 1
+    calls_in: 4
+  scripts.generate_test_audio.main:
+    name: main
+    module: scripts.generate_test_audio
+    line: 91
+    cyclomatic_complexity: 4
+    calls_out: 9
+    calls_in: 0
+  tellm.registry.core.ResourceRegistry.read:
+    name: read
+    module: tellm.registry.core
+    line: 936
+    cyclomatic_complexity: 3
+    calls_out: 5
+    calls_in: 0
+  tellm.registry.core.uri_domain:
+    name: uri_domain
+    module: tellm.registry.core
+    line: 96
+    cyclomatic_complexity: 2
+    calls_out: 1
+    calls_in: 1
+  tellm.registry.core.ResourceRegistry._call:
+    name: _call
+    module: tellm.registry.core
+    line: 964
+    cyclomatic_complexity: 4
+    calls_out: 8
+    calls_in: 0
+  tellm.bot.TellmBot._registry_now:
+    name: _registry_now
+    module: tellm.bot
+    line: 1313
+    cyclomatic_complexity: 1
+    calls_out: 3
+    calls_in: 0
+  tellm.registry.core.uri_name:
+    name: uri_name
+    module: tellm.registry.core
+    line: 101
+    cyclomatic_complexity: 2
+    calls_out: 1
+    calls_in: 3
+  tellm.registry.core.ResourceRegistry.manifest:
+    name: manifest
+    module: tellm.registry.core
+    line: 811
+    cyclomatic_complexity: 2
+    calls_out: 4
+    calls_in: 0
+  scripts.protocol_smoke.async_main:
+    name: async_main
+    module: scripts.protocol_smoke
+    line: 183
+    cyclomatic_complexity: 7
+    calls_out: 3
+    calls_in: 1
+  tellm.registry.core.service_result_schema:
+    name: service_result_schema
+    module: tellm.registry.core
+    line: 290
+    cyclomatic_complexity: 1
+    calls_out: 0
+    calls_in: 3
+  tellm.server._asyncapi_document:
+    name: _asyncapi_document
+    module: tellm.server
+    line: 1750
+    cyclomatic_complexity: 1
+    calls_out: 1
+    calls_in: 1
+  config.load_config:
+    name: load_config
+    module: config
+    line: 11
+    cyclomatic_complexity: 1
+    calls_out: 6
+    calls_in: 3
+  tellm.registry.core._schema_types:
+    name: _schema_types
+    module: tellm.registry.core
+    line: 116
+    cyclomatic_complexity: 4
+    calls_out: 3
+    calls_in: 1
+  tellm.registry.core.ResourceRegistry.register_alias:
+    name: register_alias
+    module: tellm.registry.core
+    line: 567
+    cyclomatic_complexity: 11
+    calls_out: 2
+    calls_in: 0
+  tellm.registry.core.uri_parts:
+    name: uri_parts
+    module: tellm.registry.core
+    line: 91
+    cyclomatic_complexity: 3
+    calls_out: 2
+    calls_in: 2
+  tellm.registry.core.service_result:
+    name: service_result
+    module: tellm.registry.core
+    line: 247
+    cyclomatic_complexity: 6
+    calls_out: 7
+    calls_in: 8
+  tellm.bot.TellmBot.__init__:
+    name: __init__
+    module: tellm.bot
+    line: 213
+    cyclomatic_complexity: 2
+    calls_out: 5
+    calls_in: 0
+  scripts.generate_test_audio.generate_fixture:
+    name: generate_fixture
+    module: scripts.generate_test_audio
+    line: 47
+    cyclomatic_complexity: 2
+    calls_out: 13
+    calls_in: 1
+  scripts.protocol_smoke.check_http:
+    name: check_http
+    module: scripts.protocol_smoke
+    line: 34
+    cyclomatic_complexity: 3
+    calls_out: 7
+    calls_in: 2
+  tellm.registry.core.normalize_issue_list:
+    name: normalize_issue_list
+    module: tellm.registry.core
+    line: 201
+    cyclomatic_complexity: 11
+    calls_out: 20
+    calls_in: 2
+  tellm.bot.TellmBot._price_error_result:
+    name: _price_error_result
+    module: tellm.bot
+    line: 1966
+    cyclomatic_complexity: 3
+    calls_out: 2
+    calls_in: 0
+  scripts.protocol_smoke.get_url:
+    name: get_url
+    module: scripts.protocol_smoke
+    line: 28
+    cyclomatic_complexity: 3
+    calls_out: 4
     calls_in: 1
   scripts.protocol_smoke.check_ws_text:
     name: check_ws_text
@@ -26,11 +187,39 @@ nodes:
     cyclomatic_complexity: 3
     calls_out: 7
     calls_in: 1
-  scripts.generate_test_audio.main:
-    name: main
-    module: scripts.generate_test_audio
-    line: 91
+  tellm.registry.core.validate_tellm_uri:
+    name: validate_tellm_uri
+    module: tellm.registry.core
+    line: 74
+    cyclomatic_complexity: 9
+    calls_out: 7
+    calls_in: 2
+  tellm.server.TellmServer._validate_payload:
+    name: _validate_payload
+    module: tellm.server
+    line: 2165
     cyclomatic_complexity: 4
+    calls_out: 6
+    calls_in: 0
+  tellm.registry.core.validate_schema:
+    name: validate_schema
+    module: tellm.registry.core
+    line: 142
+    cyclomatic_complexity: 23
+    calls_out: 27
+    calls_in: 9
+  tellm.server.TellmServer._local_validation_verdict:
+    name: _local_validation_verdict
+    module: tellm.server
+    line: 2792
+    cyclomatic_complexity: 23
+    calls_out: 17
+    calls_in: 0
+  tellm.registry.core.ResourceRegistry.execute:
+    name: execute
+    module: tellm.registry.core
+    line: 945
+    cyclomatic_complexity: 5
     calls_out: 9
     calls_in: 0
   scripts.generate_test_audio.run:
@@ -40,69 +229,13 @@ nodes:
     cyclomatic_complexity: 1
     calls_out: 1
     calls_in: 2
-  scripts.generate_test_audio.generate_fixture:
-    name: generate_fixture
-    module: scripts.generate_test_audio
-    line: 47
-    cyclomatic_complexity: 2
-    calls_out: 13
-    calls_in: 1
-  server._websocket_logger:
-    name: _websocket_logger
-    module: server
-    line: 18
-    cyclomatic_complexity: 1
+  tellm.registry.core.ResourceRegistry.list:
+    name: list
+    module: tellm.registry.core
+    line: 773
+    cyclomatic_complexity: 4
     calls_out: 4
-    calls_in: 1
-  bot.TellmBot.__init__:
-    name: __init__
-    module: bot
-    line: 176
-    cyclomatic_complexity: 2
-    calls_out: 2
-    calls_in: 0
-  scripts.protocol_smoke.check_http:
-    name: check_http
-    module: scripts.protocol_smoke
-    line: 34
-    cyclomatic_complexity: 3
-    calls_out: 7
-    calls_in: 2
-  main.main:
-    name: main
-    module: main
-    line: 4
-    cyclomatic_complexity: 3
-    calls_out: 14
-    calls_in: 0
-  config.load_config:
-    name: load_config
-    module: config
-    line: 11
-    cyclomatic_complexity: 1
-    calls_out: 6
     calls_in: 3
-  scripts.generate_test_audio.require_tool:
-    name: require_tool
-    module: scripts.generate_test_audio
-    line: 40
-    cyclomatic_complexity: 2
-    calls_out: 2
-    calls_in: 2
-  server.TellmServer.serve_forever:
-    name: serve_forever
-    module: server
-    line: 895
-    cyclomatic_complexity: 1
-    calls_out: 5
-    calls_in: 0
-  scripts.protocol_smoke.ws_ssl_context:
-    name: ws_ssl_context
-    module: scripts.protocol_smoke
-    line: 59
-    cyclomatic_complexity: 3
-    calls_out: 2
-    calls_in: 1
   scripts.protocol_smoke.check_ws_audio:
     name: check_ws_audio
     module: scripts.protocol_smoke
@@ -110,47 +243,98 @@ nodes:
     cyclomatic_complexity: 4
     calls_out: 8
     calls_in: 1
-  scripts.protocol_smoke.get_url:
-    name: get_url
+  scripts.protocol_smoke.ws_ssl_context:
+    name: ws_ssl_context
     module: scripts.protocol_smoke
-    line: 28
+    line: 59
     cyclomatic_complexity: 3
+    calls_out: 2
+    calls_in: 1
+  tellm.server._websocket_logger:
+    name: _websocket_logger
+    module: tellm.server
+    line: 27
+    cyclomatic_complexity: 1
     calls_out: 4
     calls_in: 1
-  scripts.protocol_smoke.async_main:
-    name: async_main
-    module: scripts.protocol_smoke
-    line: 183
-    cyclomatic_complexity: 7
-    calls_out: 3
-    calls_in: 1
-  scripts.protocol_smoke.send_ws_payload:
-    name: send_ws_payload
-    module: scripts.protocol_smoke
-    line: 65
-    cyclomatic_complexity: 4
-    calls_out: 10
-    calls_in: 2
-  server.TellmServer._handle_transcription:
-    name: _handle_transcription
-    module: server
-    line: 801
+  tellm.registry.core.json_like:
+    name: json_like
+    module: tellm.registry.core
+    line: 238
     cyclomatic_complexity: 2
-    calls_out: 15
+    calls_out: 2
+    calls_in: 1
+  tellm.bot.TellmBot._registry_domain_check:
+    name: _registry_domain_check
+    module: tellm.bot
+    line: 1725
+    cyclomatic_complexity: 14
+    calls_out: 22
+    calls_in: 0
+  tellm.server._openapi_document:
+    name: _openapi_document
+    module: tellm.server
+    line: 1413
+    cyclomatic_complexity: 1
+    calls_out: 2
+    calls_in: 1
+  tellm.bot.TellmBot._registry_echo:
+    name: _registry_echo
+    module: tellm.bot
+    line: 1326
+    cyclomatic_complexity: 1
+    calls_out: 1
+    calls_in: 0
+  tellm.registry.core.RegistryEntry.__post_init__:
+    name: __post_init__
+    module: tellm.registry.core
+    line: 445
+    cyclomatic_complexity: 17
+    calls_out: 12
+    calls_in: 0
+  tellm.registry.core.normalize_schema:
+    name: normalize_schema
+    module: tellm.registry.core
+    line: 106
+    cyclomatic_complexity: 4
+    calls_out: 3
+    calls_in: 4
+  tellm.server.TellmServer._validate_and_repair:
+    name: _validate_and_repair
+    module: tellm.server
+    line: 2838
+    cyclomatic_complexity: 12
+    calls_out: 40
+    calls_in: 0
+  tellm.bot.TellmBot._price_relevance_tokens:
+    name: _price_relevance_tokens
+    module: tellm.bot
+    line: 1868
+    cyclomatic_complexity: 6
+    calls_out: 9
+    calls_in: 0
+  tellm.server.TellmServer.serve_forever:
+    name: serve_forever
+    module: tellm.server
+    line: 3494
+    cyclomatic_complexity: 1
+    calls_out: 5
+    calls_in: 0
+  scripts.protocol_smoke.audio_data_url:
+    name: audio_data_url
+    module: scripts.protocol_smoke
+    line: 54
+    cyclomatic_complexity: 1
+    calls_out: 4
+    calls_in: 1
+  main.main:
+    name: main
+    module: main
+    line: 4
+    cyclomatic_complexity: 3
+    calls_out: 14
     calls_in: 0
 edges:
-- caller: server.TellmServer._handle_transcription
-  callee: config.load_config
-  call_type: resolved
-- caller: server.TellmServer.serve_forever
-  callee: server._websocket_logger
-  call_type: resolved
-- caller: bot.TellmBot.__init__
-  callee: config.load_config
-  call_type: resolved
-- caller: main.main
-  callee: config.load_config
-  call_type: resolved
 - caller: scripts.generate_test_audio.generate_fixture
   callee: scripts.generate_test_audio.run
   call_type: resolved
@@ -184,9 +368,91 @@ edges:
 - caller: scripts.protocol_smoke.async_main
   callee: scripts.protocol_smoke.check_ws_audio
   call_type: resolved
+- caller: tellm.server._openapi_document
+  callee: tellm.registry.core.registry_manifest_schema
+  call_type: resolved
+- caller: tellm.server._openapi_document
+  callee: tellm.registry.core.service_result_schema
+  call_type: resolved
+- caller: tellm.server._asyncapi_document
+  callee: tellm.registry.core.registry_manifest_schema
+  call_type: resolved
+- caller: tellm.server.TellmServer._validate_payload
+  callee: tellm.registry.core.validate_schema
+  call_type: resolved
+- caller: tellm.server.TellmServer._local_validation_verdict
+  callee: tellm.registry.core.validate_schema
+  call_type: resolved
+- caller: tellm.server.TellmServer._validate_and_repair
+  callee: config.load_config
+  call_type: resolved
+- caller: tellm.server.TellmServer.serve_forever
+  callee: tellm.server._websocket_logger
+  call_type: resolved
+- caller: tellm.bot.TellmBot.__init__
+  callee: config.load_config
+  call_type: resolved
+- caller: tellm.bot.TellmBot._registry_now
+  callee: tellm.registry.core.service_result
+  call_type: resolved
+- caller: tellm.bot.TellmBot._registry_echo
+  callee: tellm.registry.core.service_result
+  call_type: resolved
+- caller: tellm.bot.TellmBot._registry_domain_check
+  callee: tellm.registry.core.service_result
+  call_type: resolved
+- caller: tellm.bot.TellmBot._price_relevance_tokens
+  callee: tellm.registry.core.ResourceRegistry.list
+  call_type: resolved
+- caller: tellm.bot.TellmBot._price_error_result
+  callee: tellm.registry.core.service_result
+  call_type: resolved
+- caller: main.main
+  callee: config.load_config
+  call_type: resolved
+- caller: tellm.registry.core.uri_domain
+  callee: tellm.registry.core.uri_parts
+  call_type: resolved
+- caller: tellm.registry.core.uri_name
+  callee: tellm.registry.core.uri_parts
+  call_type: resolved
+- caller: tellm.registry.core.validate_schema
+  callee: tellm.registry.core._schema_types
+  call_type: resolved
+- caller: tellm.registry.core.normalize_issue_list
+  callee: tellm.registry.core.json_like
+  call_type: resolved
+- caller: tellm.registry.core.service_result
+  callee: tellm.registry.core.normalize_issue_list
+  call_type: resolved
+- caller: tellm.registry.core.RegistryEntry.__post_init__
+  callee: tellm.registry.core.normalize_schema
+  call_type: resolved
+- caller: tellm.registry.core.RegistryEntry.__post_init__
+  callee: tellm.registry.core.validate_tellm_uri
+  call_type: resolved
+- caller: tellm.registry.core.RegistryEntry.__post_init__
+  callee: tellm.registry.core.uri_domain
+  call_type: resolved
+- caller: tellm.registry.core.ResourceRegistry.register_alias
+  callee: tellm.registry.core.uri_name
+  call_type: resolved
+- caller: tellm.registry.core.ResourceRegistry.manifest
+  callee: tellm.registry.core.registry_manifest_schema
+  call_type: resolved
+- caller: tellm.registry.core.ResourceRegistry.manifest
+  callee: tellm.registry.core.service_result_schema
+  call_type: resolved
+- caller: tellm.registry.core.ResourceRegistry.read
+  callee: tellm.registry.core.validate_schema
+  call_type: resolved
+- caller: tellm.registry.core.ResourceRegistry.execute
+  callee: tellm.registry.core.validate_schema
+  call_type: resolved
+- caller: tellm.registry.core.ResourceRegistry._call
+  callee: tellm.registry.core.ResourceRegistry.list
+  call_type: resolved
 modules:
-  bot:
-  - bot.TellmBot.__init__
   config:
   - config.load_config
   main:
@@ -206,57 +472,222 @@ modules:
   - scripts.protocol_smoke.mime_for_audio
   - scripts.protocol_smoke.send_ws_payload
   - scripts.protocol_smoke.ws_ssl_context
-  server:
-  - server.TellmServer._handle_transcription
-  - server.TellmServer.serve_forever
-  - server._websocket_logger
+  tellm.bot:
+  - tellm.bot.TellmBot.__init__
+  - tellm.bot.TellmBot._price_error_result
+  - tellm.bot.TellmBot._price_relevance_tokens
+  - tellm.bot.TellmBot._registry_domain_check
+  - tellm.bot.TellmBot._registry_echo
+  - tellm.bot.TellmBot._registry_now
+  tellm.registry.core:
+  - tellm.registry.core.RegistryEntry.__post_init__
+  - tellm.registry.core.ResourceRegistry._call
+  - tellm.registry.core.ResourceRegistry.execute
+  - tellm.registry.core.ResourceRegistry.list
+  - tellm.registry.core.ResourceRegistry.manifest
+  - tellm.registry.core.ResourceRegistry.read
+  - tellm.registry.core.ResourceRegistry.register_alias
+  - tellm.registry.core._schema_types
+  - tellm.registry.core.json_like
+  - tellm.registry.core.normalize_issue_list
+  - tellm.registry.core.normalize_schema
+  - tellm.registry.core.registry_manifest_schema
+  - tellm.registry.core.service_result
+  - tellm.registry.core.service_result_schema
+  - tellm.registry.core.uri_domain
+  - tellm.registry.core.uri_name
+  - tellm.registry.core.uri_parts
+  - tellm.registry.core.validate_schema
+  - tellm.registry.core.validate_tellm_uri
+  tellm.server:
+  - tellm.server.TellmServer._local_validation_verdict
+  - tellm.server.TellmServer._validate_and_repair
+  - tellm.server.TellmServer._validate_payload
+  - tellm.server.TellmServer.serve_forever
+  - tellm.server._asyncapi_document
+  - tellm.server._openapi_document
+  - tellm.server._websocket_logger
 entry_points:
-- bot.TellmBot.__init__
-- bot.TellmBot._completion
-- bot.TellmBot._ensure_function_state
-- bot.TellmBot._execute_python_process
-- bot.TellmBot._execute_registered_function
-- bot.TellmBot._get_stt_model
-- bot.TellmBot._get_tts
-- bot.TellmBot._init_db
-- bot.TellmBot._normalize_processes
-- bot.TellmBot._parse_json_response
-- bot.TellmBot._process_globals
-- bot.TellmBot._restricted_import
-- bot.TellmBot.analyze_query
-- bot.TellmBot.evolve_function
-- bot.TellmBot.execute_processes
-- bot.TellmBot.execute_task
-- bot.TellmBot.generate_view
-- bot.TellmBot.get_tasks
-- bot.TellmBot.register_function
-- bot.TellmBot.save_evolution
-- bot.TellmBot.save_task
-- bot.TellmBot.save_view
-- bot.TellmBot.speak
-- bot.TellmBot.transcribe
-- bot.ViewData._render_block
-- bot.ViewData._render_dynamic
-- bot.ViewData._render_items
-- bot.ViewData._render_table
-- bot.ViewData._safe_json
-- bot.ViewData._safe_text
-- bot.ViewData.to_dict
-- bot.ViewData.to_html
 - main.main
 - scripts.generate_test_audio.main
 - scripts.protocol_smoke.main
-- server.TellmServer.__init__
-- server.TellmServer._audio_payload
-- server.TellmServer._call_maybe_async
-- server.TellmServer._handle_test_transcription
-- server.TellmServer._handle_transcription
-- server.TellmServer._http_response
-- server.TellmServer._run_blocking
-- server.TellmServer.handle
-- server.TellmServer.process_request
-- server.TellmServer.register_function
-- server.TellmServer.run
-- server.TellmServer.serve_forever
+- tellm.bot.TellmBot.__init__
+- tellm.bot.TellmBot._commerce_search_url
+- tellm.bot.TellmBot._completion
+- tellm.bot.TellmBot._ensure_function_state
+- tellm.bot.TellmBot._execute_python_process
+- tellm.bot.TellmBot._execute_registered_function
+- tellm.bot.TellmBot._extract_price_candidates
+- tellm.bot.TellmBot._geocode_city
+- tellm.bot.TellmBot._get_stt_model
+- tellm.bot.TellmBot._get_tts
+- tellm.bot.TellmBot._http_json
+- tellm.bot.TellmBot._http_text
+- tellm.bot.TellmBot._init_db
+- tellm.bot.TellmBot._init_registry
+- tellm.bot.TellmBot._is_country_level_weather_location
+- tellm.bot.TellmBot._is_text_content_type
+- tellm.bot.TellmBot._local_price_task_from_query
+- tellm.bot.TellmBot._local_task_from_query
+- tellm.bot.TellmBot._local_weather_task_from_query
+- tellm.bot.TellmBot._looks_like_price_query
+- tellm.bot.TellmBot._looks_like_weather_query
+- tellm.bot.TellmBot._message_text
+- tellm.bot.TellmBot._normalize_country_code
+- tellm.bot.TellmBot._normalize_domain
+- tellm.bot.TellmBot._normalize_price_product
+- tellm.bot.TellmBot._normalize_price_site
+- tellm.bot.TellmBot._normalize_processes
+- tellm.bot.TellmBot._normalize_weather_location
+- tellm.bot.TellmBot._package_version
+- tellm.bot.TellmBot._parse_json_response
+- tellm.bot.TellmBot._parse_price_amount
+- tellm.bot.TellmBot._price_error_result
+- tellm.bot.TellmBot._price_query_from_query
+- tellm.bot.TellmBot._price_relevance
+- tellm.bot.TellmBot._price_relevance_tokens
+- tellm.bot.TellmBot._price_site_from_query
+- tellm.bot.TellmBot._process_globals
+- tellm.bot.TellmBot._register_artifact_resources
+- tellm.bot.TellmBot._register_file_resource
+- tellm.bot.TellmBot._register_package_resource
+- tellm.bot.TellmBot._register_uri_aliases
+- tellm.bot.TellmBot._registry_autoimprove
+- tellm.bot.TellmBot._registry_domain_check
+- tellm.bot.TellmBot._registry_echo
+- tellm.bot.TellmBot._registry_now
+- tellm.bot.TellmBot._registry_price_search
+- tellm.bot.TellmBot._registry_weather_current
+- tellm.bot.TellmBot._render_autoimprovement_data
+- tellm.bot.TellmBot._render_data_from_service_result
+- tellm.bot.TellmBot._restricted_import
+- tellm.bot.TellmBot._route_price_task
+- tellm.bot.TellmBot._route_weather_task
+- tellm.bot.TellmBot._score_geocode_result
+- tellm.bot.TellmBot._storage_base_path
+- tellm.bot.TellmBot._text_from_html
+- tellm.bot.TellmBot._value_preview
+- tellm.bot.TellmBot._weather_code_description
+- tellm.bot.TellmBot._weather_location_from_query
+- tellm.bot.TellmBot.analyze_query
+- tellm.bot.TellmBot.evolve_function
+- tellm.bot.TellmBot.execute_processes
+- tellm.bot.TellmBot.execute_resource
+- tellm.bot.TellmBot.execute_task
+- tellm.bot.TellmBot.generate_view
+- tellm.bot.TellmBot.get_latest_autoimprovement_html
+- tellm.bot.TellmBot.get_latest_autoimprovement_report
+- tellm.bot.TellmBot.get_tasks
+- tellm.bot.TellmBot.get_view_html
+- tellm.bot.TellmBot.get_view_record
+- tellm.bot.TellmBot.record_execution
+- tellm.bot.TellmBot.register_function
+- tellm.bot.TellmBot.resolve_resource
+- tellm.bot.TellmBot.resolve_resource_document
+- tellm.bot.TellmBot.save_autoimprovement_report
+- tellm.bot.TellmBot.save_evolution
+- tellm.bot.TellmBot.save_task
+- tellm.bot.TellmBot.save_view
+- tellm.bot.TellmBot.speak
+- tellm.bot.TellmBot.transcribe
+- tellm.bot.TellmBot.update_autoimprovement_report_html
+- tellm.bot.ViewData._render_block
+- tellm.bot.ViewData._render_dynamic
+- tellm.bot.ViewData._render_items
+- tellm.bot.ViewData._render_table
+- tellm.bot.ViewData._safe_json
+- tellm.bot.ViewData._safe_text
+- tellm.bot.ViewData.to_dict
+- tellm.bot.ViewData.to_html
+- tellm.bot.WeatherLocationResolutionError.__init__
+- tellm.bot.WeatherLocationTooBroadError.__init__
 - tellm.create_bot
+- tellm.improvement.history.ExecutionHistoryStore.__init__
+- tellm.improvement.history.ExecutionHistoryStore._decode_row
+- tellm.improvement.history.ExecutionHistoryStore.count_since_id
+- tellm.improvement.history.ExecutionHistoryStore.init_db
+- tellm.improvement.history.ExecutionHistoryStore.latest_id
+- tellm.improvement.history.ExecutionHistoryStore.now
+- tellm.improvement.history.ExecutionHistoryStore.recent
+- tellm.improvement.history.ExecutionHistoryStore.record
+- tellm.improvement.runner.AutoimprovementRunner.__init__
+- tellm.improvement.runner.AutoimprovementRunner._collect_error_objects
+- tellm.improvement.runner.AutoimprovementRunner._collect_source_values
+- tellm.improvement.runner.AutoimprovementRunner._finding
+- tellm.improvement.runner.AutoimprovementRunner._history_health
+- tellm.improvement.runner.AutoimprovementRunner._looks_like_ad_hoc_weather_function
+- tellm.improvement.runner.AutoimprovementRunner._looks_like_weather_identifier
+- tellm.improvement.runner.AutoimprovementRunner._patches_from_findings
+- tellm.improvement.runner.AutoimprovementRunner._schema_health
+- tellm.improvement.runner.AutoimprovementRunner._suggested_actions
+- tellm.improvement.runner.AutoimprovementRunner.now
+- tellm.improvement.runner.AutoimprovementRunner.registry_health
+- tellm.improvement.runner.AutoimprovementRunner.run
+- tellm.registry.core.RegistryEntry.__post_init__
+- tellm.registry.core.RegistryEntry._transport_manifest
+- tellm.registry.core.RegistryEntry.to_dict
+- tellm.registry.core.ResourceRegistry.__init__
+- tellm.registry.core.ResourceRegistry._apply_alias_input
+- tellm.registry.core.ResourceRegistry._call
+- tellm.registry.core.ResourceRegistry._resolve_internal
+- tellm.registry.core.ResourceRegistry.canonicalize
+- tellm.registry.core.ResourceRegistry.check_permission
+- tellm.registry.core.ResourceRegistry.discover_for_llm
+- tellm.registry.core.ResourceRegistry.execute
+- tellm.registry.core.ResourceRegistry.find
+- tellm.registry.core.ResourceRegistry.find_capability
+- tellm.registry.core.ResourceRegistry.get
+- tellm.registry.core.ResourceRegistry.get_canonical
+- tellm.registry.core.ResourceRegistry.manifest
+- tellm.registry.core.ResourceRegistry.read
+- tellm.registry.core.ResourceRegistry.register
+- tellm.registry.core.ResourceRegistry.register_alias
+- tellm.registry.core.ResourceRegistry.register_callable
+- tellm.registry.core.ResourceRegistry.register_value
+- tellm.registry.core.ResourceRegistry.require
+- tellm.registry.core.ResourceRegistry.resolve
+- tellm.registry.core.ResourceRegistry.resolve_uri
 - tellm.run_server
+- tellm.server.TellmServer.__init__
+- tellm.server.TellmServer._answer_from_service_result
+- tellm.server.TellmServer._append_data_quality_warnings
+- tellm.server.TellmServer._audio_payload
+- tellm.server.TellmServer._call_maybe_async
+- tellm.server.TellmServer._collect_source_values
+- tellm.server.TellmServer._compact
+- tellm.server.TellmServer._data_source_findings
+- tellm.server.TellmServer._describe_entry
+- tellm.server.TellmServer._duration_ms
+- tellm.server.TellmServer._handle_resource_execution
+- tellm.server.TellmServer._handle_test_transcription
+- tellm.server.TellmServer._handle_transcription
+- tellm.server.TellmServer._http_response
+- tellm.server.TellmServer._json_response
+- tellm.server.TellmServer._local_validation_verdict
+- tellm.server.TellmServer._log_details
+- tellm.server.TellmServer._looks_executable_query
+- tellm.server.TellmServer._payload_from_query
+- tellm.server.TellmServer._process_message
+- tellm.server.TellmServer._registry_entry_for_task
+- tellm.server.TellmServer._registry_item_summary
+- tellm.server.TellmServer._render_logs
+- tellm.server.TellmServer._repair_count
+- tellm.server.TellmServer._requires_real_world_data
+- tellm.server.TellmServer._resource_entry_response
+- tellm.server.TellmServer._result_business_ok
+- tellm.server.TellmServer._run_blocking
+- tellm.server.TellmServer._schema_bundle
+- tellm.server.TellmServer._send_log
+- tellm.server.TellmServer._send_state
+- tellm.server.TellmServer._service_result_log
+- tellm.server.TellmServer._validate_and_repair
+- tellm.server.TellmServer._validate_payload
+- tellm.server.TellmServer._validation_error
+- tellm.server.TellmServer._virtual_schema_resource
+- tellm.server.TellmServer._virtual_view_resource
+- tellm.server.TellmServer._workflow_history_status
+- tellm.server.TellmServer.handle
+- tellm.server.TellmServer.process_request
+- tellm.server.TellmServer.register_function
+- tellm.server.TellmServer.run
+- tellm.server.TellmServer.serve_forever

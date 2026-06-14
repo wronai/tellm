@@ -1,34 +1,58 @@
-# code2llm/evolution | 51 func | 5f | 2026-06-14
+# code2llm/evolution | 204 func | 8f | 2026-06-14
 # generated in 0.00s
 
-NEXT[4] (ranked by impact):
-  [1] !! SPLIT           bot.py
-      WHY: 553L, 4 classes, max CC=22
-      EFFORT: ~4h  IMPACT: 12166
+NEXT[10] (ranked by impact):
+  [1] !! SPLIT           tellm/server.py
+      WHY: 3509L, 1 classes, max CC=95
+      EFFORT: ~4h  IMPACT: 333355
 
-  [2] !! SPLIT           server.py
-      WHY: 910L, 1 classes, max CC=10
-      EFFORT: ~4h  IMPACT: 9100
+  [2] !! SPLIT           tellm/bot.py
+      WHY: 2899L, 6 classes, max CC=47
+      EFFORT: ~4h  IMPACT: 136253
 
-  [3] !  SPLIT-FUNC      TellmBot._execute_python_process  CC=22  fan=16
+  [3] !! SPLIT           tellm/registry/core.py
+      WHY: 974L, 5 classes, max CC=23
+      EFFORT: ~4h  IMPACT: 22402
+
+  [4] !! SPLIT-FUNC      TellmServer.process_request  CC=95  fan=50
+      WHY: CC=95 exceeds 15
+      EFFORT: ~1h  IMPACT: 4750
+
+  [5] !! SPLIT-FUNC      TellmBot.resolve_resource_document  CC=47  fan=24
+      WHY: CC=47 exceeds 15
+      EFFORT: ~1h  IMPACT: 1128
+
+  [6] !! SPLIT-FUNC      AutoimprovementRunner._history_health  CC=39  fan=25
+      WHY: CC=39 exceeds 15
+      EFFORT: ~1h  IMPACT: 975
+
+  [7] !! SPLIT-FUNC      TellmBot._registry_weather_current  CC=29  fan=28
+      WHY: CC=29 exceeds 15
+      EFFORT: ~1h  IMPACT: 812
+
+  [8] !! SPLIT-FUNC      TellmBot._registry_price_search  CC=30  fan=22
+      WHY: CC=30 exceeds 15
+      EFFORT: ~1h  IMPACT: 660
+
+  [9] !  SPLIT-FUNC      TellmServer._data_source_findings  CC=21  fan=17
+      WHY: CC=21 exceeds 15
+      EFFORT: ~1h  IMPACT: 357
+
+  [10] !  SPLIT-FUNC      TellmBot._execute_python_process  CC=22  fan=16
       WHY: CC=22 exceeds 15
       EFFORT: ~1h  IMPACT: 352
 
-  [4] !! SPLIT           goal.yaml
-      WHY: 511L, 0 classes, max CC=0
-      EFFORT: ~4h  IMPACT: 0
-
 
 RISKS[3]:
-  ⚠ Splitting server.py may break 15 import paths
-  ⚠ Splitting bot.py may break 32 import paths
-  ⚠ Splitting goal.yaml may break 0 import paths
+  ⚠ Splitting tellm/server.py may break 50 import paths
+  ⚠ Splitting tellm/bot.py may break 90 import paths
+  ⚠ Splitting tellm/registry/core.py may break 39 import paths
 
 METRICS-TARGET:
-  CC̄:          3.5 → ≤2.4
-  max-CC:      22 → ≤11
-  god-modules: 3 → 0
-  high-CC(≥15): 1 → ≤0
+  CC̄:          5.7 → ≤4.0
+  max-CC:      95 → ≤20
+  god-modules: 5 → 0
+  high-CC(≥15): 14 → ≤7
   hub-types:   0 → ≤0
 
 PATTERNS (language parser shared logic):
@@ -56,4 +80,4 @@ PATTERNS (language parser shared logic):
     - Standardized FunctionInfo/ClassInfo models
 
 HISTORY:
-  (first run — no previous data)
+  prev CC̄=5.0 → now CC̄=5.7

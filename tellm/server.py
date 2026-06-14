@@ -5,6 +5,7 @@ import html as html_lib
 import inspect
 import json
 import logging
+import time
 from http import HTTPStatus
 from urllib.parse import parse_qs
 
@@ -396,6 +397,9 @@ def _browser_client_html(host: str) -> str:
 
       <section class="panel" style="grid-column: 1 / -1;">
         <h2>Logi workflow</h2>
+        <div class="share-actions">
+          <button id="copyWorkflowLogs" type="button" disabled>Kopiuj logi</button>
+        </div>
         <div id="workflowLog" class="log"><div class="empty">Brak logów.</div></div>
       </section>
 
@@ -417,6 +421,7 @@ def _browser_client_html(host: str) -> str:
     const clearBtn = document.getElementById("clear");
     const copyQueryBtn = document.getElementById("copyQuery");
     const copyResultBtn = document.getElementById("copyResult");
+    const copyWorkflowLogsBtn = document.getElementById("copyWorkflowLogs");
     const dictateBtn = document.getElementById("dictate");
     const speakEl = document.getElementById("speak");
     const workflowLogEl = document.getElementById("workflowLog");
@@ -463,6 +468,7 @@ def _browser_client_html(host: str) -> str:
     function updateShareButtons() {{
       copyQueryBtn.disabled = !promptEl.value.trim();
       copyResultBtn.disabled = !lastViewId;
+      copyWorkflowLogsBtn.disabled = workflowLogs.length === 0;
     }}
 
     function setBusy(value) {{
@@ -495,6 +501,23 @@ def _browser_client_html(host: str) -> str:
       setStatus(includeResult ? "Skopiowano wynik" : "Skopiowano query");
     }}
 
+    function workflowLogsText() {{
+      return workflowLogs.map((item) => {{
+        const details = item.details ? "\\n" + JSON.stringify(item.details, null, 2) : "";
+        return [
+          item.ts || "",
+          (item.stage || "workflow") + " / " + (item.status || "info"),
+          item.message || "",
+        ].filter(Boolean).join("\\n") + details;
+      }}).join("\\n\\n");
+    }}
+
+    async function copyWorkflowLogs() {{
+      if (!workflowLogs.length) return;
+      await copyText(workflowLogsText());
+      setStatus("Skopiowano logi workflow");
+    }}
+
     function syncQueryUrl() {{
       const current = promptEl.value.trim();
       if (lastResultQuery && current !== lastResultQuery) {{
@@ -503,6 +526,37 @@ def _browser_client_html(host: str) -> str:
       window.clearTimeout(urlTimer);
       urlTimer = window.setTimeout(() => replaceUrl(false), 180);
       updateShareButtons();
+    }}
+
+    async function restoreWorkflowLogs(viewId) {{
+      const uri = "tellm://artifact/json/workflow-result/" + viewId;
+      const response = await fetch("/resolve?uri=" + encodeURIComponent(uri) + "&include_value=true");
+      if (!response.ok) throw new Error("Nie znaleziono logów workflow");
+      const payload = await response.json();
+      const result = payload.value || {{}};
+      const resultOk = result.ok === true;
+      const errors = Array.isArray(result.errors) ? result.errors : [];
+      addWorkflowLog(
+        "service_result",
+        resultOk ? "ok" : "failed",
+        resultOk ? "Wynik usługi OK." : "Usługa zwróciła błąd biznesowy.",
+        {{
+          business_status: resultOk ? "ok" : "failed",
+          result_ok: result.ok,
+          errors,
+          uri: result.uri || "",
+          type: result.type || "",
+        }}
+      );
+      addWorkflowLog(
+        "workflow",
+        resultOk ? "ok" : "completed_with_service_error",
+        resultOk ? "Workflow potwierdzony i zakończony." : "Workflow zakończony, ale wynik usługi jest błędem.",
+        {{
+          restored_from_view_id: viewId,
+          service_result_status: resultOk ? "ok" : "failed",
+        }}
+      );
     }}
 
     async function restoreUrlState() {{
@@ -520,6 +574,7 @@ def _browser_client_html(host: str) -> str:
           viewEl.srcdoc = await response.text();
           lastViewId = viewId;
           addLog("system", "Wczytano wynik z linku.");
+          await restoreWorkflowLogs(viewId);
           setStatus("Wczytano link");
         }} catch (error) {{
           addLog("error", error.message || "Nie udało się wczytać wyniku z linku.");
@@ -569,6 +624,7 @@ def _browser_client_html(host: str) -> str:
         details
       }});
       workflowLogs = workflowLogs.slice(-80);
+      updateShareButtons();
     }}
 
     function connect() {{
@@ -709,6 +765,7 @@ def _browser_client_html(host: str) -> str:
     }});
     copyQueryBtn.addEventListener("click", () => copyShareUrl(false));
     copyResultBtn.addEventListener("click", () => copyShareUrl(true));
+    copyWorkflowLogsBtn.addEventListener("click", copyWorkflowLogs);
     dictateBtn.addEventListener("click", () => {{
       if (!recognition) return;
       recognizing ? recognition.stop() : recognition.start();
@@ -853,6 +910,15 @@ def _docs_html(host: str) -> str:
             <tr><td><code>GET</code></td><td><code>/autoimprovement</code></td><td>Panel ręcznego uruchamiania audytu autoimprovement.</td></tr>
             <tr><td><code>GET</code></td><td><code>/autoimprovement/latest</code></td><td>Ostatni zapisany raport autoimprovement jako JSON + HTML.</td></tr>
             <tr><td><code>GET</code></td><td><code>/resource?uri=tellm://...</code></td><td>Metadata jednego zasobu z registry.</td></tr>
+            <tr><td><code>GET</code></td><td><code>/schema?uri=tellm://...</code></td><td>Wszystkie schema przypisane do zasobu.</td></tr>
+            <tr><td><code>GET</code></td><td><code>/schema/input?uri=tellm://...</code></td><td>Input schema zasobu.</td></tr>
+            <tr><td><code>GET</code></td><td><code>/schema/output?uri=tellm://...</code></td><td>Output schema zasobu.</td></tr>
+            <tr><td><code>GET</code></td><td><code>/describe?uri=tellm://...</code></td><td>Skrócony opis zasobu dla LLM/UI.</td></tr>
+            <tr><td><code>GET</code></td><td><code>/permissions?uri=tellm://...</code></td><td>Uprawnienia i ryzyko zasobu.</td></tr>
+            <tr><td><code>GET</code></td><td><code>/health?uri=tellm://...</code></td><td>Status zasobu i ostatnie wykonania.</td></tr>
+            <tr><td><code>GET</code></td><td><code>/history?uri=tellm://...</code></td><td>Historia wykonań zasobu.</td></tr>
+            <tr><td><code>GET</code></td><td><code>/validate-input?uri=...&amp;input=%7B...%7D</code></td><td>Walidacja inputu w obecnym transporcie diagnostycznym.</td></tr>
+            <tr><td><code>GET</code></td><td><code>/validate-output?uri=...&amp;output=%7B...%7D</code></td><td>Walidacja outputu w obecnym transporcie diagnostycznym.</td></tr>
             <tr><td><code>GET</code></td><td><code>/resolve?uri=tellm://...</code></td><td>Diagnostyka resolvera: canonical URI, transport, schema, permissions.</td></tr>
           </tbody>
         </table>
@@ -862,7 +928,7 @@ def _docs_html(host: str) -> str:
         <h2>Realtime endpoint</h2>
         <p>Przetwarzanie komend działa przez WebSocket:</p>
         <p><code>__WS_URL__</code></p>
-        <p class="muted">Obecny transport na tym porcie to WebSocket + diagnostyczne HTTP GET. Wykonanie zasobu używa wiadomości <code>{"type":"execute"}</code>. Pełne <code>POST /execute</code> jest kontraktem dla przyszłego adaptera HTTP, bo obecny serwer WebSocket nie udostępnia body requestu w <code>process_request</code>.</p>
+        <p class="muted">Obecny transport na tym porcie to WebSocket + diagnostyczne HTTP GET. Wykonanie zasobu używa wiadomości <code>{"type":"execute"}</code>. Pełne <code>POST /execute</code>, <code>POST /validate-input</code> i <code>POST /validate-output</code> są kontraktem dla adaptera HTTP, bo obecny serwer WebSocket nie udostępnia body requestu w <code>process_request</code>.</p>
       </section>
 
       <section class="full">
@@ -890,7 +956,56 @@ curl http://localhost:8008/manifest
 curl http://localhost:8008/openapi.json
 curl http://localhost:8008/asyncapi.json
 curl "http://localhost:8008/resource?uri=tellm://service/domain/check"
-curl "http://localhost:8008/resolve?uri=tellm://function/system/now"</code></pre>
+curl "http://localhost:8008/resource?uri=tellm://service/price/search"
+curl "http://localhost:8008/resource?uri=tellm://schema/service/weather.current/input"
+curl "http://localhost:8008/schema/input?uri=tellm://service/weather/current"
+curl "http://localhost:8008/schema/output?uri=tellm://service/weather/current"
+curl "http://localhost:8008/schema/input?uri=tellm://service/price/search"
+curl "http://localhost:8008/describe?uri=tellm://service/weather/current"
+curl "http://localhost:8008/permissions?uri=tellm://service/weather/current"
+curl "http://localhost:8008/health?uri=tellm://service/weather/current"
+curl "http://localhost:8008/history?uri=tellm://service/weather/current"
+curl "http://localhost:8008/validate-input?uri=tellm://service/weather/current&amp;input=%7B%22location%22%3A%22Wejherowo%22%2C%22country%22%3A%22PL%22%7D"
+curl "http://localhost:8008/resolve?uri=tellm://function/system/now"
+curl "http://localhost:8008/resolve?uri=tellm://artifact/audio/weather-query-sample"
+curl "http://localhost:8008/resolve?uri=tellm://function/weather_wejherowo"
+curl "http://localhost:8008/resolve?uri=tellm://service/weather/get&amp;input=%7B%22city%22%3A%22Wejherowo%22%2C%22country_code%22%3A%22PL%22%7D"
+curl "http://localhost:8008/resolve?uri=tellm://prompt/validator/workflow-result&amp;include_value=true"
+curl "http://localhost:8008/resolve?uri=tellm://view/workflow/35&amp;include_value=true"</code></pre>
+      </section>
+
+      <section class="full">
+        <h2>Adresowalne artefakty</h2>
+        <p>Registry traktuje usługi, pliki, media, komendy, paczki, prompty i wyniki workflow jako zasoby z URI. URI jest stabilne, a fizyczny storage może być lokalnym plikiem, SQLite albo inline content.</p>
+        <pre><code>tellm://artifact/audio/weather-query-sample
+tellm://media/audio/weather-query-sample
+tellm://file/project/tellm/server.py
+tellm://file/output/test-audio/tellm-pl-pogoda.webm
+tellm://command/shell/pytest
+tellm://package/python/litellm
+tellm://package/python/jsonschema
+tellm://prompt/validator/workflow-result
+tellm://python/module/tellm.bot
+tellm://workflow/run/35
+tellm://view/workflow/35
+tellm://log/workflow/35
+tellm://artifact/json/workflow-result/35</code></pre>
+        <h3>Artefakty i storage</h3>
+        <pre><code>curl "http://localhost:8008/resource?uri=tellm://artifact/audio/weather-query-sample"
+curl "http://localhost:8008/resource?uri=tellm://media/audio/weather-query-sample"
+curl "http://localhost:8008/resource?uri=tellm://command/shell/pytest"
+curl "http://localhost:8008/resource?uri=tellm://package/python/litellm"
+curl "http://localhost:8008/resource?uri=tellm://workflow/run/35"
+curl "http://localhost:8008/resource?uri=tellm://log/workflow/35"
+curl "http://localhost:8008/resolve?uri=tellm://artifact/audio/weather-query-sample"
+curl "http://localhost:8008/resolve?uri=tellm://view/workflow/35&amp;include_value=true"
+curl "http://localhost:8008/registry?kind=artifact"
+curl "http://localhost:8008/registry?kind=command"
+curl "http://localhost:8008/registry?kind=package"
+curl "http://localhost:8008/registry?domain=weather"
+curl "http://localhost:8008/registry?capability=weather.current"
+curl "http://localhost:8008/registry?capability=price.search"
+curl "http://localhost:8008/registry?status=deprecated"</code></pre>
       </section>
 
       <section class="full">
@@ -956,6 +1071,12 @@ ws.onopen = () => ws.send(JSON.stringify({
   "uri": "tellm://service/weather/current",
   "input": {"city": "Wejherowo", "country": "PL"}
 }</code></pre>
+        <h3>Cena produktu</h3>
+        <pre><code>{
+  "type": "execute",
+  "uri": "tellm://service/price/search",
+  "input": {"query": "cukier", "site": "skapiec.pl"}
+}</code></pre>
         <h3>Docelowy REST kontrakt</h3>
         <pre><code>POST /execute
 Content-Type: application/json
@@ -999,7 +1120,8 @@ Content-Type: application/json
 
       <section class="full">
         <h2>Data source validation</h2>
-        <p>Zapytania wymagające aktualnych danych zewnętrznych, np. pogoda albo domeny, dostają dodatkowy etap <code>data_source</code>. Jeśli wynik używa <code>local_simulation</code>, <code>mock</code> albo <code>llm_generated</code>, workflow pokazuje ostrzeżenie i zapisuje finding dla autoimprovement.</p>
+        <p>Zapytania wymagające aktualnych danych zewnętrznych, np. pogoda, ceny albo domeny, dostają dodatkowy etap <code>data_source</code>. Jeśli wynik używa <code>local_simulation</code>, <code>mock</code> albo <code>llm_generated</code>, workflow pokazuje ostrzeżenie i zapisuje finding dla autoimprovement.</p>
+        <p>Pytania o ceny powinny używać <code>tellm://service/price/search</code>. <code>tellm://service/domain/check</code> sprawdza tylko status domeny i nie jest poprawną odpowiedzią na pytanie o cenę produktu.</p>
         <pre><code>{
   "type": "log",
   "stage": "data_source",
@@ -1402,6 +1524,152 @@ def _openapi_document(host: str) -> dict:
                     "responses": {"200": {"description": "Resource manifest"}},
                 }
             },
+            "/schema": {
+                "get": {
+                    "summary": "Return all schemas for a registry resource.",
+                    "parameters": [
+                        {
+                            "name": "uri",
+                            "in": "query",
+                            "required": True,
+                            "schema": {"type": "string", "format": "uri"},
+                        }
+                    ],
+                    "responses": {"200": {"description": "Schema bundle"}},
+                }
+            },
+            "/schema/input": {
+                "get": {
+                    "summary": "Return input schema for a registry resource.",
+                    "parameters": [
+                        {
+                            "name": "uri",
+                            "in": "query",
+                            "required": True,
+                            "schema": {"type": "string", "format": "uri"},
+                        }
+                    ],
+                    "responses": {"200": {"description": "Input schema"}},
+                }
+            },
+            "/schema/output": {
+                "get": {
+                    "summary": "Return output schema for a registry resource.",
+                    "parameters": [
+                        {
+                            "name": "uri",
+                            "in": "query",
+                            "required": True,
+                            "schema": {"type": "string", "format": "uri"},
+                        }
+                    ],
+                    "responses": {"200": {"description": "Output schema"}},
+                }
+            },
+            "/describe": {
+                "get": {
+                    "summary": "Return a compact resource description for LLM/UI.",
+                    "parameters": [
+                        {
+                            "name": "uri",
+                            "in": "query",
+                            "required": True,
+                            "schema": {"type": "string", "format": "uri"},
+                        }
+                    ],
+                    "responses": {"200": {"description": "Resource description"}},
+                }
+            },
+            "/permissions": {
+                "get": {
+                    "summary": "Return resource permissions.",
+                    "parameters": [
+                        {
+                            "name": "uri",
+                            "in": "query",
+                            "required": True,
+                            "schema": {"type": "string", "format": "uri"},
+                        }
+                    ],
+                    "responses": {"200": {"description": "Resource permissions"}},
+                }
+            },
+            "/health": {
+                "get": {
+                    "summary": "Return resource health based on execution history.",
+                    "parameters": [
+                        {
+                            "name": "uri",
+                            "in": "query",
+                            "required": True,
+                            "schema": {"type": "string", "format": "uri"},
+                        }
+                    ],
+                    "responses": {"200": {"description": "Resource health"}},
+                }
+            },
+            "/history": {
+                "get": {
+                    "summary": "Return recent execution history for a resource.",
+                    "parameters": [
+                        {
+                            "name": "uri",
+                            "in": "query",
+                            "required": True,
+                            "schema": {"type": "string", "format": "uri"},
+                        },
+                        {
+                            "name": "limit",
+                            "in": "query",
+                            "required": False,
+                            "schema": {"type": "integer", "default": 20},
+                        },
+                    ],
+                    "responses": {"200": {"description": "Execution history"}},
+                }
+            },
+            "/validate-input": {
+                "get": {
+                    "summary": "Validate input JSON against a resource input schema.",
+                    "description": "Diagnostic GET variant for this WebSocket-backed server. HTTP adapters should expose the same contract as POST with JSON body.",
+                    "parameters": [
+                        {
+                            "name": "uri",
+                            "in": "query",
+                            "required": True,
+                            "schema": {"type": "string", "format": "uri"},
+                        },
+                        {
+                            "name": "input",
+                            "in": "query",
+                            "required": True,
+                            "schema": {"type": "string", "description": "JSON object encoded as a query parameter"},
+                        },
+                    ],
+                    "responses": {"200": {"description": "Validation result"}, "400": {"description": "Invalid input"}},
+                }
+            },
+            "/validate-output": {
+                "get": {
+                    "summary": "Validate output JSON against a resource output schema.",
+                    "description": "Diagnostic GET variant for this WebSocket-backed server. HTTP adapters should expose the same contract as POST with JSON body.",
+                    "parameters": [
+                        {
+                            "name": "uri",
+                            "in": "query",
+                            "required": True,
+                            "schema": {"type": "string", "format": "uri"},
+                        },
+                        {
+                            "name": "output",
+                            "in": "query",
+                            "required": True,
+                            "schema": {"type": "string", "description": "JSON object encoded as a query parameter"},
+                        },
+                    ],
+                    "responses": {"200": {"description": "Validation result"}, "400": {"description": "Invalid output"}},
+                }
+            },
             "/resolve": {
                 "get": {
                     "summary": "Resolve one resource including diagnostic private flags.",
@@ -1630,6 +1898,308 @@ class TellmServer:
             status,
         )
 
+    def _resource_entry_response(self, uri: str):
+        if not uri:
+            return None, self._json_response(
+                {"ok": False, "error": {"code": "MISSING_URI", "message": "missing uri"}},
+                HTTPStatus.BAD_REQUEST,
+            )
+        entry = self.bot.registry.get(uri)
+        if entry is None or not entry.permissions.get("llm_discover"):
+            return None, self._json_response(
+                {
+                    "ok": False,
+                    "error": {
+                        "code": "RESOURCE_NOT_FOUND",
+                        "message": "resource not found",
+                        "uri": uri,
+                    },
+                },
+                HTTPStatus.NOT_FOUND,
+            )
+        return entry, None
+
+    @staticmethod
+    def _registry_item_summary(entry):
+        return {
+            "uri": entry.uri,
+            "kind": entry.kind,
+            "name": entry.name,
+            "description": entry.description,
+            "canonical_uri": entry.canonical_uri,
+            "domain": entry.domain,
+            "has_input_schema": bool(entry.input_schema),
+            "has_output_schema": bool(entry.output_schema),
+            "has_value_schema": bool(entry.value_schema),
+            "llm_execute": bool(entry.permissions.get("llm_execute")),
+            "requires_confirmation": bool(entry.permissions.get("requires_confirmation")),
+            "danger_level": entry.permissions.get("danger_level", "read_only"),
+            "storage_type": entry.storage.get("type", "") if entry.storage else "",
+            "content_type": entry.content_type,
+            "media_type": entry.media_type,
+            "capabilities": entry.capabilities,
+            "tags": entry.tags,
+            "status": entry.status,
+            "replacement": entry.replacement,
+        }
+
+    def _virtual_schema_resource(self, uri: str):
+        for entry in self.bot.registry.list():
+            schemas = [
+                ("input", entry.input_schema),
+                ("output", entry.output_schema),
+                ("value", entry.value_schema),
+                ("metadata", entry.metadata_schema),
+            ]
+            for schema_kind, schema in schemas:
+                if not isinstance(schema, dict) or schema.get("$id") != uri:
+                    continue
+                return {
+                    "manifest_version": "1.0.0",
+                    "uri": uri,
+                    "kind": "schema",
+                    "name": entry.name + "." + schema_kind,
+                    "description": "%s schema for %s." % (schema_kind, entry.uri),
+                    "version": entry.version,
+                    "schema_version": entry.schema_version,
+                    "compatibility": entry.compatibility,
+                    "transport": {
+                        "type": "registry-ref",
+                        "resource_uri": entry.uri,
+                        "schema": schema_kind,
+                    },
+                    "input_schema": None,
+                    "output_schema": None,
+                    "value_schema": schema,
+                    "metadata_schema": None,
+                    "permissions": {
+                        "llm_discover": True,
+                        "llm_read": True,
+                        "llm_write": False,
+                        "llm_execute": False,
+                        "requires_confirmation": False,
+                        "network": False,
+                        "filesystem_read": False,
+                        "filesystem_write": False,
+                        "shell": False,
+                        "env_read": False,
+                        "env_write": False,
+                        "danger_level": "safe",
+                    },
+                    "data_policy": {},
+                    "render": {"renderer": "auto"},
+                    "tags": ["schema", entry.kind, schema_kind],
+                    "status": entry.status,
+                    "metadata": {"resource_uri": entry.uri, "schema": schema_kind},
+                    "aliases": [],
+                    "masked": False,
+                }
+        return None
+
+    def _virtual_view_resource(self, uri: str):
+        prefixes = [
+            ("tellm://workflow/run/", "workflow", "application/json", "workflow_run"),
+            ("tellm://log/workflow/", "log", "application/json", "workflow_log"),
+            ("tellm://view/workflow/", "view", "text/html", "workflow_view"),
+            ("tellm://artifact/html/view/", "artifact", "text/html", "html_artifact"),
+            ("tellm://artifact/json/workflow-result/", "artifact", "application/json", "json_artifact"),
+        ]
+        matched = None
+        for prefix, kind, content_type, resource_type in prefixes:
+            if uri.startswith(prefix):
+                matched = (prefix, kind, content_type, resource_type)
+                break
+        if not matched:
+            return None
+        prefix, kind, content_type, resource_type = matched
+        try:
+            view_id = int(uri[len(prefix) :])
+        except ValueError:
+            return None
+        record = self.bot.get_view_record(view_id)
+        if not record:
+            return None
+        if resource_type == "workflow_run":
+            value_schema = {"type": "object"}
+            storage_column = "record"
+            relations = {
+                "output_artifacts": [
+                    "tellm://artifact/json/workflow-result/%d" % view_id,
+                    "tellm://view/workflow/%d" % view_id,
+                    "tellm://log/workflow/%d" % view_id,
+                ],
+                "rendered_as": ["tellm://view/workflow/%d" % view_id],
+                "log": ["tellm://log/workflow/%d" % view_id],
+            }
+            name = "workflow_run_%d" % view_id
+            description = "Runtime workflow run reconstructed from the views table."
+            tags = ["workflow", "run", "artifact"]
+        elif resource_type == "workflow_log":
+            value_schema = {"type": "object"}
+            storage_column = "result_data"
+            relations = {
+                "describes": ["tellm://workflow/run/%d" % view_id],
+                "derived_from": ["tellm://artifact/json/workflow-result/%d" % view_id],
+            }
+            name = "workflow_log_%d" % view_id
+            description = "Runtime workflow log resource reconstructed from persisted workflow data."
+            tags = ["workflow", "log", "artifact"]
+        elif content_type == "application/json":
+            value_schema = {"type": "object"}
+            storage_column = "result_data"
+            relations = {"rendered_as": ["tellm://view/workflow/%d" % view_id]}
+            name = "workflow_result_%d" % view_id
+            description = "Runtime JSON artifact stored in the views table."
+            tags = ["workflow", "view", "artifact"]
+        else:
+            value_schema = {"type": "string"}
+            storage_column = "html"
+            relations = {"derived_from": ["tellm://artifact/json/workflow-result/%d" % view_id]}
+            name = "workflow_view_%d" % view_id
+            description = "Runtime HTML view stored in the views table."
+            tags = ["workflow", "view", "artifact"]
+        return {
+            "manifest_version": "1.0.0",
+            "uri": uri,
+            "kind": kind,
+            "name": name,
+            "description": description,
+            "version": "1.0.0",
+            "schema_version": "2020-12",
+            "compatibility": {"breaking_change": False, "deprecated": False},
+            "transport": {"type": "sqlite", "table": "views", "id": view_id},
+            "input_schema": None,
+            "output_schema": None,
+            "value_schema": value_schema,
+            "metadata_schema": None,
+            "permissions": {
+                "llm_discover": True,
+                "llm_read": True,
+                "llm_write": False,
+                "llm_execute": False,
+                "requires_confirmation": False,
+                "network": False,
+                "filesystem_read": False,
+                "filesystem_write": False,
+                "shell": False,
+                "env_read": False,
+                "env_write": False,
+                "danger_level": "read_only",
+            },
+            "data_policy": {},
+            "render": {"renderer": "auto"},
+            "storage": {
+                "type": "sqlite",
+                "table": "views",
+                "id": view_id,
+                "column": storage_column,
+            },
+            "relations": relations,
+            "dependencies": [],
+            "capabilities": [],
+            "content_type": content_type,
+            "media_type": "",
+            "command_template": "",
+            "ecosystem": "",
+            "import_name": "",
+            "tags": tags,
+            "status": "active",
+            "metadata": {
+                "view_id": view_id,
+                "transcription": record.get("transcription", ""),
+                "task": record.get("task", {}),
+            },
+            "aliases": [],
+            "masked": False,
+        }
+
+    @staticmethod
+    def _schema_bundle(entry):
+        return {
+            "uri": entry.uri,
+            "schemas": {
+                "input": entry.input_schema,
+                "output": entry.output_schema,
+                "value": entry.value_schema,
+                "metadata": entry.metadata_schema,
+                "view": entry.render or {"renderer": "auto"},
+            },
+        }
+
+    @staticmethod
+    def _describe_entry(entry):
+        output_type = entry.metadata.get("result_type", "")
+        if not output_type and isinstance(entry.output_schema, dict):
+            output_type = entry.output_schema.get("$id", "")
+        input_required = []
+        if isinstance(entry.input_schema, dict):
+            input_required = entry.input_schema.get("required") or []
+        return {
+            "uri": entry.uri,
+            "kind": entry.kind,
+            "name": entry.name,
+            "description": entry.description,
+            "can_execute": bool(entry.permissions.get("llm_execute")),
+            "requires_confirmation": bool(entry.permissions.get("requires_confirmation")),
+            "input_required": input_required,
+            "output_type": output_type,
+            "danger_level": entry.permissions.get("danger_level", "read_only"),
+            "permissions": entry.permissions,
+            "transport": entry.to_dict().get("transport", {}),
+            "render": entry.render or {"renderer": "auto"},
+            "tags": entry.tags,
+            "status": entry.status,
+        }
+
+    @staticmethod
+    def _validation_error(message: str):
+        path = "$"
+        if message.startswith("$."):
+            path = message.split(" ", 1)[0]
+        return {
+            "code": "SCHEMA_VALIDATION_FAILED",
+            "path": path,
+            "message": message,
+        }
+
+    def _validate_payload(self, uri: str, payload, schema_kind: str):
+        entry, error = self._resource_entry_response(uri)
+        if error:
+            return error
+        schema = entry.input_schema if schema_kind == "input" else entry.output_schema
+        try:
+            validate_schema(schema, payload)
+            return self._json_response(
+                {
+                    "ok": True,
+                    "uri": entry.uri,
+                    "schema": schema_kind,
+                    "valid": True,
+                    "errors": [],
+                }
+            )
+        except Exception as exc:
+            return self._json_response(
+                {
+                    "ok": False,
+                    "uri": entry.uri,
+                    "schema": schema_kind,
+                    "valid": False,
+                    "errors": [self._validation_error(str(exc))],
+                },
+                HTTPStatus.BAD_REQUEST,
+            )
+
+    def _payload_from_query(self, params, field: str):
+        raw = (params.get(field) or ["{}"])[0]
+        try:
+            payload = json.loads(raw)
+        except Exception as exc:
+            raise RegistryValidationError("Invalid JSON in %s: %s" % (field, exc))
+        if not isinstance(payload, dict):
+            raise RegistryValidationError("%s must be a JSON object" % field)
+        return payload
+
     def process_request(self, connection, request):
         raw_path = request.path
         path = raw_path.split("?", 1)[0]
@@ -1679,26 +2249,176 @@ class TellmServer:
             host = request.headers.get("Host", f"{self.host}:{self.port}")
             return self._json_response(_asyncapi_document(host))
         if path == "/registry":
-            entries = self.bot.registry.discover_for_llm()
+            registry_entries = [
+                entry
+                for entry in self.bot.registry.list()
+                if bool(entry.permissions.get("llm_discover"))
+            ]
             kinds = params.get("kind") or []
             if kinds:
                 wanted = set(kinds)
-                entries = [entry for entry in entries if entry.get("kind") in wanted]
-            return self._json_response({"ok": True, "entries": entries})
+                registry_entries = [
+                    entry for entry in registry_entries if entry.kind in wanted
+                ]
+            tags = params.get("tag") or []
+            if tags:
+                wanted_tags = set(tags)
+                registry_entries = [
+                    entry
+                    for entry in registry_entries
+                    if wanted_tags.intersection(set(entry.tags))
+                ]
+            domains = params.get("domain") or []
+            if domains:
+                wanted_domains = set(domains)
+                registry_entries = [
+                    entry for entry in registry_entries if entry.domain in wanted_domains
+                ]
+            statuses = params.get("status") or []
+            if statuses:
+                wanted_statuses = set(statuses)
+                registry_entries = [
+                    entry for entry in registry_entries if entry.status in wanted_statuses
+                ]
+            capabilities = params.get("capability") or []
+            if capabilities:
+                wanted_capabilities = set(capabilities)
+                registry_entries = [
+                    entry
+                    for entry in registry_entries
+                    if wanted_capabilities.intersection(set(entry.capabilities))
+                ]
+            entries = [entry.to_dict() for entry in registry_entries]
+            items = [self._registry_item_summary(entry) for entry in registry_entries]
+            return self._json_response({"ok": True, "items": items, "entries": entries})
         if path == "/resource":
             uri = (params.get("uri") or [""])[0]
             if not uri:
                 return self._json_response(
-                    {"ok": False, "error": "missing uri"},
+                    {"ok": False, "error": {"code": "MISSING_URI", "message": "missing uri"}},
                     HTTPStatus.BAD_REQUEST,
                 )
             entry = self.bot.registry.get(uri)
             if entry is None or not entry.permissions.get("llm_discover"):
+                schema_resource = self._virtual_schema_resource(uri)
+                if schema_resource:
+                    return self._json_response({"ok": True, "resource": schema_resource})
+                view_resource = self._virtual_view_resource(uri)
+                if view_resource:
+                    return self._json_response({"ok": True, "resource": view_resource})
                 return self._json_response(
-                    {"ok": False, "error": "resource not found"},
+                    {
+                        "ok": False,
+                        "error": {
+                            "code": "RESOURCE_NOT_FOUND",
+                            "message": "resource not found",
+                            "uri": uri,
+                        },
+                    },
                     HTTPStatus.NOT_FOUND,
                 )
             return self._json_response({"ok": True, "resource": entry.to_dict()})
+        if path in {"/schema", "/schema/input", "/schema/output"}:
+            uri = (params.get("uri") or [""])[0]
+            entry, error = self._resource_entry_response(uri)
+            if error:
+                return error
+            if path == "/schema/input":
+                return self._json_response(
+                    {"ok": True, "uri": entry.uri, "schema": "input", "value": entry.input_schema}
+                )
+            if path == "/schema/output":
+                return self._json_response(
+                    {"ok": True, "uri": entry.uri, "schema": "output", "value": entry.output_schema}
+                )
+            return self._json_response({"ok": True, **self._schema_bundle(entry)})
+        if path == "/describe":
+            uri = (params.get("uri") or [""])[0]
+            entry, error = self._resource_entry_response(uri)
+            if error:
+                return error
+            return self._json_response({"ok": True, "description": self._describe_entry(entry)})
+        if path == "/permissions":
+            uri = (params.get("uri") or [""])[0]
+            entry, error = self._resource_entry_response(uri)
+            if error:
+                return error
+            return self._json_response(
+                {"ok": True, "uri": entry.uri, "permissions": entry.permissions}
+            )
+        if path == "/history":
+            uri = (params.get("uri") or [""])[0]
+            entry, error = self._resource_entry_response(uri)
+            if error:
+                return error
+            limit = int((params.get("limit") or ["20"])[0] or 20)
+            return self._json_response(
+                {
+                    "ok": True,
+                    "uri": entry.uri,
+                    "history": self.bot.history.recent(limit=max(1, min(limit, 100)), uri=entry.uri),
+                }
+            )
+        if path == "/health":
+            uri = (params.get("uri") or [""])[0]
+            entry, error = self._resource_entry_response(uri)
+            if error:
+                return error
+            recent = self.bot.history.recent(limit=20, uri=entry.uri)
+            failures = [
+                item
+                for item in recent
+                if not item.get("ok")
+                or (
+                    isinstance(item.get("result"), dict)
+                    and item["result"].get("ok") is False
+                )
+            ]
+            return self._json_response(
+                {
+                    "ok": not failures,
+                    "uri": entry.uri,
+                    "status": entry.status,
+                    "recent_executions": len(recent),
+                    "recent_failures": len(failures),
+                    "last_execution": recent[0] if recent else None,
+                }
+            )
+        if path in {"/validate", "/validate-input", "/validate-output"}:
+            uri = (params.get("uri") or [""])[0]
+            schema_kind = "output" if path == "/validate-output" else "input"
+            if path == "/validate":
+                schema_kind = (params.get("schema") or ["input"])[0]
+                if schema_kind not in {"input", "output"}:
+                    return self._json_response(
+                        {
+                            "ok": False,
+                            "valid": False,
+                            "errors": [
+                                {
+                                    "code": "UNSUPPORTED_SCHEMA_KIND",
+                                    "path": "$.schema",
+                                    "message": "schema must be input or output",
+                                }
+                            ],
+                        },
+                        HTTPStatus.BAD_REQUEST,
+                    )
+            field = "output" if schema_kind == "output" else "input"
+            try:
+                payload = self._payload_from_query(params, field)
+            except Exception as exc:
+                return self._json_response(
+                    {
+                        "ok": False,
+                        "uri": uri,
+                        "schema": schema_kind,
+                        "valid": False,
+                        "errors": [self._validation_error(str(exc))],
+                    },
+                    HTTPStatus.BAD_REQUEST,
+                )
+            return self._validate_payload(uri, payload, schema_kind)
         if path == "/resolve":
             uri = (params.get("uri") or [""])[0]
             if not uri:
@@ -1706,9 +2426,47 @@ class TellmServer:
                     {"ok": False, "error": "missing uri"},
                     HTTPStatus.BAD_REQUEST,
                 )
+            include_value = (params.get("include_value") or ["false"])[0].lower() in {
+                "1",
+                "true",
+                "yes",
+            }
             try:
+                max_bytes = int((params.get("max_bytes") or ["65536"])[0] or 65536)
+            except ValueError:
+                max_bytes = 65536
+            try:
+                input_data = self._payload_from_query(params, "input") if "input" in params else {}
+            except Exception as exc:
                 return self._json_response(
-                    {"ok": True, "resource": self.bot.registry.resolve(uri)}
+                    {
+                        "ok": False,
+                        "uri": uri,
+                        "valid": False,
+                        "errors": [self._validation_error(str(exc))],
+                    },
+                    HTTPStatus.BAD_REQUEST,
+                )
+            try:
+                entry = self.bot.registry.get(uri)
+                if entry is not None:
+                    resolved = self.bot.resolve_resource(
+                        uri,
+                        input_data=input_data,
+                        include_value=include_value,
+                        max_bytes=max(0, min(max_bytes, 1048576)),
+                    )
+                else:
+                    virtual_resource = self._virtual_schema_resource(uri) or self._virtual_view_resource(uri)
+                    if not virtual_resource:
+                        raise KeyError("Unknown registry URI: %s" % uri)
+                    resolved = self.bot.resolve_resource_document(
+                        virtual_resource,
+                        include_value=include_value,
+                        max_bytes=max(0, min(max_bytes, 1048576)),
+                    )
+                return self._json_response(
+                    {"ok": True, **resolved}
                 )
             except Exception as exc:
                 return self._json_response(
@@ -1830,6 +2588,13 @@ class TellmServer:
         allowed = set()
         entry = self._registry_entry_for_task(task)
         requires_real_world = self._requires_real_world_data(transcription, task)
+        if (
+            isinstance(result, dict)
+            and result.get("ok") is False
+            and isinstance(result.get("errors"), list)
+            and result.get("errors")
+        ):
+            return []
         if entry and entry.metadata:
             requires_real_world = requires_real_world or bool(
                 entry.metadata.get("requires_real_world_data")
@@ -2021,8 +2786,54 @@ class TellmServer:
                     "message": "Dołączono logi z poprzedniej interakcji klienta",
                     "details": {"count": len(client_logs), "tail": client_logs[-10:]},
                 }
-            )
+                )
         return logs
+
+    def _local_validation_verdict(self, task: Task, result, view, render_logs):
+        if not task.function_name.startswith("tellm://"):
+            return None
+        if task.processes:
+            return None
+        if not isinstance(result, dict):
+            return None
+        business_ok = self._result_business_ok(result)
+        errors = result.get("errors")
+        if business_ok and errors:
+            return None
+        if not business_ok and not (
+            isinstance(errors, list)
+            and errors
+            and all(isinstance(error, dict) for error in errors)
+        ):
+            return None
+        renderer_ok = any(
+            log.get("stage") == "renderer" and log.get("status") == "ok"
+            for log in render_logs or []
+        )
+        if not renderer_ok:
+            return None
+        if any(
+            log.get("stage") == "data_source" and log.get("status") == "warning"
+            for log in render_logs or []
+        ):
+            return None
+        if not isinstance(view.render_data, dict):
+            return None
+        entry = self.bot.registry.get(task.function_name)
+        if entry is None:
+            return None
+        try:
+            validate_schema(entry.output_schema, result)
+        except RegistryValidationError:
+            return None
+        return {
+            "status": "ok",
+            "answer": self._answer_from_service_result(result) or "OK",
+            "reason": (
+                "Lokalna walidacja potwierdziła schema-valid wynik lub błąd "
+                "z zaufanej usługi registry, poprawny renderer i brak ostrzeżeń data_source."
+            ),
+        }
 
     async def _validate_and_repair(
         self,
@@ -2037,7 +2848,23 @@ class TellmServer:
     ):
         config = load_config()
         answer = ""
+        local_started = time.perf_counter()
+        local_verdict = self._local_validation_verdict(task, result, view, render_logs)
+        if local_verdict is not None:
+            await self._send_log(
+                websocket,
+                "local_validation",
+                "ok",
+                "Lokalny walidator potwierdził wynik bez wywołania LLM.",
+                {
+                    "duration_ms": self._duration_ms(local_started),
+                    "reason": local_verdict["reason"],
+                    "llm_validation": "skipped",
+                },
+            )
+            return view, local_verdict["answer"], render_logs
         for attempt in range(1, max_attempts + 1):
+            attempt_started = time.perf_counter()
             await self._send_log(
                 websocket,
                 "llm_validation",
@@ -2079,7 +2906,7 @@ class TellmServer:
                 api_key=config.openrouter_api_key,
                 base_url="https://openrouter.ai/api/v1",
             )
-            content = resp.choices[0].message.content
+            content = self.bot._message_text(resp.choices[0].message)
             try:
                 verdict = self.bot._parse_json_response(content)
             except Exception:
@@ -2088,7 +2915,7 @@ class TellmServer:
                     "llm_validation",
                     "ok",
                     "Walidator nie zwrócił JSON; traktuję odpowiedź jako finalny tekst.",
-                    {"attempt": attempt},
+                    {"attempt": attempt, "duration_ms": self._duration_ms(attempt_started)},
                 )
                 return view, content, render_logs
 
@@ -2100,7 +2927,11 @@ class TellmServer:
                     "llm_validation",
                     "ok",
                     "LLM potwierdził poprawność wyniku.",
-                    {"attempt": attempt, "reason": verdict.get("reason", "")},
+                    {
+                        "attempt": attempt,
+                        "duration_ms": self._duration_ms(attempt_started),
+                        "reason": verdict.get("reason", ""),
+                    },
                 )
                 return view, answer, render_logs
 
@@ -2116,7 +2947,12 @@ class TellmServer:
                 "llm_validation",
                 "repair",
                 "LLM zażądał naprawy danych i ponownego renderowania.",
-                {"attempt": attempt, "reason": verdict.get("reason", ""), "repaired": repaired},
+                {
+                    "attempt": attempt,
+                    "duration_ms": self._duration_ms(attempt_started),
+                    "reason": verdict.get("reason", ""),
+                    "repaired": repaired,
+                },
             )
             view = await self._run_blocking(
                 self.bot.generate_view, transcription, task, result
@@ -2181,31 +3017,60 @@ class TellmServer:
             ]
         )
 
+    @staticmethod
+    def _duration_ms(start: float) -> int:
+        return int(round((time.perf_counter() - start) * 1000))
+
     async def _handle_transcription(self, websocket, transcription: str, speak: bool, client_logs=None):
+        workflow_started = time.perf_counter()
         print("TEXT:", transcription)
         await websocket.send(json.dumps({"type": "view", "data": {"transcription": transcription, "status": "analyzing"}}))
         await self._send_log(websocket, "query", "received", "Przyjęto query.", {"text": transcription})
-        await self._send_log(websocket, "llm_answer", "running", "Wysyłam query do LLM po JSON task/view/processes.")
-        task = await self._run_blocking(self.bot.analyze_query, transcription)
-        await self._send_log(
-            websocket,
-            "llm_answer",
-            "ok",
-            "LLM zwrócił JSON do wykonania i renderowania.",
-            {
-                "task_type": task.type.value,
-                "function": task.function_name,
-                "processes": len(task.processes),
-            },
-        )
+        llm_started = time.perf_counter()
+        local_task = self.bot._local_task_from_query(transcription)
+        if local_task is not None:
+            task = local_task
+            await self._send_log(
+                websocket,
+                "router",
+                "ok",
+                "Lokalny router rozpoznał stałą usługę registry bez wywołania LLM.",
+                {
+                    "task_type": task.type.value,
+                    "function": task.function_name,
+                    "processes": len(task.processes),
+                    "router": task.view.get("_router") if isinstance(task.view, dict) else "local",
+                    "duration_ms": self._duration_ms(llm_started),
+                },
+            )
+        else:
+            await self._send_log(websocket, "llm_answer", "running", "Wysyłam query do LLM po JSON task/view/processes.")
+            task = await self._run_blocking(self.bot.analyze_query, transcription)
+            await self._send_log(
+                websocket,
+                "llm_answer",
+                "ok",
+                "LLM zwrócił JSON do wykonania i renderowania.",
+                {
+                    "task_type": task.type.value,
+                    "function": task.function_name,
+                    "processes": len(task.processes),
+                    "duration_ms": self._duration_ms(llm_started),
+                },
+            )
         await self._send_log(websocket, "functions", "running", "Uruchamiam funkcje/procesy Python.")
+        execution_started = time.perf_counter()
         result = await self._run_blocking(self.bot.execute_task, task)
         await self._send_log(
             websocket,
             "functions",
             "completed",
             "Warstwa wykonawcza zakończyła pracę.",
-            {"execution_status": "completed", "result": result},
+            {
+                "execution_status": "completed",
+                "duration_ms": self._duration_ms(execution_started),
+                "result": result,
+            },
         )
         service_log = self._service_result_log(result)
         await self._send_log(
@@ -2216,6 +3081,7 @@ class TellmServer:
             service_log["details"],
         )
         await self._send_log(websocket, "renderer", "running", "Renderuję HTML z danych JSON.")
+        renderer_started = time.perf_counter()
         view = await self._run_blocking(self.bot.generate_view, transcription, task, result)
         data_quality_findings = self._data_source_findings(transcription, task, result)
         self._append_data_quality_warnings(view, data_quality_findings)
@@ -2237,8 +3103,12 @@ class TellmServer:
             "renderer",
             "ok",
             "Renderer zakończył pracę. Logi idą do walidacji LLM.",
-            self._log_details(render_logs, "renderer"),
+            {
+                **self._log_details(render_logs, "renderer"),
+                "duration_ms": self._duration_ms(renderer_started),
+            },
         )
+        validation_started = time.perf_counter()
         view, answer, render_logs = await self._validate_and_repair(
             websocket,
             transcription,
@@ -2248,6 +3118,7 @@ class TellmServer:
             render_logs,
             client_logs,
         )
+        validation_duration_ms = self._duration_ms(validation_started)
         data_quality_findings = self._data_source_findings(transcription, task, view.result)
         self._append_data_quality_warnings(view, data_quality_findings)
         answer = self._answer_from_service_result(view.result) or answer
@@ -2285,7 +3156,11 @@ class TellmServer:
                 "workflow",
                 "completed_with_service_error",
                 "Workflow zakończony, ale wynik usługi jest błędem.",
-                {"service_result_status": service_result_status},
+                {
+                    "service_result_status": service_result_status,
+                    "validation_duration_ms": validation_duration_ms,
+                    "total_duration_ms": self._duration_ms(workflow_started),
+                },
             )
         elif data_quality_findings:
             await self._send_log(
@@ -2293,15 +3168,29 @@ class TellmServer:
                 "workflow",
                 "warning",
                 "Workflow zakończony z ostrzeżeniem jakości danych.",
-                {"data_quality_findings": data_quality_findings},
+                {
+                    "data_quality_findings": data_quality_findings,
+                    "validation_duration_ms": validation_duration_ms,
+                    "total_duration_ms": self._duration_ms(workflow_started),
+                },
             )
         else:
-            await self._send_log(websocket, "workflow", "ok", "Workflow potwierdzony i zakończony.")
+            await self._send_log(
+                websocket,
+                "workflow",
+                "ok",
+                "Workflow potwierdzony i zakończony.",
+                {
+                    "validation_duration_ms": validation_duration_ms,
+                    "total_duration_ms": self._duration_ms(workflow_started),
+                },
+            )
         await websocket.send(json.dumps({"type": "view", "data": view.to_dict(), "html": html}))
         if speak:
             await self._run_blocking(self.bot.speak, answer)
 
     async def _handle_resource_execution(self, websocket, uri: str, payload, speak: bool, client_logs=None):
+        workflow_started = time.perf_counter()
         if not isinstance(payload, dict):
             payload = {}
         await websocket.send(
@@ -2331,13 +3220,18 @@ class TellmServer:
             "Uruchamiam lokalny zasób przez resolver.",
             {"uri": uri},
         )
+        execution_started = time.perf_counter()
         result = await self._run_blocking(self.bot.execute_resource, uri, payload)
         await self._send_log(
             websocket,
             "registry",
             "completed",
             "Lokalny resolver zakończył pracę.",
-            {"execution_status": "completed", "result": result},
+            {
+                "execution_status": "completed",
+                "duration_ms": self._duration_ms(execution_started),
+                "result": result,
+            },
         )
         service_log = self._service_result_log(result)
         await self._send_log(
@@ -2347,6 +3241,7 @@ class TellmServer:
             service_log["message"],
             service_log["details"],
         )
+        renderer_started = time.perf_counter()
         view = await self._run_blocking(self.bot.generate_view, uri, task, result)
         data_quality_findings = self._data_source_findings(uri, task, result)
         self._append_data_quality_warnings(view, data_quality_findings)
@@ -2368,8 +3263,12 @@ class TellmServer:
             "renderer",
             "ok",
             "Renderer utworzył HTML z wyniku lokalnego zasobu.",
-            self._log_details(render_logs, "renderer"),
+            {
+                **self._log_details(render_logs, "renderer"),
+                "duration_ms": self._duration_ms(renderer_started),
+            },
         )
+        validation_started = time.perf_counter()
         view, answer, render_logs = await self._validate_and_repair(
             websocket,
             uri,
@@ -2379,6 +3278,7 @@ class TellmServer:
             render_logs,
             client_logs,
         )
+        validation_duration_ms = self._duration_ms(validation_started)
         data_quality_findings = self._data_source_findings(uri, task, view.result)
         self._append_data_quality_warnings(view, data_quality_findings)
         answer = self._answer_from_service_result(view.result) or answer
@@ -2420,7 +3320,11 @@ class TellmServer:
                 "workflow",
                 "completed_with_service_error",
                 "Registry execute zakończony, ale wynik usługi jest błędem.",
-                {"service_result_status": service_result_status},
+                {
+                    "service_result_status": service_result_status,
+                    "validation_duration_ms": validation_duration_ms,
+                    "total_duration_ms": self._duration_ms(workflow_started),
+                },
             )
         elif data_quality_findings:
             await self._send_log(
@@ -2428,10 +3332,23 @@ class TellmServer:
                 "workflow",
                 "warning",
                 "Registry execute zakończony z ostrzeżeniem jakości danych.",
-                {"data_quality_findings": data_quality_findings},
+                {
+                    "data_quality_findings": data_quality_findings,
+                    "validation_duration_ms": validation_duration_ms,
+                    "total_duration_ms": self._duration_ms(workflow_started),
+                },
             )
         else:
-            await self._send_log(websocket, "workflow", "ok", "Registry execute potwierdzony i zakończony.")
+            await self._send_log(
+                websocket,
+                "workflow",
+                "ok",
+                "Registry execute potwierdzony i zakończony.",
+                {
+                    "validation_duration_ms": validation_duration_ms,
+                    "total_duration_ms": self._duration_ms(workflow_started),
+                },
+            )
         await websocket.send(json.dumps({"type": "view", "data": view.to_dict(), "html": html}))
         if speak and answer:
             await self._run_blocking(self.bot.speak, answer)

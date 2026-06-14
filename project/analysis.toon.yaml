@@ -1,139 +1,177 @@
-# code2llm | 13f 2494L | python:8,shell:2,yaml:1,txt:1,json:1 | 2026-06-14
-# generated in 0.00s
-# CC̅=3.4 | critical:1/67 | dups:0 | cycles:0
+# code2llm | 21f 9667L | python:13,yaml:5,shell:2,txt:1 | 2026-06-14
+# generated in 0.01s
+# CC̅=5.5 | critical:14/220 | dups:0 | cycles:2
 
-HEALTH[2]:
-  🔴 GOD   bot.py = 553L, 4 classes, 32m, max CC=22
+HEALTH[16]:
+  🔴 GOD   tellm/bot.py = 2899L, 6 classes, 90m, max CC=47
+  🔴 GOD   tellm/registry/core.py = 974L, 5 classes, 39m, max CC=23
+  🟡 CC    process_request CC=95 (limit:15)
+  🟡 CC    _data_source_findings CC=21 (limit:15)
+  🟡 CC    _local_validation_verdict CC=23 (limit:15)
+  🟡 CC    _process_message CC=15 (limit:15)
+  🟡 CC    resolve_resource_document CC=47 (limit:15)
+  🟡 CC    _registry_weather_current CC=29 (limit:15)
+  🟡 CC    _registry_price_search CC=30 (limit:15)
+  🟡 CC    _parse_json_response CC=18 (limit:15)
   🟡 CC    _execute_python_process CC=22 (limit:15)
+  🟡 CC    _schema_health CC=15 (limit:15)
+  🟡 CC    _history_health CC=39 (limit:15)
+  🟡 CC    validate_schema CC=23 (limit:15)
+  🟡 CC    __post_init__ CC=17 (limit:15)
+  🟡 CC    _resolve_internal CC=17 (limit:15)
 
-REFACTOR[2]:
-  1. split bot.py  (god module)
-  2. split 1 high-CC methods  (CC>15)
+REFACTOR[4]:
+  1. split tellm/bot.py  (god module)
+  2. split tellm/registry/core.py  (god module)
+  3. split 14 high-CC methods  (CC>15)
+  4. break 2 circular dependencies
 
-PIPELINES[47]:
-  [1] Src [__init__]: __init__
+PIPELINES[177]:
+  [1] Src [create_bot]: create_bot
       PURITY: 100% pure
-  [2] Src [register_function]: register_function
+  [2] Src [run_server]: run_server
       PURITY: 100% pure
-  [3] Src [_http_response]: _http_response
+  [3] Src [__init__]: __init__
       PURITY: 100% pure
-  [4] Src [process_request]: process_request → _docs_html
+  [4] Src [now]: now
       PURITY: 100% pure
-  [5] Src [_call_maybe_async]: _call_maybe_async
+  [5] Src [init_db]: init_db
       PURITY: 100% pure
-  [6] Src [_run_blocking]: _run_blocking
+  [6] Src [record]: record
       PURITY: 100% pure
-  [7] Src [_handle_transcription]: _handle_transcription → load_config
+  [7] Src [_decode_row]: _decode_row
       PURITY: 100% pure
-  [8] Src [_handle_test_transcription]: _handle_test_transcription
+  [8] Src [recent]: recent
       PURITY: 100% pure
-  [9] Src [_audio_payload]: _audio_payload
+  [9] Src [count_since_id]: count_since_id
       PURITY: 100% pure
-  [10] Src [handle]: handle
+  [10] Src [latest_id]: latest_id
       PURITY: 100% pure
-  [11] Src [serve_forever]: serve_forever → _websocket_logger
+  [11] Src [main]: main → generate_fixture → run
       PURITY: 100% pure
-  [12] Src [run]: run
+  [12] Src [main]: main → check_http → get_url
       PURITY: 100% pure
-  [13] Src [create_bot]: create_bot
+  [13] Src [__init__]: __init__
       PURITY: 100% pure
-  [14] Src [run_server]: run_server
+  [14] Src [register_function]: register_function
       PURITY: 100% pure
-  [15] Src [_safe_json]: _safe_json
+  [15] Src [_http_response]: _http_response
       PURITY: 100% pure
-  [16] Src [_safe_text]: _safe_text
+  [16] Src [_json_response]: _json_response
       PURITY: 100% pure
-  [17] Src [_render_items]: _render_items
+  [17] Src [_resource_entry_response]: _resource_entry_response
       PURITY: 100% pure
-  [18] Src [_render_table]: _render_table
+  [18] Src [_registry_item_summary]: _registry_item_summary
       PURITY: 100% pure
-  [19] Src [_render_block]: _render_block
+  [19] Src [_virtual_schema_resource]: _virtual_schema_resource
       PURITY: 100% pure
-  [20] Src [_render_dynamic]: _render_dynamic
+  [20] Src [_virtual_view_resource]: _virtual_view_resource
       PURITY: 100% pure
-  [21] Src [to_html]: to_html
+  [21] Src [_describe_entry]: _describe_entry
       PURITY: 100% pure
-  [22] Src [__init__]: __init__ → load_config
+  [22] Src [_validation_error]: _validation_error
       PURITY: 100% pure
-  [23] Src [_init_db]: _init_db
+  [23] Src [_validate_payload]: _validate_payload → validate_schema → _schema_types
       PURITY: 100% pure
-  [24] Src [save_task]: save_task
+  [24] Src [_payload_from_query]: _payload_from_query
       PURITY: 100% pure
-  [25] Src [save_evolution]: save_evolution
+  [25] Src [process_request]: process_request → _openapi_document → registry_manifest_schema
       PURITY: 100% pure
-  [26] Src [save_view]: save_view
+  [26] Src [_call_maybe_async]: _call_maybe_async
       PURITY: 100% pure
-  [27] Src [get_tasks]: get_tasks
+  [27] Src [_run_blocking]: _run_blocking
       PURITY: 100% pure
-  [28] Src [_completion]: _completion
+  [28] Src [_send_log]: _send_log
       PURITY: 100% pure
-  [29] Src [_parse_json_response]: _parse_json_response
+  [29] Src [_send_state]: _send_state
       PURITY: 100% pure
-  [30] Src [_normalize_processes]: _normalize_processes
+  [30] Src [_compact]: _compact
       PURITY: 100% pure
-  [31] Src [_ensure_function_state]: _ensure_function_state
+  [31] Src [_collect_source_values]: _collect_source_values
       PURITY: 100% pure
-  [32] Src [_restricted_import]: _restricted_import
+  [32] Src [_requires_real_world_data]: _requires_real_world_data
       PURITY: 100% pure
-  [33] Src [_process_globals]: _process_globals
+  [33] Src [_registry_entry_for_task]: _registry_entry_for_task
       PURITY: 100% pure
-  [34] Src [_execute_registered_function]: _execute_registered_function
+  [34] Src [_data_source_findings]: _data_source_findings
       PURITY: 100% pure
-  [35] Src [_execute_python_process]: _execute_python_process
+  [35] Src [_append_data_quality_warnings]: _append_data_quality_warnings
       PURITY: 100% pure
-  [36] Src [execute_processes]: execute_processes
+  [36] Src [_log_details]: _log_details
       PURITY: 100% pure
-  [37] Src [_get_stt_model]: _get_stt_model
+  [37] Src [_result_business_ok]: _result_business_ok
       PURITY: 100% pure
-  [38] Src [_get_tts]: _get_tts
+  [38] Src [_service_result_log]: _service_result_log
       PURITY: 100% pure
-  [39] Src [analyze_query]: analyze_query
+  [39] Src [_workflow_history_status]: _workflow_history_status
       PURITY: 100% pure
-  [40] Src [evolve_function]: evolve_function
+  [40] Src [_render_logs]: _render_logs
       PURITY: 100% pure
-  [41] Src [execute_task]: execute_task
+  [41] Src [_local_validation_verdict]: _local_validation_verdict → validate_schema → _schema_types
       PURITY: 100% pure
-  [42] Src [transcribe]: transcribe
+  [42] Src [_validate_and_repair]: _validate_and_repair → load_config
       PURITY: 100% pure
-  [43] Src [speak]: speak
+  [43] Src [_answer_from_service_result]: _answer_from_service_result
       PURITY: 100% pure
-  [44] Src [generate_view]: generate_view
+  [44] Src [_looks_executable_query]: _looks_executable_query
       PURITY: 100% pure
-  [45] Src [main]: main → load_config
+  [45] Src [_repair_count]: _repair_count
       PURITY: 100% pure
-  [46] Src [main]: main → generate_fixture → run
+  [46] Src [_duration_ms]: _duration_ms
       PURITY: 100% pure
-  [47] Src [main]: main → check_http → get_url
+  [47] Src [_handle_transcription]: _handle_transcription
+      PURITY: 100% pure
+  [48] Src [_handle_resource_execution]: _handle_resource_execution
+      PURITY: 100% pure
+  [49] Src [_handle_test_transcription]: _handle_test_transcription
+      PURITY: 100% pure
+  [50] Src [_audio_payload]: _audio_payload
       PURITY: 100% pure
 
 LAYERS:
-  ./                              CC̄=3.5    ←in:0  →out:0
-  │ !! server                     910L  1C   15m  CC=10     ←0
-  │ !! bot                        553L  4C   32m  CC=22     ←0
-  │ !! goal.yaml                  511L  0C    0m  CC=0.0    ←0
-  │ project.sh                  59L  0C    0m  CC=0.0    ←0
-  │ setup                       17L  0C    0m  CC=0.0    ←0
-  │ main                        16L  0C    1m  CC=3      ←0
-  │ config                      12L  1C    1m  CC=1      ←3
-  │ __init__                     8L  0C    2m  CC=1      ←0
-  │ requirements.txt             5L  0C    0m  CC=0.0    ←0
-  │ tree.sh                      1L  0C    0m  CC=0.0    ←0
+  tellm/                          CC̄=5.8    ←in:0  →out:17  !! split
+  │ !! server                    3509L  1C   50m  CC=95     ←0
+  │ !! bot                       2899L  6C   90m  CC=47     ←0
+  │ !! core                       974L  5C   39m  CC=23     ←3
+  │ !! runner                     498L  1C   13m  CC=39     ←0
+  │ history                    131L  1C    8m  CC=4      ←0
+  │ aliases.yaml                35L  0C    0m  CC=0.0    ←0
+  │ __init__                    31L  0C    0m  CC=0.0    ←0
+  │ __init__                    20L  0C    2m  CC=1      ←0
+  │ __init__                     4L  0C    0m  CC=0.0    ←0
   │
   scripts/                        CC̄=3.0    ←in:0  →out:0
   │ protocol_smoke             233L  0C   12m  CC=7      ←0
   │ generate_test_audio        109L  0C    4m  CC=4      ←0
   │
-  output/                         CC̄=0.0    ←in:0  →out:0
-  │ manifest.json               60L  0C    0m  CC=0.0    ←0
+  ./                              CC̄=2.0    ←in:0  →out:0
+  │ !! planfile.yaml              526L  0C    0m  CC=0.0    ←0
+  │ !! goal.yaml                  511L  0C    0m  CC=0.0    ←0
+  │ prefact.yaml                94L  0C    0m  CC=0.0    ←0
+  │ project.sh                  59L  0C    0m  CC=0.0    ←0
+  │ setup                       18L  0C    0m  CC=0.0    ←0
+  │ requirements.txt             5L  0C    0m  CC=0.0    ←0
+  │ tree.sh                      1L  0C    0m  CC=0.0    ←0
+  │ config                       0L  1C    1m  CC=1      ←3
+  │ main                         0L  0C    1m  CC=3      ←0
   │
+  testql-scenarios/               CC̄=0.0    ←in:0  →out:0
+  │ generated-from-pytests.testql.toon.yaml    10L  0C    0m  CC=0.0    ←0
+  │
+  ── zero ──
+     config.py                                 0L
+     main.py                                   0L
 
 COUPLING:
-          config     bot    main  server
-  config      ──      ←1      ←1      ←1
-     bot       1      ──                
-    main       1              ──        
-  server       1                      ──
-  CYCLES: none
+                        tellm.registry              tellm             config  tellm.improvement               main
+     tellm.registry                 ──                ←15                                    ←3                     hub
+              tellm                 15                 ──                  2                                        !! fan-out
+             config                                    ←2                 ──                                    ←1
+  tellm.improvement                  3                                                       ──                   
+               main                                                        1                                    ──
+  CYCLES: 2
+  HUB: tellm.registry/ (fan-in=18)
+  SMELL: tellm/ fan-out=17 → split needed
 
 EXTERNAL:
   validation: run `vallm batch .` → validation.toon

@@ -1,0 +1,35 @@
+aliases:
+  tellm://function/weather_wejherowo:
+    target: tellm://service/weather/current
+    status: deprecated
+    default_input:
+      location: Wejherowo
+      country: PL
+    reason: Replaced by generic weather.current service.
+
+  tellm://function/get_weather_wejherowo:
+    target: tellm://service/weather/current
+    status: deprecated
+    default_input:
+      location: Wejherowo
+      country: PL
+    reason: Generated per-city weather functions must route to weather.current.
+
+  tellm://service/pogoda/current:
+    target: tellm://service/weather/current
+    status: alias
+    reason: Polish alias for current weather.
+
+  tellm://service/weather/get:
+    target: tellm://service/weather/current
+    status: deprecated
+    input_map:
+      city: location
+      country_code: country
+    reason: Legacy input shape mapped to location/country.
+
+tombstones:
+  tellm://service/old/weather:
+    replacement: tellm://service/weather/current
+    status: removed
+    reason: Removed weather service. Use canonical weather.current.

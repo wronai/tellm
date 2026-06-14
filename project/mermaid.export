@@ -1,41 +1,5 @@
 flowchart TD
 %% generated in 0.00s
-    subgraph bot__TellmBot
-        bot__TellmBot____init__["__init__"]
-        bot__TellmBot___init_db["_init_db"]
-        bot__TellmBot__save_task["save_task"]
-        bot__TellmBot__save_evolution["save_evolution"]
-        bot__TellmBot__save_view["save_view"]
-        bot__TellmBot__get_tasks["get_tasks"]
-        bot__TellmBot__register_function["register_function"]
-        bot__TellmBot___completion["_completion"]
-        bot__TellmBot___parse_json_response("_parse_json_response CC=9")
-        bot__TellmBot___normalize_processes["_normalize_processes"]
-        bot__TellmBot___ensure_function_state["_ensure_function_state"]
-        bot__TellmBot___restricted_import["_restricted_import"]
-        bot__TellmBot___process_globals["_process_globals"]
-        bot__TellmBot___execute_registered_function["_execute_registered_function"]
-        bot__TellmBot___execute_python_process{{_execute_python_process CC=22}}
-        bot__TellmBot__execute_processes["execute_processes"]
-        bot__TellmBot___get_stt_model["_get_stt_model"]
-        bot__TellmBot___get_tts["_get_tts"]
-        bot__TellmBot__analyze_query("analyze_query CC=12")
-        bot__TellmBot__evolve_function["evolve_function"]
-        bot__TellmBot__execute_task["execute_task"]
-        bot__TellmBot__transcribe["transcribe"]
-        bot__TellmBot__speak["speak"]
-        bot__TellmBot__generate_view["generate_view"]
-    end
-    subgraph bot__ViewData
-        bot__ViewData__to_dict["to_dict"]
-        bot__ViewData___safe_json["_safe_json"]
-        bot__ViewData___safe_text["_safe_text"]
-        bot__ViewData___render_items["_render_items"]
-        bot__ViewData___render_table("_render_table CC=11")
-        bot__ViewData___render_block("_render_block CC=11")
-        bot__ViewData___render_dynamic["_render_dynamic"]
-        bot__ViewData__to_html["to_html"]
-    end
     subgraph config
         config__load_config["load_config"]
     end
@@ -62,35 +26,188 @@ flowchart TD
         scripts__protocol_smoke__async_main["async_main"]
         scripts__protocol_smoke__main["main"]
     end
-    subgraph server
-        server___websocket_logger["_websocket_logger"]
-        server___browser_client_html["_browser_client_html"]
-        server___docs_html["_docs_html"]
-    end
-    subgraph server__TellmServer
-        server__TellmServer____init__["__init__"]
-        server__TellmServer__register_function["register_function"]
-        server__TellmServer___http_response["_http_response"]
-        server__TellmServer__process_request["process_request"]
-        server__TellmServer___call_maybe_async["_call_maybe_async"]
-        server__TellmServer___run_blocking["_run_blocking"]
-        server__TellmServer___handle_transcription["_handle_transcription"]
-        server__TellmServer___handle_test_transcription["_handle_test_transcription"]
-        server__TellmServer___audio_payload["_audio_payload"]
-        server__TellmServer__handle("handle CC=10")
-        server__TellmServer__serve_forever["serve_forever"]
-        server__TellmServer__run["run"]
-    end
     subgraph tellm
         tellm__create_bot["create_bot"]
         tellm__run_server["run_server"]
     end
-    server__TellmServer__process_request --> server___docs_html
-    server__TellmServer__process_request --> server___browser_client_html
-    server__TellmServer___handle_transcription --> config__load_config
-    server__TellmServer__serve_forever --> server___websocket_logger
-    bot__TellmBot____init__ --> config__load_config
-    main__main --> config__load_config
+    subgraph tellm__bot
+        tellm__bot__WeatherLocationResolutionError____init__["__init__"]
+        tellm__bot__WeatherLocationTooBroadError____init__["__init__"]
+        tellm__bot__ViewData__to_dict["to_dict"]
+        tellm__bot__ViewData___safe_json["_safe_json"]
+        tellm__bot__ViewData___safe_text["_safe_text"]
+        tellm__bot__ViewData___render_items["_render_items"]
+        tellm__bot__ViewData___render_table("_render_table CC=11")
+        tellm__bot__ViewData___render_block("_render_block CC=11")
+        tellm__bot__ViewData___render_dynamic["_render_dynamic"]
+        tellm__bot__ViewData__to_html["to_html"]
+        tellm__bot__TellmBot____init__["__init__"]
+        tellm__bot__TellmBot___init_db["_init_db"]
+        tellm__bot__TellmBot__record_execution["record_execution"]
+        tellm__bot__TellmBot__save_autoimprovement_report["save_autoimprovement_report"]
+        tellm__bot__TellmBot__update_autoimprovement_report_html["update_autoimprovement_report_html"]
+        tellm__bot__TellmBot__get_latest_autoimprovement_report["get_latest_autoimprovement_report"]
+        tellm__bot__TellmBot__get_latest_autoimprovement_html["get_latest_autoimprovement_html"]
+        tellm__bot__TellmBot__save_task["save_task"]
+        tellm__bot__TellmBot__save_evolution["save_evolution"]
+        tellm__bot__TellmBot__save_view["save_view"]
+        tellm__bot__TellmBot__get_view_html["get_view_html"]
+        tellm__bot__TellmBot__get_view_record["get_view_record"]
+        tellm__bot__TellmBot___is_text_content_type["_is_text_content_type"]
+        tellm__bot__TellmBot___storage_base_path["_storage_base_path"]
+        tellm__bot__TellmBot___value_preview["_value_preview"]
+        tellm__bot__TellmBot__resolve_resource_document{{resolve_resource_document CC=47}}
+        tellm__bot__TellmBot__resolve_resource["resolve_resource"]
+        tellm__bot__TellmBot__get_tasks["get_tasks"]
+        tellm__bot__TellmBot__register_function["register_function"]
+        tellm__bot__TellmBot___package_version["_package_version"]
+        tellm__bot__TellmBot___register_file_resource["_register_file_resource"]
+        tellm__bot__TellmBot___register_package_resource["_register_package_resource"]
+        tellm__bot__TellmBot___register_artifact_resources["_register_artifact_resources"]
+        tellm__bot__TellmBot___register_uri_aliases["_register_uri_aliases"]
+        tellm__bot__TellmBot___init_registry["_init_registry"]
+        tellm__bot__TellmBot___registry_now["_registry_now"]
+        tellm__bot__TellmBot___registry_echo["_registry_echo"]
+        tellm__bot__TellmBot___registry_autoimprove["_registry_autoimprove"]
+        tellm__bot__TellmBot___weather_code_description["_weather_code_description"]
+        tellm__bot__TellmBot___http_json["_http_json"]
+        tellm__bot__TellmBot___http_text["_http_text"]
+        tellm__bot__TellmBot___normalize_country_code["_normalize_country_code"]
+        tellm__bot__TellmBot___is_country_level_weather_location["_is_country_level_weather_location"]
+        tellm__bot__TellmBot___score_geocode_result["_score_geocode_result"]
+        tellm__bot__TellmBot___geocode_city["_geocode_city"]
+        tellm__bot__TellmBot___registry_weather_current{{_registry_weather_current CC=29}}
+        tellm__bot__TellmBot___normalize_domain["_normalize_domain"]
+        tellm__bot__TellmBot___registry_domain_check("_registry_domain_check CC=14")
+        tellm__bot__TellmBot___normalize_price_site["_normalize_price_site"]
+        tellm__bot__TellmBot___commerce_search_url["_commerce_search_url"]
+        tellm__bot__TellmBot___text_from_html["_text_from_html"]
+        tellm__bot__TellmBot___parse_price_amount["_parse_price_amount"]
+        tellm__bot__TellmBot___price_relevance_tokens["_price_relevance_tokens"]
+        tellm__bot__TellmBot___price_relevance["_price_relevance"]
+        tellm__bot__TellmBot___extract_price_candidates["_extract_price_candidates"]
+        tellm__bot__TellmBot___price_error_result["_price_error_result"]
+        tellm__bot__TellmBot___registry_price_search{{_registry_price_search CC=30}}
+        tellm__bot__TellmBot__execute_resource("execute_resource CC=9")
+        tellm__bot__TellmBot___completion["_completion"]
+        tellm__bot__TellmBot___message_text("_message_text CC=14")
+    end
+    subgraph tellm__improvement
+        tellm__improvement__history__ExecutionHistoryStore____init__["__init__"]
+        tellm__improvement__history__ExecutionHistoryStore__now["now"]
+        tellm__improvement__history__ExecutionHistoryStore__init_db["init_db"]
+        tellm__improvement__history__ExecutionHistoryStore__record["record"]
+        tellm__improvement__history__ExecutionHistoryStore___decode_row["_decode_row"]
+        tellm__improvement__history__ExecutionHistoryStore__recent["recent"]
+        tellm__improvement__history__ExecutionHistoryStore__count_since_id["count_since_id"]
+        tellm__improvement__history__ExecutionHistoryStore__latest_id["latest_id"]
+        tellm__improvement__runner__AutoimprovementRunner____init__["__init__"]
+        tellm__improvement__runner__AutoimprovementRunner__now["now"]
+        tellm__improvement__runner__AutoimprovementRunner___finding["_finding"]
+        tellm__improvement__runner__AutoimprovementRunner___collect_source_values["_collect_source_values"]
+        tellm__improvement__runner__AutoimprovementRunner___collect_error_objects("_collect_error_objects CC=9")
+        tellm__improvement__runner__AutoimprovementRunner___looks_like_weather_identifier["_looks_like_weather_identifier"]
+        tellm__improvement__runner__AutoimprovementRunner___looks_like_ad_hoc_weather_function["_looks_like_ad_hoc_weather_function"]
+        tellm__improvement__runner__AutoimprovementRunner___schema_health{{_schema_health CC=15}}
+        tellm__improvement__runner__AutoimprovementRunner___history_health{{_history_health CC=39}}
+        tellm__improvement__runner__AutoimprovementRunner___patches_from_findings["_patches_from_findings"]
+        tellm__improvement__runner__AutoimprovementRunner___suggested_actions["_suggested_actions"]
+        tellm__improvement__runner__AutoimprovementRunner__registry_health["registry_health"]
+        tellm__improvement__runner__AutoimprovementRunner__run("run CC=11")
+    end
+    subgraph tellm__registry
+        tellm__registry__core__validate_tellm_uri("validate_tellm_uri CC=9")
+        tellm__registry__core__uri_parts["uri_parts"]
+        tellm__registry__core__uri_domain["uri_domain"]
+        tellm__registry__core__uri_name["uri_name"]
+        tellm__registry__core__normalize_schema["normalize_schema"]
+        tellm__registry__core___schema_types["_schema_types"]
+        tellm__registry__core___matches_type("_matches_type CC=11")
+        tellm__registry__core__validate_schema{{validate_schema CC=23}}
+        tellm__registry__core___issue_code_from_text("_issue_code_from_text CC=10")
+        tellm__registry__core__normalize_issue_list("normalize_issue_list CC=11")
+        tellm__registry__core__json_like["json_like"]
+        tellm__registry__core__service_result["service_result"]
+        tellm__registry__core__service_result_schema["service_result_schema"]
+        tellm__registry__core__registry_manifest_schema["registry_manifest_schema"]
+        tellm__registry__core__RegistryEntry____post_init__{{__post_init__ CC=17}}
+        tellm__registry__core__RegistryEntry___transport_manifest["_transport_manifest"]
+        tellm__registry__core__RegistryEntry__to_dict["to_dict"]
+        tellm__registry__core__ResourceRegistry____init__["__init__"]
+        tellm__registry__core__ResourceRegistry__register["register"]
+        tellm__registry__core__ResourceRegistry__register_alias("register_alias CC=11")
+        tellm__registry__core__ResourceRegistry__register_value("register_value CC=14")
+        tellm__registry__core__ResourceRegistry__register_callable("register_callable CC=14")
+        tellm__registry__core__ResourceRegistry__get["get"]
+        tellm__registry__core__ResourceRegistry__get_canonical["get_canonical"]
+        tellm__registry__core__ResourceRegistry__require["require"]
+        tellm__registry__core__ResourceRegistry__list["list"]
+        tellm__registry__core__ResourceRegistry__find("find CC=14")
+        tellm__registry__core__ResourceRegistry__find_capability["find_capability"]
+        tellm__registry__core__ResourceRegistry__discover_for_llm["discover_for_llm"]
+        tellm__registry__core__ResourceRegistry__manifest["manifest"]
+        tellm__registry__core__ResourceRegistry__check_permission["check_permission"]
+        tellm__registry__core__ResourceRegistry___apply_alias_input["_apply_alias_input"]
+        tellm__registry__core__ResourceRegistry___resolve_internal{{_resolve_internal CC=17}}
+        tellm__registry__core__ResourceRegistry__canonicalize["canonicalize"]
+        tellm__registry__core__ResourceRegistry__resolve_uri["resolve_uri"]
+        tellm__registry__core__ResourceRegistry__resolve["resolve"]
+        tellm__registry__core__ResourceRegistry__read["read"]
+        tellm__registry__core__ResourceRegistry__execute["execute"]
+        tellm__registry__core__ResourceRegistry___call["_call"]
+    end
+    subgraph tellm__server
+        tellm__server___websocket_logger["_websocket_logger"]
+        tellm__server___browser_client_html["_browser_client_html"]
+        tellm__server___docs_html["_docs_html"]
+        tellm__server___registry_ui_html["_registry_ui_html"]
+        tellm__server___autoimprovement_html["_autoimprovement_html"]
+        tellm__server___openapi_document["_openapi_document"]
+        tellm__server___asyncapi_document["_asyncapi_document"]
+        tellm__server__TellmServer____init__["__init__"]
+        tellm__server__TellmServer__register_function["register_function"]
+        tellm__server__TellmServer___http_response["_http_response"]
+        tellm__server__TellmServer___json_response["_json_response"]
+        tellm__server__TellmServer___resource_entry_response["_resource_entry_response"]
+        tellm__server__TellmServer___registry_item_summary["_registry_item_summary"]
+        tellm__server__TellmServer___virtual_schema_resource["_virtual_schema_resource"]
+        tellm__server__TellmServer___virtual_view_resource("_virtual_view_resource CC=9")
+        tellm__server__TellmServer___schema_bundle["_schema_bundle"]
+        tellm__server__TellmServer___describe_entry["_describe_entry"]
+        tellm__server__TellmServer___validation_error["_validation_error"]
+        tellm__server__TellmServer___validate_payload["_validate_payload"]
+        tellm__server__TellmServer___payload_from_query["_payload_from_query"]
+        tellm__server__TellmServer__process_request{{process_request CC=95}}
+        tellm__server__TellmServer___call_maybe_async["_call_maybe_async"]
+        tellm__server__TellmServer___run_blocking["_run_blocking"]
+        tellm__server__TellmServer___send_log["_send_log"]
+        tellm__server__TellmServer___send_state["_send_state"]
+        tellm__server__TellmServer___compact["_compact"]
+        tellm__server__TellmServer___collect_source_values["_collect_source_values"]
+        tellm__server__TellmServer___requires_real_world_data["_requires_real_world_data"]
+        tellm__server__TellmServer___registry_entry_for_task["_registry_entry_for_task"]
+        tellm__server__TellmServer___data_source_findings{{_data_source_findings CC=21}}
+        tellm__server__TellmServer___append_data_quality_warnings("_append_data_quality_warnings CC=8")
+        tellm__server__TellmServer___log_details["_log_details"]
+        tellm__server__TellmServer___result_business_ok("_result_business_ok CC=10")
+        tellm__server__TellmServer___service_result_log("_service_result_log CC=8")
+        tellm__server__TellmServer___workflow_history_status["_workflow_history_status"]
+        tellm__server__TellmServer___render_logs("_render_logs CC=12")
+        tellm__server__TellmServer___local_validation_verdict{{_local_validation_verdict CC=23}}
+        tellm__server__TellmServer___validate_and_repair("_validate_and_repair CC=12")
+        tellm__server__TellmServer___answer_from_service_result["_answer_from_service_result"]
+        tellm__server__TellmServer___looks_executable_query["_looks_executable_query"]
+        tellm__server__TellmServer___repair_count["_repair_count"]
+        tellm__server__TellmServer___duration_ms["_duration_ms"]
+        tellm__server__TellmServer___handle_transcription("_handle_transcription CC=13")
+        tellm__server__TellmServer___handle_resource_execution("_handle_resource_execution CC=14")
+        tellm__server__TellmServer___handle_test_transcription["_handle_test_transcription"]
+        tellm__server__TellmServer___audio_payload["_audio_payload"]
+        tellm__server__TellmServer___process_message{{_process_message CC=15}}
+        tellm__server__TellmServer__handle("handle CC=10")
+        tellm__server__TellmServer__serve_forever["serve_forever"]
+        tellm__server__TellmServer__run["run"]
+    end
     scripts__generate_test_audio__generate_fixture --> scripts__generate_test_audio__run
     scripts__generate_test_audio__generate_fixture --> scripts__generate_test_audio__require_tool
     scripts__generate_test_audio__main --> scripts__generate_test_audio__generate_fixture
@@ -102,8 +219,39 @@ flowchart TD
     scripts__protocol_smoke__check_ws_audio --> scripts__protocol_smoke__send_ws_payload
     scripts__protocol_smoke__async_main --> scripts__protocol_smoke__check_ws_text
     scripts__protocol_smoke__async_main --> scripts__protocol_smoke__check_ws_audio
+    tellm__server___openapi_document --> tellm__registry__core__registry_manifest_schema
+    tellm__server___openapi_document --> tellm__registry__core__service_result_schema
+    tellm__server___asyncapi_document --> tellm__registry__core__registry_manifest_schema
+    tellm__server__TellmServer___validate_payload --> tellm__registry__core__validate_schema
+    tellm__server__TellmServer___local_validation_verdict --> tellm__registry__core__validate_schema
+    tellm__server__TellmServer___validate_and_repair --> config__load_config
+    tellm__server__TellmServer__serve_forever --> tellm__server___websocket_logger
+    tellm__bot__TellmBot____init__ --> config__load_config
+    tellm__bot__TellmBot___registry_now --> tellm__registry__core__service_result
+    tellm__bot__TellmBot___registry_echo --> tellm__registry__core__service_result
+    tellm__bot__TellmBot___registry_domain_check --> tellm__registry__core__service_result
+    tellm__bot__TellmBot___price_relevance_tokens --> tellm__registry__core__ResourceRegistry__list
+    tellm__bot__TellmBot___price_error_result --> tellm__registry__core__service_result
+    main__main --> config__load_config
+    tellm__improvement__runner__AutoimprovementRunner___schema_health --> tellm__registry__core__validate_schema
+    tellm__improvement__runner__AutoimprovementRunner__run --> tellm__registry__core__service_result
+    tellm__registry__core__uri_domain --> tellm__registry__core__uri_parts
+    tellm__registry__core__uri_name --> tellm__registry__core__uri_parts
+    tellm__registry__core__validate_schema --> tellm__registry__core___schema_types
+    tellm__registry__core__normalize_issue_list --> tellm__registry__core__json_like
+    tellm__registry__core__service_result --> tellm__registry__core__normalize_issue_list
+    tellm__registry__core__RegistryEntry____post_init__ --> tellm__registry__core__normalize_schema
+    tellm__registry__core__RegistryEntry____post_init__ --> tellm__registry__core__validate_tellm_uri
+    tellm__registry__core__RegistryEntry____post_init__ --> tellm__registry__core__uri_domain
+    tellm__registry__core__RegistryEntry____post_init__ --> tellm__registry__core__uri_name
+    tellm__registry__core__ResourceRegistry__register_alias --> tellm__registry__core__uri_name
+    tellm__registry__core__ResourceRegistry__manifest --> tellm__registry__core__registry_manifest_schema
+    tellm__registry__core__ResourceRegistry__manifest --> tellm__registry__core__service_result_schema
+    tellm__registry__core__ResourceRegistry__read --> tellm__registry__core__validate_schema
+    tellm__registry__core__ResourceRegistry__execute --> tellm__registry__core__validate_schema
+    tellm__registry__core__ResourceRegistry___call --> tellm__registry__core__ResourceRegistry__list
 
     classDef highCC fill:#ff6b6b,stroke:#c92a2a,color:#fff
     classDef medCC fill:#ffd43b,stroke:#f08c00,color:#000
-    class bot__TellmBot___execute_python_process highCC
-    class server__TellmServer__handle,bot__ViewData___render_table,bot__ViewData___render_block,bot__TellmBot___parse_json_response,bot__TellmBot__analyze_query medCC
+    class tellm__server__TellmServer__process_request,tellm__server__TellmServer___data_source_findings,tellm__server__TellmServer___local_validation_verdict,tellm__server__TellmServer___process_message,tellm__bot__TellmBot__resolve_resource_document,tellm__bot__TellmBot___registry_weather_current,tellm__bot__TellmBot___registry_price_search,tellm__bot__TellmBot___parse_json_response,tellm__bot__TellmBot___execute_python_process,tellm__improvement__runner__AutoimprovementRunner___schema_health,tellm__improvement__runner__AutoimprovementRunner___history_health,tellm__registry__core__validate_schema,tellm__registry__core__RegistryEntry____post_init__,tellm__registry__core__ResourceRegistry___resolve_internal highCC
+    class tellm__server__TellmServer___virtual_view_resource,tellm__server__TellmServer___append_data_quality_warnings,tellm__server__TellmServer___result_business_ok,tellm__server__TellmServer___service_result_log,tellm__server__TellmServer___render_logs,tellm__server__TellmServer___validate_and_repair,tellm__server__TellmServer___handle_transcription,tellm__server__TellmServer___handle_resource_execution,tellm__server__TellmServer__handle,tellm__bot__ViewData___render_table,tellm__bot__ViewData___render_block,tellm__bot__TellmBot___registry_domain_check,tellm__bot__TellmBot__execute_resource,tellm__bot__TellmBot___message_text,tellm__bot__TellmBot__analyze_query,tellm__bot__TellmBot__execute_task,tellm__bot__TellmBot___render_autoimprovement_data,tellm__bot__TellmBot___render_data_from_service_result,tellm__improvement__runner__AutoimprovementRunner___collect_error_objects,tellm__improvement__runner__AutoimprovementRunner__run,tellm__registry__core__validate_tellm_uri,tellm__registry__core___matches_type,tellm__registry__core___issue_code_from_text,tellm__registry__core__normalize_issue_list,tellm__registry__core__ResourceRegistry__register_alias,tellm__registry__core__ResourceRegistry__register_value,tellm__registry__core__ResourceRegistry__register_callable,tellm__registry__core__ResourceRegistry__find medCC

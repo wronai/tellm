@@ -1,40 +1,28 @@
-# tellm | 12f 2503L | python:9,shell:2,less:1 | 2026-06-14
-# stats: 36 func | 6 cls | 12 mod | CC̄=3.4 | critical:2 | cycles:0
-# alerts[5]: CC test_server_handles_plain_http_request=11; CC test_server_docs_describe_text_and_speech_api=11; CC async_main=7; CC test_view_html_renders_dynamic_json_structure=7; CC test_server_accepts_text_websocket_messages=7
-# hotspots[5]: test_server_accepts_text_websocket_messages fan=18; test_server_handles_plain_http_request fan=14; test_server_docs_describe_text_and_speech_api fan=14; test_server_test_mode_returns_echo_without_llm fan=11; main fan=10
+# tellm | 17f 10771L | python:14,shell:2,less:1 | 2026-06-14
+# stats: 87 func | 15 cls | 17 mod | CC̄=7.7 | critical:13 | cycles:0
+# alerts[5]: CC test_server_registry_http_endpoints=138; CC test_server_docs_describe_text_and_speech_api=59; CC test_registry_manifest_uses_tellm_standards=55; CC test_server_handles_plain_http_request=24; CC validate_schema=23
+# hotspots[5]: test_server_accepts_text_websocket_messages fan=21; test_server_validation_can_repair_render_data fan=19; test_server_blocks_parallel_query_and_accepts_cancel fan=19; test_server_registry_http_endpoints fan=18; test_server_returns_saved_view_by_id fan=18
 # evolution: baseline
 # Keys: M=modules, D=details, i=imports, e=exports, c=classes, f=functions, m=methods
-M[12]:
-  __init__.py,9
-  app.doql.less,23
-  bot.py,565
-  config.py,12
-  main.py,16
+M[17]:
+  app.doql.less,27
   project.sh,59
   scripts/generate_test_audio.py,110
   scripts/protocol_smoke.py,234
-  server.py,1028
-  setup.py,18
-  tests/test_tellm.py,427
+  setup.py,19
+  tellm/__init__.py,21
+  tellm/bot.py,2900
+  tellm/config.py,12
+  tellm/improvement/__init__.py,5
+  tellm/improvement/history.py,132
+  tellm/improvement/runner.py,499
+  tellm/main.py,16
+  tellm/registry/__init__.py,32
+  tellm/registry/core.py,975
+  tellm/server.py,3510
+  tests/test_tellm.py,2218
   tree.sh,2
 D:
-  __init__.py:
-    e: create_bot,run_server
-    create_bot(db_path)
-    run_server(host;port;db_path)
-  bot.py:
-    e: TaskType,Task,ViewData,TellmBot
-    TaskType:
-    Task:
-    ViewData: to_dict(0),_safe_json(1),_safe_text(1),_render_items(1),_render_table(1),_render_block(1),_render_dynamic(0),to_html(0)
-    TellmBot: __init__(2),_init_db(0),save_task(3),save_evolution(2),save_view(1),get_view_html(1),get_tasks(1),register_function(2),_completion(1),_parse_json_response(1),_normalize_processes(1),_ensure_function_state(1),_restricted_import(5),_process_globals(0),_execute_registered_function(2),_execute_python_process(2),execute_processes(1),_get_stt_model(0),_get_tts(0),analyze_query(1),evolve_function(1),execute_task(1),transcribe(2),speak(1),generate_view(3)
-  config.py:
-    e: load_config,Config
-    Config:
-    load_config()
-  main.py:
-    e: main
-    main()
   scripts/generate_test_audio.py:
     e: run,require_tool,generate_fixture,main
     run(cmd)
@@ -55,25 +43,110 @@ D:
     write_webrtc_html(path;ws_url;transcription)
     async_main(args)
     main()
-  server.py:
-    e: _websocket_logger,_browser_client_html,_docs_html,TellmServer
-    TellmServer: __init__(3),register_function(2),_http_response(3),process_request(2),_call_maybe_async(1),_run_blocking(1),_handle_transcription(3),_handle_test_transcription(4),_audio_payload(1),handle(2),serve_forever(0),run(0)
+  setup.py:
+  tellm/__init__.py:
+    e: create_bot,run_server
+    create_bot(db_path)
+    run_server(host;port;db_path)
+  tellm/bot.py:
+    e: TaskType,WeatherLocationResolutionError,WeatherLocationTooBroadError,Task,ViewData,TellmBot
+    TaskType:
+    WeatherLocationResolutionError: __init__(4)
+    WeatherLocationTooBroadError: __init__(3)
+    Task:
+    ViewData: to_dict(0),_safe_json(1),_safe_text(1),_render_items(1),_render_table(1),_render_block(1),_render_dynamic(0),to_html(0)
+    TellmBot: __init__(2),_init_db(0),record_execution(8),save_autoimprovement_report(2),update_autoimprovement_report_html(3),get_latest_autoimprovement_report(0),get_latest_autoimprovement_html(0),save_task(3),save_evolution(2),save_view(1),get_view_html(1),get_view_record(1),_is_text_content_type(1),_storage_base_path(1),_value_preview(1),resolve_resource_document(4),resolve_resource(4),get_tasks(1),register_function(2),_package_version(1),_register_file_resource(6),_register_package_resource(4),_register_artifact_resources(0),_register_uri_aliases(0),_init_registry(0),_registry_now(1),_registry_echo(1),_registry_autoimprove(1),_weather_code_description(1),_http_json(2),_http_text(2),_normalize_country_code(1),_is_country_level_weather_location(2),_score_geocode_result(3),_geocode_city(2),_registry_weather_current(1),_normalize_domain(1),_registry_domain_check(1),_normalize_price_site(1),_commerce_search_url(2),_text_from_html(1),_parse_price_amount(1),_price_relevance_tokens(1),_price_relevance(2),_extract_price_candidates(5),_price_error_result(11),_registry_price_search(1),execute_resource(2),_completion(1),_message_text(1),_parse_json_response(1),_normalize_processes(1),_ensure_function_state(1),_restricted_import(5),_process_globals(0),_execute_registered_function(2),_execute_python_process(2),execute_processes(1),_get_stt_model(0),_get_tts(0),_looks_like_weather_query(1),_normalize_weather_location(1),_weather_location_from_query(2),_route_weather_task(2),_local_weather_task_from_query(1),_looks_like_price_query(1),_price_site_from_query(2),_normalize_price_product(1),_price_query_from_query(2),_route_price_task(2),_local_price_task_from_query(1),_local_task_from_query(1),analyze_query(1),evolve_function(1),execute_task(1),transcribe(2),speak(1),_render_autoimprovement_data(2),_render_data_from_service_result(1),generate_view(3)
+  tellm/config.py:
+    e: load_config,Config
+    Config:
+    load_config()
+  tellm/improvement/__init__.py:
+  tellm/improvement/history.py:
+    e: ExecutionHistoryStore
+    ExecutionHistoryStore: __init__(1),now(0),init_db(0),record(8),_decode_row(1),recent(2),count_since_id(1),latest_id(0)
+  tellm/improvement/runner.py:
+    e: AutoimprovementRunner
+    AutoimprovementRunner: __init__(2),now(0),_finding(6),_collect_source_values(1),_collect_error_objects(1),_looks_like_weather_identifier(2),_looks_like_ad_hoc_weather_function(2),_schema_health(1),_history_health(3),_patches_from_findings(2),_suggested_actions(1),registry_health(0),run(1)
+  tellm/main.py:
+    e: main
+    main()
+  tellm/registry/__init__.py:
+  tellm/registry/core.py:
+    e: validate_tellm_uri,uri_parts,uri_domain,uri_name,normalize_schema,_schema_types,_matches_type,validate_schema,_issue_code_from_text,normalize_issue_list,json_like,service_result,service_result_schema,registry_manifest_schema,RegistryError,RegistryPermissionError,RegistryValidationError,RegistryEntry,ResourceRegistry
+    RegistryError:
+    RegistryPermissionError:
+    RegistryValidationError:
+    RegistryEntry: __post_init__(0),_transport_manifest(0),to_dict(1)
+    ResourceRegistry: __init__(0),register(1),register_alias(9),register_value(36),register_callable(33),get(1),get_canonical(1),require(1),list(1),find(5),find_capability(2),discover_for_llm(0),manifest(0),check_permission(3),_apply_alias_input(2),_resolve_internal(3),canonicalize(1),resolve_uri(2),resolve(1),read(1),execute(3),_call(2)
+    validate_tellm_uri(uri;expected_kind)
+    uri_parts(uri)
+    uri_domain(uri)
+    uri_name(uri)
+    normalize_schema(schema;schema_id)
+    _schema_types(schema_type)
+    _matches_type(value;schema_type)
+    validate_schema(schema;value;path)
+    _issue_code_from_text(detail;default_code)
+    normalize_issue_list(issues;default_source;default_code;recoverable)
+    json_like(value)
+    service_result(ok;result_type;data;title;summary;details;errors;view;uri;warnings;meta;render)
+    service_result_schema()
+    registry_manifest_schema()
+  tellm/server.py:
+    e: _websocket_logger,_browser_client_html,_docs_html,_registry_ui_html,_autoimprovement_html,_openapi_document,_asyncapi_document,TellmServer
+    TellmServer: __init__(3),register_function(2),_http_response(3),_json_response(2),_resource_entry_response(1),_registry_item_summary(1),_virtual_schema_resource(1),_virtual_view_resource(1),_schema_bundle(1),_describe_entry(1),_validation_error(1),_validate_payload(3),_payload_from_query(2),process_request(2),_call_maybe_async(1),_run_blocking(1),_send_log(5),_send_state(3),_compact(2),_collect_source_values(1),_requires_real_world_data(2),_registry_entry_for_task(1),_data_source_findings(3),_append_data_quality_warnings(2),_log_details(2),_result_business_ok(1),_service_result_log(2),_workflow_history_status(3),_render_logs(6),_local_validation_verdict(4),_validate_and_repair(8),_answer_from_service_result(1),_looks_executable_query(1),_repair_count(1),_duration_ms(1),_handle_transcription(4),_handle_resource_execution(5),_handle_test_transcription(4),_audio_payload(1),_process_message(2),handle(2),serve_forever(0),run(0)
     _websocket_logger()
     _browser_client_html(host)
     _docs_html(host)
-  setup.py:
+    _registry_ui_html(bot;host)
+    _autoimprovement_html(host)
+    _openapi_document(host)
+    _asyncapi_document(host)
   tests/test_tellm.py:
-    e: test_import,test_sqlite_save_and_get_tasks,test_view_html_escapes_user_content,test_view_html_renders_dynamic_json_structure,test_execute_task_supports_sync_functions,test_analyze_query_reads_llm_json_view_and_processes,test_execute_task_runs_python_process,test_server_starts_inside_running_event_loop,test_server_handles_plain_http_request,test_server_docs_describe_text_and_speech_api,test_server_audio_payload_reads_data_url_suffix,test_server_test_mode_returns_echo_without_llm,test_server_accepts_text_websocket_messages
+    e: test_import,test_sqlite_save_and_get_tasks,test_view_html_escapes_user_content,test_view_html_renders_dynamic_json_structure,test_execute_task_supports_sync_functions,test_registry_executes_typed_local_resource,test_registry_manifest_uses_tellm_standards,test_registry_masks_env_and_exposes_discovery,test_weather_service_fetches_open_meteo_data,test_weather_service_normalizes_country_and_falls_back_geocoding,test_weather_service_returns_location_not_found_diagnostics,test_weather_service_rejects_country_level_location,test_weather_service_returns_standard_error_when_network_denied,test_price_service_extracts_visible_prices_from_supported_source,test_price_service_rejects_prices_unrelated_to_requested_product,test_price_service_returns_structured_not_found_error,test_autoimprove_service_returns_and_saves_schema_valid_report,test_autoimprove_finds_missing_schema,test_autoimprove_finds_repeated_service_failures,test_autoimprove_finds_direct_llm_answer_violation,test_autoimprove_finds_simulated_data_for_real_world_query,test_autoimprove_finds_missing_weather_provider_and_ad_hoc_function,test_autoimprove_finds_provider_location_resolution_failure,test_autoimprovement_report_renders_as_html,test_analyze_query_reads_llm_json_view_and_processes,test_analyze_query_routes_weather_to_registry_service,test_analyze_query_routes_price_to_registry_service,test_analyze_query_can_still_rewrite_ad_hoc_weather_llm_response,test_analyze_query_reads_json_from_reasoning_when_content_is_empty,test_execute_task_runs_python_process,test_server_starts_inside_running_event_loop,test_server_handles_plain_http_request,test_server_docs_describe_text_and_speech_api,test_server_registry_http_endpoints,test_server_registry_ui_and_autoimprovement_pages,test_server_returns_saved_view_by_id,test_server_audio_payload_reads_data_url_suffix,test_server_validation_can_repair_render_data,test_server_local_validation_skips_llm_for_trusted_registry_result,test_server_local_validation_skips_llm_for_structured_service_error,test_server_flags_simulated_weather_source,test_server_logs_execution_and_service_result_separately,test_server_blocks_parallel_query_and_accepts_cancel,test_server_test_mode_returns_echo_without_llm,test_server_executes_registry_uri_over_websocket,test_server_accepts_text_websocket_messages
     test_import()
     test_sqlite_save_and_get_tasks(tmp_path)
     test_view_html_escapes_user_content()
     test_view_html_renders_dynamic_json_structure()
     test_execute_task_supports_sync_functions(tmp_path)
+    test_registry_executes_typed_local_resource(tmp_path)
+    test_registry_manifest_uses_tellm_standards(tmp_path)
+    test_registry_masks_env_and_exposes_discovery(tmp_path;monkeypatch)
+    test_weather_service_fetches_open_meteo_data(tmp_path;monkeypatch)
+    test_weather_service_normalizes_country_and_falls_back_geocoding(tmp_path;monkeypatch)
+    test_weather_service_returns_location_not_found_diagnostics(tmp_path;monkeypatch)
+    test_weather_service_rejects_country_level_location(tmp_path;monkeypatch)
+    test_weather_service_returns_standard_error_when_network_denied(tmp_path;monkeypatch)
+    test_price_service_extracts_visible_prices_from_supported_source(tmp_path;monkeypatch)
+    test_price_service_rejects_prices_unrelated_to_requested_product(tmp_path;monkeypatch)
+    test_price_service_returns_structured_not_found_error(tmp_path;monkeypatch)
+    test_autoimprove_service_returns_and_saves_schema_valid_report(tmp_path)
+    test_autoimprove_finds_missing_schema(tmp_path)
+    test_autoimprove_finds_repeated_service_failures(tmp_path)
+    test_autoimprove_finds_direct_llm_answer_violation(tmp_path)
+    test_autoimprove_finds_simulated_data_for_real_world_query(tmp_path)
+    test_autoimprove_finds_missing_weather_provider_and_ad_hoc_function(tmp_path)
+    test_autoimprove_finds_provider_location_resolution_failure(tmp_path)
+    test_autoimprovement_report_renders_as_html(tmp_path)
     test_analyze_query_reads_llm_json_view_and_processes(tmp_path;monkeypatch)
+    test_analyze_query_routes_weather_to_registry_service(tmp_path;monkeypatch)
+    test_analyze_query_routes_price_to_registry_service(tmp_path;monkeypatch)
+    test_analyze_query_can_still_rewrite_ad_hoc_weather_llm_response(tmp_path;monkeypatch)
+    test_analyze_query_reads_json_from_reasoning_when_content_is_empty(tmp_path;monkeypatch)
     test_execute_task_runs_python_process(tmp_path)
     test_server_starts_inside_running_event_loop(tmp_path)
     test_server_handles_plain_http_request(tmp_path)
     test_server_docs_describe_text_and_speech_api(tmp_path)
+    test_server_registry_http_endpoints(tmp_path)
+    test_server_registry_ui_and_autoimprovement_pages(tmp_path)
+    test_server_returns_saved_view_by_id(tmp_path)
     test_server_audio_payload_reads_data_url_suffix(tmp_path)
+    test_server_validation_can_repair_render_data(tmp_path;monkeypatch)
+    test_server_local_validation_skips_llm_for_trusted_registry_result(tmp_path;monkeypatch)
+    test_server_local_validation_skips_llm_for_structured_service_error(tmp_path;monkeypatch)
+    test_server_flags_simulated_weather_source(tmp_path)
+    test_server_logs_execution_and_service_result_separately(tmp_path)
+    test_server_blocks_parallel_query_and_accepts_cancel(tmp_path;monkeypatch)
     test_server_test_mode_returns_echo_without_llm(tmp_path)
+    test_server_executes_registry_uri_over_websocket(tmp_path;monkeypatch)
     test_server_accepts_text_websocket_messages(tmp_path;monkeypatch)

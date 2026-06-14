@@ -11,6 +11,9 @@ TRM_VERSION = "1.0.0"
 TSR_VERSION = "1.0.0"
 
 RESOURCE_KINDS = {
+    "alias",
+    "artifact",
+    "command",
     "function",
     "data",
     "variable",
@@ -22,14 +25,20 @@ RESOURCE_KINDS = {
     "view",
     "task",
     "file",
+    "log",
+    "media",
     "model",
+    "package",
     "prompt",
+    "python",
     "tool",
     "event",
     "stream",
     "policy",
     "report",
     "patch",
+    "workflow",
+    "tombstone",
 }
 
 EXECUTABLE_KINDS = {"function", "service", "process", "tool"}
@@ -77,6 +86,21 @@ def validate_tellm_uri(uri: str, expected_kind: Optional[str] = None) -> None:
     path_parts = [part for part in parsed.path.split("/") if part]
     if not path_parts:
         raise RegistryValidationError("URI must include a resource path: %s" % uri)
+
+
+def uri_parts(uri: str) -> List[str]:
+    parsed = urlparse(uri)
+    return [part for part in parsed.path.split("/") if part]
+
+
+def uri_domain(uri: str) -> str:
+    parts = uri_parts(uri)
+    return parts[0] if parts else ""
+
+
+def uri_name(uri: str) -> str:
+    parts = uri_parts(uri)
+    return parts[-1] if parts else ""
 
 
 def normalize_schema(schema: Optional[Dict[str, Any]], schema_id: str = "") -> Optional[Dict[str, Any]]:
@@ -341,6 +365,8 @@ def registry_manifest_schema() -> Dict[str, Any]:
             "kind": {"type": "string", "enum": sorted(RESOURCE_KINDS)},
             "name": {"type": "string"},
             "description": {"type": "string"},
+            "canonical_uri": {"type": "string"},
+            "domain": {"type": "string"},
             "version": {"type": "string"},
             "schema_version": {"type": "string"},
             "tags": {"type": "array", "items": {"type": "string"}},
@@ -348,10 +374,26 @@ def registry_manifest_schema() -> Dict[str, Any]:
             "input_schema": {"type": ["object", "null"]},
             "output_schema": {"type": ["object", "null"]},
             "value_schema": {"type": ["object", "null"]},
+            "input_schema_uri": {"type": "string"},
+            "output_schema_uri": {"type": "string"},
             "permissions": {"type": "object"},
             "data_policy": {"type": "object"},
             "render": {"type": "object"},
             "compatibility": {"type": "object"},
+            "storage": {"type": "object"},
+            "relations": {"type": "object"},
+            "dependencies": {"type": "array", "items": {"type": "string"}},
+            "capabilities": {"type": "array", "items": {"type": "string"}},
+            "content_type": {"type": "string"},
+            "media_type": {"type": "string"},
+            "command_template": {"type": "string"},
+            "ecosystem": {"type": "string"},
+            "import_name": {"type": "string"},
+            "target": {"type": "string"},
+            "replacement": {"type": "string"},
+            "deprecation": {"type": "object"},
+            "input_map": {"type": "object"},
+            "default_input": {"type": "object"},
         },
         "additionalProperties": True,
     }
@@ -363,6 +405,8 @@ class RegistryEntry:
     kind: str
     name: str
     description: str = ""
+    canonical_uri: str = ""
+    domain: str = ""
     version: str = "1.0.0"
     schema_version: str = "2020-12"
     transport: Any = "local"
@@ -370,6 +414,8 @@ class RegistryEntry:
     output_schema: Optional[Dict[str, Any]] = None
     value_schema: Optional[Dict[str, Any]] = None
     metadata_schema: Optional[Dict[str, Any]] = None
+    input_schema_uri: str = ""
+    output_schema_uri: str = ""
     callable_ref: Optional[Callable[..., Any]] = None
     value_ref: Any = None
     permissions: Dict[str, Any] = field(default_factory=dict)
@@ -379,13 +425,42 @@ class RegistryEntry:
     data_policy: Dict[str, Any] = field(default_factory=dict)
     render: Dict[str, Any] = field(default_factory=dict)
     compatibility: Dict[str, Any] = field(default_factory=dict)
+    storage: Dict[str, Any] = field(default_factory=dict)
+    relations: Dict[str, Any] = field(default_factory=dict)
+    dependencies: List[str] = field(default_factory=list)
+    capabilities: List[str] = field(default_factory=list)
+    content_type: str = ""
+    media_type: str = ""
+    command_template: str = ""
+    ecosystem: str = ""
+    import_name: str = ""
+    target: str = ""
+    replacement: str = ""
+    deprecation: Dict[str, Any] = field(default_factory=dict)
+    input_map: Dict[str, str] = field(default_factory=dict)
+    default_input: Dict[str, Any] = field(default_factory=dict)
     aliases: List[str] = field(default_factory=list)
     masked: bool = False
 
     def __post_init__(self) -> None:
         if self.kind not in RESOURCE_KINDS:
             raise RegistryValidationError("Unsupported resource kind: %s" % self.kind)
-        validate_tellm_uri(self.uri, self.kind)
+        if self.kind in {"alias", "tombstone"}:
+            validate_tellm_uri(self.uri)
+        else:
+            validate_tellm_uri(self.uri, self.kind)
+        self.canonical_uri = self.canonical_uri or self.uri
+        self.domain = self.domain or uri_domain(self.canonical_uri or self.uri)
+        self.input_schema_uri = self.input_schema_uri or (
+            "tellm://schema/" + self.domain + "/" + uri_name(self.canonical_uri or self.uri) + "/input"
+            if self.input_schema
+            else ""
+        )
+        self.output_schema_uri = self.output_schema_uri or (
+            "tellm://schema/" + self.domain + "/" + uri_name(self.canonical_uri or self.uri) + "/output"
+            if self.output_schema
+            else ""
+        )
         merged = dict(DEFAULT_PERMISSIONS)
         merged.update(self.permissions or {})
         self.permissions = merged
@@ -418,7 +493,7 @@ class RegistryEntry:
             }
         self.compatibility = {
             "breaking_change": False,
-            "deprecated": False,
+            "deprecated": self.status == "deprecated",
             **(self.compatibility or {}),
         }
 
@@ -437,6 +512,8 @@ class RegistryEntry:
             "kind": self.kind,
             "name": self.name,
             "description": self.description,
+            "canonical_uri": self.canonical_uri,
+            "domain": self.domain,
             "version": self.version,
             "schema_version": self.schema_version,
             "compatibility": self.compatibility,
@@ -445,9 +522,25 @@ class RegistryEntry:
             "output_schema": self.output_schema,
             "value_schema": self.value_schema,
             "metadata_schema": self.metadata_schema,
+            "input_schema_uri": self.input_schema_uri,
+            "output_schema_uri": self.output_schema_uri,
             "permissions": self.permissions,
             "data_policy": self.data_policy,
             "render": self.render or {"renderer": "auto"},
+            "storage": self.storage,
+            "relations": self.relations,
+            "dependencies": self.dependencies,
+            "capabilities": self.capabilities,
+            "content_type": self.content_type,
+            "media_type": self.media_type,
+            "command_template": self.command_template,
+            "ecosystem": self.ecosystem,
+            "import_name": self.import_name,
+            "target": self.target,
+            "replacement": self.replacement,
+            "deprecation": self.deprecation,
+            "input_map": self.input_map,
+            "default_input": self.default_input,
             "tags": self.tags,
             "status": self.status,
             "metadata": self.metadata,
@@ -471,6 +564,41 @@ class ResourceRegistry:
             self._aliases[alias] = entry.uri
         return entry
 
+    def register_alias(
+        self,
+        uri: str,
+        target: str,
+        status: str = "deprecated",
+        default_input: Optional[Dict[str, Any]] = None,
+        input_map: Optional[Dict[str, str]] = None,
+        description: str = "",
+        deprecation: Optional[Dict[str, Any]] = None,
+        replacement: str = "",
+        message: str = "",
+    ) -> RegistryEntry:
+        return self.register_value(
+            uri=uri,
+            kind="alias",
+            name=uri_name(uri),
+            value={
+                "target": target,
+                "default_input": default_input or {},
+                "input_map": input_map or {},
+                "message": message,
+            },
+            description=description or message or ("Alias for " + target),
+            canonical_uri=target,
+            target=target,
+            replacement=replacement or target,
+            deprecation=deprecation or {},
+            input_map=input_map or {},
+            default_input=default_input or {},
+            permissions={"llm_read": True, "danger_level": "read_only"},
+            tags=["alias", "deprecated"] if status == "deprecated" else ["alias"],
+            status=status,
+            metadata={"message": message} if message else {},
+        )
+
     def register_value(
         self,
         uri: str,
@@ -478,29 +606,75 @@ class ResourceRegistry:
         name: str,
         value: Any,
         description: str = "",
+        canonical_uri: str = "",
+        domain: str = "",
+        input_schema: Optional[Dict[str, Any]] = None,
+        output_schema: Optional[Dict[str, Any]] = None,
         value_schema: Optional[Dict[str, Any]] = None,
+        metadata_schema: Optional[Dict[str, Any]] = None,
+        input_schema_uri: str = "",
+        output_schema_uri: str = "",
         permissions: Optional[Dict[str, Any]] = None,
         tags: Optional[List[str]] = None,
         masked: bool = False,
+        status: str = "active",
         metadata: Optional[Dict[str, Any]] = None,
         version: str = "1.0.0",
         data_policy: Optional[Dict[str, Any]] = None,
         render: Optional[Dict[str, Any]] = None,
+        storage: Optional[Dict[str, Any]] = None,
+        relations: Optional[Dict[str, Any]] = None,
+        dependencies: Optional[List[str]] = None,
+        capabilities: Optional[List[str]] = None,
+        content_type: str = "",
+        media_type: str = "",
+        command_template: str = "",
+        ecosystem: str = "",
+        import_name: str = "",
+        target: str = "",
+        replacement: str = "",
+        deprecation: Optional[Dict[str, Any]] = None,
+        input_map: Optional[Dict[str, str]] = None,
+        default_input: Optional[Dict[str, Any]] = None,
+        aliases: Optional[List[str]] = None,
     ) -> RegistryEntry:
         entry = RegistryEntry(
             uri=uri,
             kind=kind,
             name=name,
             description=description,
+            canonical_uri=canonical_uri,
+            domain=domain,
             value_ref=value,
+            input_schema=input_schema,
+            output_schema=output_schema,
             value_schema=value_schema,
+            metadata_schema=metadata_schema,
+            input_schema_uri=input_schema_uri,
+            output_schema_uri=output_schema_uri,
             permissions=permissions or {},
             tags=tags or [],
+            status=status,
             masked=masked,
             metadata=metadata or {},
             version=version,
             data_policy=data_policy or {},
             render=render or {},
+            storage=storage or {},
+            relations=relations or {},
+            dependencies=dependencies or [],
+            capabilities=capabilities or [],
+            content_type=content_type,
+            media_type=media_type,
+            command_template=command_template,
+            ecosystem=ecosystem,
+            import_name=import_name,
+            target=target,
+            replacement=replacement,
+            deprecation=deprecation or {},
+            input_map=input_map or {},
+            default_input=default_input or {},
+            aliases=aliases or [],
         )
         return self.register(entry)
 
@@ -511,37 +685,84 @@ class ResourceRegistry:
         name: str,
         func: Callable[..., Any],
         description: str = "",
+        canonical_uri: str = "",
+        domain: str = "",
         input_schema: Optional[Dict[str, Any]] = None,
         output_schema: Optional[Dict[str, Any]] = None,
+        input_schema_uri: str = "",
+        output_schema_uri: str = "",
         permissions: Optional[Dict[str, Any]] = None,
         tags: Optional[List[str]] = None,
         aliases: Optional[List[str]] = None,
+        status: str = "active",
         metadata: Optional[Dict[str, Any]] = None,
         version: str = "1.0.0",
         data_policy: Optional[Dict[str, Any]] = None,
         render: Optional[Dict[str, Any]] = None,
+        storage: Optional[Dict[str, Any]] = None,
+        relations: Optional[Dict[str, Any]] = None,
+        dependencies: Optional[List[str]] = None,
+        capabilities: Optional[List[str]] = None,
+        content_type: str = "",
+        media_type: str = "",
+        command_template: str = "",
+        ecosystem: str = "",
+        import_name: str = "",
+        target: str = "",
+        replacement: str = "",
+        deprecation: Optional[Dict[str, Any]] = None,
+        input_map: Optional[Dict[str, str]] = None,
+        default_input: Optional[Dict[str, Any]] = None,
     ) -> RegistryEntry:
         entry = RegistryEntry(
             uri=uri,
             kind=kind,
             name=name,
             description=description,
+            canonical_uri=canonical_uri,
+            domain=domain,
             callable_ref=func,
             input_schema=input_schema,
             output_schema=output_schema,
+            input_schema_uri=input_schema_uri,
+            output_schema_uri=output_schema_uri,
             permissions=permissions or {},
             tags=tags or [],
+            status=status,
             aliases=aliases or [],
             metadata=metadata or {},
             version=version,
             data_policy=data_policy or {},
             render=render or {},
+            storage=storage or {},
+            relations=relations or {},
+            dependencies=dependencies or [],
+            capabilities=capabilities or [],
+            content_type=content_type,
+            media_type=media_type,
+            command_template=command_template,
+            ecosystem=ecosystem,
+            import_name=import_name,
+            target=target,
+            replacement=replacement,
+            deprecation=deprecation or {},
+            input_map=input_map or {},
+            default_input=default_input or {},
         )
         return self.register(entry)
 
     def get(self, uri: str) -> Optional[RegistryEntry]:
+        if uri in self._entries:
+            return self._entries[uri]
         canonical = self._aliases.get(uri, uri)
         return self._entries.get(canonical)
+
+    def get_canonical(self, uri: str) -> Optional[RegistryEntry]:
+        try:
+            resolved = self._resolve_internal(uri)
+        except RegistryError:
+            return None
+        return resolved["entry"]
 
     def require(self, uri: str) -> RegistryEntry:
         entry = self.get(uri)
@@ -554,6 +775,31 @@ class ResourceRegistry:
             return list(self._entries.values())
         allowed = set(kinds)
         return [entry for entry in self._entries.values() if entry.kind in allowed]
+
+    def find(
+        self,
+        kind: str = "",
+        domain: str = "",
+        tag: str = "",
+        status: str = "",
+        capability: str = "",
+    ) -> List[RegistryEntry]:
+        entries = self.list([kind]) if kind else self.list()
+        if domain:
+            entries = [entry for entry in entries if entry.domain == domain]
+        if tag:
+            entries = [entry for entry in entries if tag in entry.tags]
+        if status:
+            entries = [entry for entry in entries if entry.status == status]
+        if capability:
+            entries = [entry for entry in entries if capability in entry.capabilities]
+        return entries
+
+    def find_capability(self, capability: str, kind: str = "") -> Optional[str]:
+        entries = self.find(kind=kind, capability=capability, status="active")
+        if not entries:
+            entries = self.find(kind=kind, capability=capability)
+        return entries[0].canonical_uri if entries else None
 
     def discover_for_llm(self) -> List[Dict[str, Any]]:
         return [
@@ -587,9 +833,105 @@ class ResourceRegistry:
         if action == "execute" and entry.permissions.get("requires_confirmation") and not confirmed:
             raise RegistryPermissionError("Execution requires confirmation for %s" % entry.uri)
 
+    @staticmethod
+    def _apply_alias_input(
+        alias: RegistryEntry,
+        payload: Optional[Dict[str, Any]] = None,
+    ) -> Dict[str, Any]:
+        data = dict(alias.default_input or {})
+        source = payload or {}
+        if alias.input_map:
+            for key, value in source.items():
+                data[alias.input_map.get(key, key)] = value
+        else:
+            data.update(source)
+        return data
+
+    def _resolve_internal(
+        self,
+        uri: str,
+        payload: Optional[Dict[str, Any]] = None,
+        max_redirects: int = 8,
+    ) -> Dict[str, Any]:
+        requested_uri = uri
+        current_uri = uri
+        input_data = dict(payload or {})
+        route: List[Dict[str, Any]] = []
+        warnings: List[Dict[str, Any]] = []
+
+        for _ in range(max_redirects):
+            if current_uri in self._aliases and current_uri not in self._entries:
+                target = self._aliases[current_uri]
+                route.append({"from": current_uri, "to": target, "type": "simple_alias"})
+                warnings.append(
+                    {
+                        "code": "ALIASED_URI",
+                        "uri": current_uri,
+                        "target": target,
+                        "message": "URI is an alias for " + target,
+                    }
+                )
+                current_uri = target
+                continue
+
+            entry = self._entries.get(current_uri)
+            if entry is None:
+                raise RegistryError("Unknown registry URI: %s" % current_uri)
+
+            if entry.kind in {"alias", "tombstone"}:
+                target = entry.target or entry.replacement or entry.canonical_uri
+                if not target or target == current_uri:
+                    raise RegistryError("Alias has no target: %s" % current_uri)
+                input_data = self._apply_alias_input(entry, input_data)
+                warning_code = "REMOVED_URI" if entry.kind == "tombstone" or entry.status == "removed" else "DEPRECATED_URI"
+                route.append({"from": current_uri, "to": target, "type": entry.kind, "status": entry.status})
+                warnings.append(
+                    {
+                        "code": warning_code,
+                        "uri": current_uri,
+                        "target": target,
+                        "message": entry.metadata.get("message")
+                        or entry.deprecation.get("message")
+                        or ("Use " + target + " instead."),
+                    }
+                )
+                current_uri = target
+                continue
+
+            if entry.canonical_uri and entry.canonical_uri != entry.uri:
+                route.append({"from": entry.uri, "to": entry.canonical_uri, "type": "canonical_uri"})
+                current_uri = entry.canonical_uri
+                continue
+
+            return {
+                "requested_uri": requested_uri,
+                "canonical_uri": entry.uri,
+                "entry": entry,
+                "input": input_data,
+                "route": route,
+                "warnings": warnings,
+                "deprecated": bool(warnings),
+            }
+
+        raise RegistryError("Too many URI redirects for %s" % requested_uri)
+
+    def canonicalize(self, uri: str) -> str:
+        return self._resolve_internal(uri)["canonical_uri"]
+
+    def resolve_uri(
+        self,
+        uri: str,
+        payload: Optional[Dict[str, Any]] = None,
+    ) -> Dict[str, Any]:
+        resolved = self._resolve_internal(uri, payload)
+        entry = resolved.pop("entry")
+        return {
+            **resolved,
+            "resource": entry.to_dict(include_private=True),
+        }
+
     def resolve(self, uri: str) -> Dict[str, Any]:
-        entry = self.require(uri)
-        return entry.to_dict(include_private=True)
+        return self.resolve_uri(uri)["resource"]
 
     def read(self, uri: str) -> Any:
         entry = self.require(uri)
@@ -601,14 +943,15 @@ class ResourceRegistry:
         return value
 
     def execute(self, uri: str, payload: Optional[Dict[str, Any]] = None, confirmed: bool = False) -> Any:
-        entry = self.require(uri)
+        resolved = self._resolve_internal(uri, payload or {})
+        entry = resolved["entry"]
         if entry.kind not in EXECUTABLE_KINDS:
             raise RegistryError("URI is not executable: %s" % uri)
         if entry.callable_ref is None:
             raise RegistryError("URI has no callable: %s" % uri)
         self.check_permission(entry, "execute", confirmed=confirmed)
 
-        data = payload or {}
+        data = resolved["input"]
         if not isinstance(data, dict):
             raise RegistryValidationError("Execution input must be an object")
         validate_schema(entry.input_schema, data)

@@ -8,6 +8,34 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.1.10] - 2026-06-14
 
 ### Fixed
+- Fix relative-imports issues (ticket-9d339d03)
+- Fix relative-imports issues (ticket-8878cd9a)
+- Fix string-concat issues (ticket-6b812730)
+- Fix relative-imports issues (ticket-4c4369af)
+- Fix string-concat issues (ticket-19757ea1)
+
+## [0.1.10] - 2026-06-14
+
+### Fixed
+- Fix relative-imports issues (ticket-920d651c)
+- Fix smart-return-type issues (ticket-26f50f26)
+- Fix unused-imports issues (ticket-78f9b30f)
+- Fix magic-numbers issues (ticket-9ef11828)
+- Fix relative-imports issues (ticket-1c7db970)
+- Fix smart-return-type issues (ticket-6d603cca)
+- Fix ai-boilerplate issues (ticket-ef74b6ca)
+- Fix relative-imports issues (ticket-c9fdf3eb)
+- Fix string-concat issues (ticket-fc4cbc1e)
+- Fix relative-imports issues (ticket-04b93bfd)
+- Fix relative-imports issues (ticket-85bde04e)
+- Fix string-concat issues (ticket-8e59420c)
+- Fix smart-return-type issues (ticket-01f1a91e)
+- Fix magic-numbers issues (ticket-f7199ff5)
+- Fix string-concat issues (ticket-742e2d66)
+
+## [0.1.10] - 2026-06-14
+
+### Fixed
 - Fix relative-imports issues (ticket-21179bdb)
 - Fix smart-return-type issues (ticket-fd28744f)
 - Fix unused-imports issues (ticket-7892c43b)
@@ -48,6 +76,58 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fix llm-hallucinations issues (ticket-af40c0e5)
 
 ## [Unreleased]
+
+### Docs
+- Add project documentation under `docs/` with getting started, architecture, API/protocols, registry URI, workflow/autoimprovement and testing guides.
+- Link `docs/` from README and TODO.
+
+### Fixed
+- Handle LLM responses where `message.content` is empty but JSON is available in reasoning/provider-specific fields.
+- Reject country-level weather locations such as `Polska` with a structured `LOCATION_TOO_BROAD` service error instead of geocoding an arbitrary country point.
+- Treat schema-valid registry service errors as locally valid workflow outcomes, avoiding unnecessary LLM validation waits.
+- Route product price questions to `tellm://service/price/search` instead of `domain.check` or generated `run` functions.
+
+### Added
+- Add browser UI action for copying workflow logs to the clipboard.
+- Add workflow timing diagnostics for router, execution, rendering, LLM validation and total duration.
+- Add Open-Meteo geocoding/forecast timing diagnostics to `weather.current` results.
+- Route simple weather queries locally to `tellm://service/weather/current` without an LLM router call.
+- Confirm trusted schema-valid registry results with local validation instead of calling LLM validation.
+- Add `tellm://service/price/search` for supported commerce price lookup with structured errors such as `PRICE_NOT_FOUND`.
+
+### Tests
+- Add regression coverage for parsing JSON from reasoning-only LLM responses.
+
+## [4.0.6] - 2026-06-14
+
+### Docs
+- Update CHANGELOG.md
+- Update README.md
+- Update SUMD.md
+- Update SUMR.md
+- Update TODO.md
+- Update docs/README.md
+- Update docs/api.md
+- Update docs/architecture.md
+- Update docs/getting-started.md
+- Update docs/registry-and-uri.md
+- ... and 4 more files
+
+### Test
+- Update tests/test_tellm.py
+
+### Other
+- Update MANIFEST.in
+- Update app.doql.less
+- Update planfile.yaml
+- Update project/analysis.toon.yaml
+- Update project/calls.mmd
+- Update project/calls.png
+- Update project/calls.toon.yaml
+- Update project/calls.yaml
+- Update project/compact_flow.mmd
+- Update project/compact_flow.png
+- ... and 16 more files
 
 ## [4.0.5] - 2026-06-14
 
@@ -131,4 +211,3 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Update main.py
 - Update requirements.txt
 - Update server.py
-

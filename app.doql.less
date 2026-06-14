@@ -5,6 +5,10 @@ app {
   version: 0.1.0;
 }
 
+tests {
+  import: testql-scenarios/**/*.testql.toon.yaml;
+}
+
 env_vars {
   keys: OPENROUTER_API_KEY, LLM_MODEL, HOST, PORT;
 }

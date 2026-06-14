@@ -1,9 +1,33 @@
-# redup/duplication | 0 groups | 7f 1749L | 2026-06-13
+# redup/duplication | 1 groups | 12f 8345L | 2026-06-14
 
 SUMMARY:
-  files_scanned: 7
-  total_lines:   1749
-  dup_groups:    0
-  dup_fragments: 0
-  saved_lines:   0
-  scan_ms:       2666
+  files_scanned: 12
+  total_lines:   8345
+  dup_groups:    1
+  dup_fragments: 2
+  saved_lines:   457
+  scan_ms:       2495
+
+HOTSPOTS[1] (files with most duplication):
+  tellm/server.py  dup=571L  groups=1  frags=2  (6.8%)
+
+DUPLICATES[1] (ranked by impact):
+  [f8b3673c2f6f19bf] !! STRU  _docs_html  L=457 N=2 saved=457 sim=1.00
+      tellm/server.py:787-1243  (_docs_html)
+      tellm/server.py:1297-1410  (_autoimprovement_html)
+
+REFACTOR[1] (ranked by priority):
+  [1] ○ extract_module     → tellm/utils/_docs_html.py
+      WHY: 2 occurrences of 457-line block across 1 files — saves 457 lines
+      FILES: tellm/server.py
+
+QUICK_WINS[1] (low risk, high savings — do first):
+  [1] extract_module     saved=457L  → tellm/utils/_docs_html.py
+      FILES: server.py
+
+EFFORT_ESTIMATE (total ≈ 22.9h):
+  hard   _docs_html                          saved=457L  ~1371min
+
+METRICS-TARGET:
+  dup_groups:  1 → 0
+  saved_lines: 457 lines recoverable

@@ -1,10 +1,100 @@
 source: code2llm
+# generated in 0.03s
 schema: code2llm.planfile_tickets.v1
 project_root: /home/tom/github/wronai/tellm
 tickets:
+- signal: code2llm_cc
+  title: 'Reduce cyclomatic complexity: tellm.bot.TellmBot._registry_price_search
+    (CC=30)'
+  description: 'code2llm reports `tellm.bot.TellmBot._registry_price_search` at `tellm/bot.py:2005`
+    with cyclomatic complexity 30 (limit 15).
+
+
+    Extract smaller functions, flatten conditionals, or split strategy branches. Re-run
+    code2llm after the change and keep tests green.'
+  priority: high
+  labels:
+  - llm-ready
+  - code2llm
+  - complexity
+  - refactor
+  files:
+  - tellm/bot.py
+  dedupe_key: code2llm:cc:tellm/bot.py:tellm.bot.TellmBot._registry_price_search
+- signal: code2llm_cc
+  title: 'Reduce cyclomatic complexity: tellm.bot.TellmBot._registry_weather_current
+    (CC=29)'
+  description: 'code2llm reports `tellm.bot.TellmBot._registry_weather_current` at
+    `tellm/bot.py:1543` with cyclomatic complexity 29 (limit 15).
+
+
+    Extract smaller functions, flatten conditionals, or split strategy branches. Re-run
+    code2llm after the change and keep tests green.'
+  priority: high
+  labels:
+  - llm-ready
+  - code2llm
+  - complexity
+  - refactor
+  files:
+  - tellm/bot.py
+  dedupe_key: code2llm:cc:tellm/bot.py:tellm.bot.TellmBot._registry_weather_current
+- signal: code2llm_cc
+  title: 'Reduce cyclomatic complexity: tellm.bot.TellmBot.resolve_resource_document
+    (CC=47)'
+  description: 'code2llm reports `tellm.bot.TellmBot.resolve_resource_document` at
+    `tellm/bot.py:409` with cyclomatic complexity 47 (limit 15).
+
+
+    Extract smaller functions, flatten conditionals, or split strategy branches. Re-run
+    code2llm after the change and keep tests green.'
+  priority: high
+  labels:
+  - llm-ready
+  - code2llm
+  - complexity
+  - refactor
+  files:
+  - tellm/bot.py
+  dedupe_key: code2llm:cc:tellm/bot.py:tellm.bot.TellmBot.resolve_resource_document
+- signal: code2llm_cc
+  title: 'Reduce cyclomatic complexity: tellm.improvement.runner.AutoimprovementRunner._history_health
+    (CC=39)'
+  description: 'code2llm reports `tellm.improvement.runner.AutoimprovementRunner._history_health`
+    at `tellm/improvement/runner.py:172` with cyclomatic complexity 39 (limit 15).
+
+
+    Extract smaller functions, flatten conditionals, or split strategy branches. Re-run
+    code2llm after the change and keep tests green.'
+  priority: high
+  labels:
+  - llm-ready
+  - code2llm
+  - complexity
+  - refactor
+  files:
+  - tellm/improvement/runner.py
+  dedupe_key: code2llm:cc:tellm/improvement/runner.py:tellm.improvement.runner.AutoimprovementRunner._history_health
+- signal: code2llm_cc
+  title: 'Reduce cyclomatic complexity: tellm.server.TellmServer.process_request (CC=95)'
+  description: 'code2llm reports `tellm.server.TellmServer.process_request` at `tellm/server.py:2203`
+    with cyclomatic complexity 95 (limit 15).
+
+
+    Extract smaller functions, flatten conditionals, or split strategy branches. Re-run
+    code2llm after the change and keep tests green.'
+  priority: high
+  labels:
+  - llm-ready
+  - code2llm
+  - complexity
+  - refactor
+  files:
+  - tellm/server.py
+  dedupe_key: code2llm:cc:tellm/server.py:tellm.server.TellmServer.process_request
 - signal: code2llm_god
-  title: 'Split god module: bot.py'
-  description: 'code2llm reports `bot.py` as a large module (553 lines, 4 classes).
+  title: 'Split god module: tellm/bot.py'
+  description: 'code2llm reports `tellm/bot.py` as a large module (2899 lines, 6 classes).
 
 
     Split it by responsibility, keep public imports stable, and add focused tests
@@ -16,11 +106,29 @@ tickets:
   - god-module
   - refactor
   files:
-  - bot.py
-  dedupe_key: code2llm:god:bot.py
+  - tellm/bot.py
+  dedupe_key: code2llm:god:tellm/bot.py
+- signal: code2llm_god
+  title: 'Split god module: tellm/registry/core.py'
+  description: 'code2llm reports `tellm/registry/core.py` as a large module (974 lines,
+    5 classes).
+
+
+    Split it by responsibility, keep public imports stable, and add focused tests
+    around the moved behavior.'
+  priority: high
+  labels:
+  - llm-ready
+  - code2llm
+  - god-module
+  - refactor
+  files:
+  - tellm/registry/core.py
+  dedupe_key: code2llm:god:tellm/registry/core.py
 - signal: code2llm_cc
-  title: 'Reduce cyclomatic complexity: bot.TellmBot._execute_python_process (CC=22)'
-  description: 'code2llm reports `bot.TellmBot._execute_python_process` at `bot.py:327`
+  title: 'Reduce cyclomatic complexity: tellm.bot.TellmBot._execute_python_process
+    (CC=22)'
+  description: 'code2llm reports `tellm.bot.TellmBot._execute_python_process` at `tellm/bot.py:2345`
     with cyclomatic complexity 22 (limit 15).
 
 
@@ -33,15 +141,157 @@ tickets:
   - complexity
   - refactor
   files:
-  - bot.py
-  dedupe_key: code2llm:cc:bot.py:bot.TellmBot._execute_python_process
+  - tellm/bot.py
+  dedupe_key: code2llm:cc:tellm/bot.py:tellm.bot.TellmBot._execute_python_process
+- signal: code2llm_cc
+  title: 'Reduce cyclomatic complexity: tellm.bot.TellmBot._parse_json_response (CC=18)'
+  description: 'code2llm reports `tellm.bot.TellmBot._parse_json_response` at `tellm/bot.py:2240`
+    with cyclomatic complexity 18 (limit 15).
+
+
+    Extract smaller functions, flatten conditionals, or split strategy branches. Re-run
+    code2llm after the change and keep tests green.'
+  priority: normal
+  labels:
+  - llm-ready
+  - code2llm
+  - complexity
+  - refactor
+  files:
+  - tellm/bot.py
+  dedupe_key: code2llm:cc:tellm/bot.py:tellm.bot.TellmBot._parse_json_response
+- signal: code2llm_cc
+  title: 'Reduce cyclomatic complexity: tellm.improvement.runner.AutoimprovementRunner._schema_health
+    (CC=15)'
+  description: 'code2llm reports `tellm.improvement.runner.AutoimprovementRunner._schema_health`
+    at `tellm/improvement/runner.py:81` with cyclomatic complexity 15 (limit 15).
+
+
+    Extract smaller functions, flatten conditionals, or split strategy branches. Re-run
+    code2llm after the change and keep tests green.'
+  priority: normal
+  labels:
+  - llm-ready
+  - code2llm
+  - complexity
+  - refactor
+  files:
+  - tellm/improvement/runner.py
+  dedupe_key: code2llm:cc:tellm/improvement/runner.py:tellm.improvement.runner.AutoimprovementRunner._schema_health
+- signal: code2llm_cc
+  title: 'Reduce cyclomatic complexity: tellm.registry.core.RegistryEntry.__post_init__
+    (CC=17)'
+  description: 'code2llm reports `tellm.registry.core.RegistryEntry.__post_init__`
+    at `tellm/registry/core.py:445` with cyclomatic complexity 17 (limit 15).
+
+
+    Extract smaller functions, flatten conditionals, or split strategy branches. Re-run
+    code2llm after the change and keep tests green.'
+  priority: normal
+  labels:
+  - llm-ready
+  - code2llm
+  - complexity
+  - refactor
+  files:
+  - tellm/registry/core.py
+  dedupe_key: code2llm:cc:tellm/registry/core.py:tellm.registry.core.RegistryEntry.__post_init__
+- signal: code2llm_cc
+  title: 'Reduce cyclomatic complexity: tellm.registry.core.ResourceRegistry._resolve_internal
+    (CC=17)'
+  description: 'code2llm reports `tellm.registry.core.ResourceRegistry._resolve_internal`
+    at `tellm/registry/core.py:850` with cyclomatic complexity 17 (limit 15).
+
+
+    Extract smaller functions, flatten conditionals, or split strategy branches. Re-run
+    code2llm after the change and keep tests green.'
+  priority: normal
+  labels:
+  - llm-ready
+  - code2llm
+  - complexity
+  - refactor
+  files:
+  - tellm/registry/core.py
+  dedupe_key: code2llm:cc:tellm/registry/core.py:tellm.registry.core.ResourceRegistry._resolve_internal
+- signal: code2llm_cc
+  title: 'Reduce cyclomatic complexity: tellm.registry.core.validate_schema (CC=23)'
+  description: 'code2llm reports `tellm.registry.core.validate_schema` at `tellm/registry/core.py:142`
+    with cyclomatic complexity 23 (limit 15).
+
+
+    Extract smaller functions, flatten conditionals, or split strategy branches. Re-run
+    code2llm after the change and keep tests green.'
+  priority: normal
+  labels:
+  - llm-ready
+  - code2llm
+  - complexity
+  - refactor
+  files:
+  - tellm/registry/core.py
+  dedupe_key: code2llm:cc:tellm/registry/core.py:tellm.registry.core.validate_schema
+- signal: code2llm_cc
+  title: 'Reduce cyclomatic complexity: tellm.server.TellmServer._data_source_findings
+    (CC=21)'
+  description: 'code2llm reports `tellm.server.TellmServer._data_source_findings`
+    at `tellm/server.py:2586` with cyclomatic complexity 21 (limit 15).
+
+
+    Extract smaller functions, flatten conditionals, or split strategy branches. Re-run
+    code2llm after the change and keep tests green.'
+  priority: normal
+  labels:
+  - llm-ready
+  - code2llm
+  - complexity
+  - refactor
+  files:
+  - tellm/server.py
+  dedupe_key: code2llm:cc:tellm/server.py:tellm.server.TellmServer._data_source_findings
+- signal: code2llm_cc
+  title: 'Reduce cyclomatic complexity: tellm.server.TellmServer._local_validation_verdict
+    (CC=23)'
+  description: 'code2llm reports `tellm.server.TellmServer._local_validation_verdict`
+    at `tellm/server.py:2792` with cyclomatic complexity 23 (limit 15).
+
+
+    Extract smaller functions, flatten conditionals, or split strategy branches. Re-run
+    code2llm after the change and keep tests green.'
+  priority: normal
+  labels:
+  - llm-ready
+  - code2llm
+  - complexity
+  - refactor
+  files:
+  - tellm/server.py
+  dedupe_key: code2llm:cc:tellm/server.py:tellm.server.TellmServer._local_validation_verdict
+- signal: code2llm_cc
+  title: 'Reduce cyclomatic complexity: tellm.server.TellmServer._process_message
+    (CC=15)'
+  description: 'code2llm reports `tellm.server.TellmServer._process_message` at `tellm/server.py:3395`
+    with cyclomatic complexity 15 (limit 15).
+
+
+    Extract smaller functions, flatten conditionals, or split strategy branches. Re-run
+    code2llm after the change and keep tests green.'
+  priority: normal
+  labels:
+  - llm-ready
+  - code2llm
+  - complexity
+  - refactor
+  files:
+  - tellm/server.py
+  dedupe_key: code2llm:cc:tellm/server.py:tellm.server.TellmServer._process_message
 - signal: code2llm_smell_data_clump
-  title: 'Address code smell: Data Clump: name, self, func'
-  description: 'code2llm reports `Data Clump: name, self, func` in `server.py:762`.
+  title: 'Address code smell: Data Clump: func, self, name'
+  description: 'code2llm reports `Data Clump: func, self, name` in `tellm/server.py:1881`.
 
 
-    Arguments (name, self, func) are used together in multiple functions: server.TellmServer.register_function,
-    bot.TellmBot.register_function.
+    Arguments (func, self, name) are used together in multiple functions: tellm.server.TellmServer.register_function,
+    tellm.bot.TellmBot.register_function.
 
 
     Make the smallest refactor that removes the smell and run local tests.'
@@ -52,15 +302,16 @@ tickets:
   - code-smell
   - data-clump
   files:
-  - server.py
-  dedupe_key: 'code2llm:smell:data_clump:server.py:762:Data Clump: name, self, func'
+  - tellm/server.py
+  dedupe_key: 'code2llm:smell:data_clump:tellm/server.py:1881:Data Clump: func, self,
+    name'
 - signal: code2llm_smell_data_clump
-  title: 'Address code smell: Data Clump: name, self, func'
-  description: 'code2llm reports `Data Clump: name, self, func` in `bot.py:227`.
+  title: 'Address code smell: Data Clump: func, self, name'
+  description: 'code2llm reports `Data Clump: func, self, name` in `tellm/bot.py:558`.
 
 
-    Arguments (name, self, func) are used together in multiple functions: server.TellmServer.register_function,
-    bot.TellmBot.register_function.
+    Arguments (func, self, name) are used together in multiple functions: tellm.server.TellmServer.register_function,
+    tellm.bot.TellmBot.register_function.
 
 
     Make the smallest refactor that removes the smell and run local tests.'
@@ -71,16 +322,16 @@ tickets:
   - code-smell
   - data-clump
   files:
-  - bot.py
-  dedupe_key: 'code2llm:smell:data_clump:bot.py:227:Data Clump: name, self, func'
+  - tellm/bot.py
+  dedupe_key: 'code2llm:smell:data_clump:tellm/bot.py:558:Data Clump: func, self,
+    name'
 - signal: code2llm_smell_data_clump
-  title: 'Address code smell: Data Clump: task, result, transcription, self'
-  description: 'code2llm reports `Data Clump: task, result, transcription, self` in
-    `bot.py:196`.
+  title: 'Address code smell: Data Clump: parameters, self, query'
+  description: 'code2llm reports `Data Clump: parameters, self, query` in `tellm/bot.py:2463`.
 
 
-    Arguments (task, result, transcription, self) are used together in multiple functions:
-    bot.TellmBot.save_task, bot.TellmBot.generate_view.
+    Arguments (parameters, self, query) are used together in multiple functions: tellm.bot.TellmBot._weather_location_from_query,
+    tellm.bot.TellmBot._price_site_from_query, tellm.bot.TellmBot._price_query_from_query.
 
 
     Make the smallest refactor that removes the smell and run local tests.'
@@ -91,17 +342,16 @@ tickets:
   - code-smell
   - data-clump
   files:
-  - bot.py
-  dedupe_key: 'code2llm:smell:data_clump:bot.py:196:Data Clump: task, result, transcription,
-    self'
+  - tellm/bot.py
+  dedupe_key: 'code2llm:smell:data_clump:tellm/bot.py:2463:Data Clump: parameters,
+    self, query'
 - signal: code2llm_smell_data_clump
-  title: 'Address code smell: Data Clump: task, result, transcription, self'
-  description: 'code2llm reports `Data Clump: task, result, transcription, self` in
-    `bot.py:538`.
+  title: 'Address code smell: Data Clump: parameters, self, query'
+  description: 'code2llm reports `Data Clump: parameters, self, query` in `tellm/bot.py:2546`.
 
 
-    Arguments (task, result, transcription, self) are used together in multiple functions:
-    bot.TellmBot.save_task, bot.TellmBot.generate_view.
+    Arguments (parameters, self, query) are used together in multiple functions: tellm.bot.TellmBot._weather_location_from_query,
+    tellm.bot.TellmBot._price_site_from_query, tellm.bot.TellmBot._price_query_from_query.
 
 
     Make the smallest refactor that removes the smell and run local tests.'
@@ -112,12 +362,350 @@ tickets:
   - code-smell
   - data-clump
   files:
-  - bot.py
-  dedupe_key: 'code2llm:smell:data_clump:bot.py:538:Data Clump: task, result, transcription,
-    self'
+  - tellm/bot.py
+  dedupe_key: 'code2llm:smell:data_clump:tellm/bot.py:2546:Data Clump: parameters,
+    self, query'
+- signal: code2llm_smell_data_clump
+  title: 'Address code smell: Data Clump: parameters, self, query'
+  description: 'code2llm reports `Data Clump: parameters, self, query` in `tellm/bot.py:2573`.
+
+
+    Arguments (parameters, self, query) are used together in multiple functions: tellm.bot.TellmBot._weather_location_from_query,
+    tellm.bot.TellmBot._price_site_from_query, tellm.bot.TellmBot._price_query_from_query.
+
+
+    Make the smallest refactor that removes the smell and run local tests.'
+  priority: normal
+  labels:
+  - llm-ready
+  - code2llm
+  - code-smell
+  - data-clump
+  files:
+  - tellm/bot.py
+  dedupe_key: 'code2llm:smell:data_clump:tellm/bot.py:2573:Data Clump: parameters,
+    self, query'
+- signal: code2llm_smell_data_clump
+  title: 'Address code smell: Data Clump: result, uri, self, metadata, kind, ok, logs,
+    error, status'
+  description: 'code2llm reports `Data Clump: result, uri, self, metadata, kind, ok,
+    logs, error, status` in `tellm/improvement/history.py:38`.
+
+
+    Arguments (result, uri, self, metadata, kind, ok, logs, error, status) are used
+    together in multiple functions: tellm.improvement.history.ExecutionHistoryStore.record,
+    tellm.bot.TellmBot.record_execution.
+
+
+    Make the smallest refactor that removes the smell and run local tests.'
+  priority: normal
+  labels:
+  - llm-ready
+  - code2llm
+  - code-smell
+  - data-clump
+  files:
+  - tellm/improvement/history.py
+  dedupe_key: 'code2llm:smell:data_clump:tellm/improvement/history.py:38:Data Clump:
+    result, uri, self, metadata, kind, ok, logs, error, status'
+- signal: code2llm_smell_data_clump
+  title: 'Address code smell: Data Clump: result, uri, self, metadata, kind, ok, logs,
+    error, status'
+  description: 'code2llm reports `Data Clump: result, uri, self, metadata, kind, ok,
+    logs, error, status` in `tellm/bot.py:238`.
+
+
+    Arguments (result, uri, self, metadata, kind, ok, logs, error, status) are used
+    together in multiple functions: tellm.improvement.history.ExecutionHistoryStore.record,
+    tellm.bot.TellmBot.record_execution.
+
+
+    Make the smallest refactor that removes the smell and run local tests.'
+  priority: normal
+  labels:
+  - llm-ready
+  - code2llm
+  - code-smell
+  - data-clump
+  files:
+  - tellm/bot.py
+  dedupe_key: 'code2llm:smell:data_clump:tellm/bot.py:238:Data Clump: result, uri,
+    self, metadata, kind, ok, logs, error, status'
+- signal: code2llm_smell_data_clump
+  title: 'Address code smell: Data Clump: self, uri, payload'
+  description: 'code2llm reports `Data Clump: self, uri, payload` in `tellm/bot.py:2163`.
+
+
+    Arguments (self, uri, payload) are used together in multiple functions: tellm.bot.TellmBot.execute_resource,
+    tellm.registry.core.ResourceRegistry.resolve_uri.
+
+
+    Make the smallest refactor that removes the smell and run local tests.'
+  priority: normal
+  labels:
+  - llm-ready
+  - code2llm
+  - code-smell
+  - data-clump
+  files:
+  - tellm/bot.py
+  dedupe_key: 'code2llm:smell:data_clump:tellm/bot.py:2163:Data Clump: self, uri,
+    payload'
+- signal: code2llm_smell_data_clump
+  title: 'Address code smell: Data Clump: self, uri, payload'
+  description: 'code2llm reports `Data Clump: self, uri, payload` in `tellm/registry/core.py:921`.
+
+
+    Arguments (self, uri, payload) are used together in multiple functions: tellm.bot.TellmBot.execute_resource,
+    tellm.registry.core.ResourceRegistry.resolve_uri.
+
+
+    Make the smallest refactor that removes the smell and run local tests.'
+  priority: normal
+  labels:
+  - llm-ready
+  - code2llm
+  - code-smell
+  - data-clump
+  files:
+  - tellm/registry/core.py
+  dedupe_key: 'code2llm:smell:data_clump:tellm/registry/core.py:921:Data Clump: self,
+    uri, payload'
+- signal: code2llm_smell_data_clump
+  title: 'Address code smell: Data Clump: task, result, self, transcription'
+  description: 'code2llm reports `Data Clump: task, result, self, transcription` in
+    `tellm/server.py:2586`.
+
+
+    Arguments (task, result, self, transcription) are used together in multiple functions:
+    tellm.server.TellmServer._data_source_findings, tellm.bot.TellmBot.save_task,
+    tellm.bot.TellmBot.generate_view.
+
+
+    Make the smallest refactor that removes the smell and run local tests.'
+  priority: normal
+  labels:
+  - llm-ready
+  - code2llm
+  - code-smell
+  - data-clump
+  files:
+  - tellm/server.py
+  dedupe_key: 'code2llm:smell:data_clump:tellm/server.py:2586:Data Clump: task, result,
+    self, transcription'
+- signal: code2llm_smell_data_clump
+  title: 'Address code smell: Data Clump: task, result, self, transcription'
+  description: 'code2llm reports `Data Clump: task, result, self, transcription` in
+    `tellm/bot.py:324`.
+
+
+    Arguments (task, result, self, transcription) are used together in multiple functions:
+    tellm.server.TellmServer._data_source_findings, tellm.bot.TellmBot.save_task,
+    tellm.bot.TellmBot.generate_view.
+
+
+    Make the smallest refactor that removes the smell and run local tests.'
+  priority: normal
+  labels:
+  - llm-ready
+  - code2llm
+  - code-smell
+  - data-clump
+  files:
+  - tellm/bot.py
+  dedupe_key: 'code2llm:smell:data_clump:tellm/bot.py:324:Data Clump: task, result,
+    self, transcription'
+- signal: code2llm_smell_data_clump
+  title: 'Address code smell: Data Clump: task, result, self, transcription'
+  description: 'code2llm reports `Data Clump: task, result, self, transcription` in
+    `tellm/bot.py:2882`.
+
+
+    Arguments (task, result, self, transcription) are used together in multiple functions:
+    tellm.server.TellmServer._data_source_findings, tellm.bot.TellmBot.save_task,
+    tellm.bot.TellmBot.generate_view.
+
+
+    Make the smallest refactor that removes the smell and run local tests.'
+  priority: normal
+  labels:
+  - llm-ready
+  - code2llm
+  - code-smell
+  - data-clump
+  files:
+  - tellm/bot.py
+  dedupe_key: 'code2llm:smell:data_clump:tellm/bot.py:2882:Data Clump: task, result,
+    self, transcription'
+- signal: code2llm_smell_data_clump
+  title: 'Address code smell: Data Clump: task, self, query'
+  description: 'code2llm reports `Data Clump: task, self, query` in `tellm/bot.py:2483`.
+
+
+    Arguments (task, self, query) are used together in multiple functions: tellm.bot.TellmBot._route_weather_task,
+    tellm.bot.TellmBot._route_price_task.
+
+
+    Make the smallest refactor that removes the smell and run local tests.'
+  priority: normal
+  labels:
+  - llm-ready
+  - code2llm
+  - code-smell
+  - data-clump
+  files:
+  - tellm/bot.py
+  dedupe_key: 'code2llm:smell:data_clump:tellm/bot.py:2483:Data Clump: task, self,
+    query'
+- signal: code2llm_smell_data_clump
+  title: 'Address code smell: Data Clump: task, self, query'
+  description: 'code2llm reports `Data Clump: task, self, query` in `tellm/bot.py:2588`.
+
+
+    Arguments (task, self, query) are used together in multiple functions: tellm.bot.TellmBot._route_weather_task,
+    tellm.bot.TellmBot._route_price_task.
+
+
+    Make the smallest refactor that removes the smell and run local tests.'
+  priority: normal
+  labels:
+  - llm-ready
+  - code2llm
+  - code-smell
+  - data-clump
+  files:
+  - tellm/bot.py
+  dedupe_key: 'code2llm:smell:data_clump:tellm/bot.py:2588:Data Clump: task, self,
+    query'
+- signal: code2llm_smell_god_function
+  title: 'Address code smell: God Function: _extract_price_candidates'
+  description: 'code2llm reports `God Function: _extract_price_candidates` in `tellm/bot.py:1909`.
+
+
+    Function ''_extract_price_candidates'' is oversized: CC=7, fan-out=18, mutations=0.
+
+
+    Make the smallest refactor that removes the smell and run local tests.'
+  priority: normal
+  labels:
+  - llm-ready
+  - code2llm
+  - code-smell
+  - god-function
+  files:
+  - tellm/bot.py
+  dedupe_key: 'code2llm:smell:god_function:tellm/bot.py:1909:God Function: _extract_price_candidates'
+- signal: code2llm_smell_god_function
+  title: 'Address code smell: God Function: _geocode_city'
+  description: 'code2llm reports `God Function: _geocode_city` in `tellm/bot.py:1486`.
+
+
+    Function ''_geocode_city'' is oversized: CC=5, fan-out=18, mutations=0.
+
+
+    Make the smallest refactor that removes the smell and run local tests.'
+  priority: normal
+  labels:
+  - llm-ready
+  - code2llm
+  - code-smell
+  - god-function
+  files:
+  - tellm/bot.py
+  dedupe_key: 'code2llm:smell:god_function:tellm/bot.py:1486:God Function: _geocode_city'
+- signal: code2llm_smell_god_function
+  title: 'Address code smell: God Function: _handle_resource_execution'
+  description: 'code2llm reports `God Function: _handle_resource_execution` in `tellm/server.py:3192`.
+
+
+    Function ''_handle_resource_execution'' is oversized: CC=14, fan-out=25, mutations=0.
+
+
+    Make the smallest refactor that removes the smell and run local tests.'
+  priority: normal
+  labels:
+  - llm-ready
+  - code2llm
+  - code-smell
+  - god-function
+  files:
+  - tellm/server.py
+  dedupe_key: 'code2llm:smell:god_function:tellm/server.py:3192:God Function: _handle_resource_execution'
+- signal: code2llm_smell_god_function
+  title: 'Address code smell: God Function: _handle_transcription'
+  description: 'code2llm reports `God Function: _handle_transcription` in `tellm/server.py:3024`.
+
+
+    Function ''_handle_transcription'' is oversized: CC=13, fan-out=27, mutations=0.
+
+
+    Make the smallest refactor that removes the smell and run local tests.'
+  priority: normal
+  labels:
+  - llm-ready
+  - code2llm
+  - code-smell
+  - god-function
+  files:
+  - tellm/server.py
+  dedupe_key: 'code2llm:smell:god_function:tellm/server.py:3024:God Function: _handle_transcription'
+- signal: code2llm_smell_god_function
+  title: 'Address code smell: God Function: _init_registry'
+  description: 'code2llm reports `God Function: _init_registry` in `tellm/bot.py:969`.
+
+
+    Function ''_init_registry'' is oversized: CC=3, fan-out=13, mutations=0.
+
+
+    Make the smallest refactor that removes the smell and run local tests.'
+  priority: normal
+  labels:
+  - llm-ready
+  - code2llm
+  - code-smell
+  - god-function
+  files:
+  - tellm/bot.py
+  dedupe_key: 'code2llm:smell:god_function:tellm/bot.py:969:God Function: _init_registry'
+- signal: code2llm_smell_god_function
+  title: 'Address code smell: God Function: _message_text'
+  description: 'code2llm reports `God Function: _message_text` in `tellm/bot.py:2214`.
+
+
+    Function ''_message_text'' is oversized: CC=14, fan-out=7, mutations=0.
+
+
+    Make the smallest refactor that removes the smell and run local tests.'
+  priority: normal
+  labels:
+  - llm-ready
+  - code2llm
+  - code-smell
+  - god-function
+  files:
+  - tellm/bot.py
+  dedupe_key: 'code2llm:smell:god_function:tellm/bot.py:2214:God Function: _message_text'
+- signal: code2llm_smell_god_function
+  title: 'Address code smell: God Function: _registry_domain_check'
+  description: 'code2llm reports `God Function: _registry_domain_check` in `tellm/bot.py:1725`.
+
+
+    Function ''_registry_domain_check'' is oversized: CC=14, fan-out=13, mutations=0.
+
+
+    Make the smallest refactor that removes the smell and run local tests.'
+  priority: normal
+  labels:
+  - llm-ready
+  - code2llm
+  - code-smell
+  - god-function
+  files:
+  - tellm/bot.py
+  dedupe_key: 'code2llm:smell:god_function:tellm/bot.py:1725:God Function: _registry_domain_check'
 - signal: code2llm_smell_god_function
   title: 'Address code smell: God Function: _render_block'
-  description: 'code2llm reports `God Function: _render_block` in `bot.py:99`.
+  description: 'code2llm reports `God Function: _render_block` in `tellm/bot.py:136`.
 
 
     Function ''_render_block'' is oversized: CC=11, fan-out=11, mutations=0.
@@ -131,32 +719,107 @@ tickets:
   - code-smell
   - god-function
   files:
-  - bot.py
-  dedupe_key: 'code2llm:smell:god_function:bot.py:99:God Function: _render_block'
+  - tellm/bot.py
+  dedupe_key: 'code2llm:smell:god_function:tellm/bot.py:136:God Function: _render_block'
+- signal: code2llm_smell_god_function
+  title: 'Address code smell: God Function: _render_data_from_service_result'
+  description: 'code2llm reports `God Function: _render_data_from_service_result`
+    in `tellm/bot.py:2853`.
+
+
+    Function ''_render_data_from_service_result'' is oversized: CC=13, fan-out=6,
+    mutations=0.
+
+
+    Make the smallest refactor that removes the smell and run local tests.'
+  priority: normal
+  labels:
+  - llm-ready
+  - code2llm
+  - code-smell
+  - god-function
+  files:
+  - tellm/bot.py
+  dedupe_key: 'code2llm:smell:god_function:tellm/bot.py:2853:God Function: _render_data_from_service_result'
+- signal: code2llm_smell_god_function
+  title: 'Address code smell: God Function: _render_logs'
+  description: 'code2llm reports `God Function: _render_logs` in `tellm/server.py:2709`.
+
+
+    Function ''_render_logs'' is oversized: CC=12, fan-out=11, mutations=0.
+
+
+    Make the smallest refactor that removes the smell and run local tests.'
+  priority: normal
+  labels:
+  - llm-ready
+  - code2llm
+  - code-smell
+  - god-function
+  files:
+  - tellm/server.py
+  dedupe_key: 'code2llm:smell:god_function:tellm/server.py:2709:God Function: _render_logs'
+- signal: code2llm_smell_god_function
+  title: 'Address code smell: God Function: _validate_and_repair'
+  description: 'code2llm reports `God Function: _validate_and_repair` in `tellm/server.py:2838`.
+
+
+    Function ''_validate_and_repair'' is oversized: CC=12, fan-out=17, mutations=0.
+
+
+    Make the smallest refactor that removes the smell and run local tests.'
+  priority: normal
+  labels:
+  - llm-ready
+  - code2llm
+  - code-smell
+  - god-function
+  files:
+  - tellm/server.py
+  dedupe_key: 'code2llm:smell:god_function:tellm/server.py:2838:God Function: _validate_and_repair'
+- signal: code2llm_smell_god_function
+  title: 'Address code smell: God Function: analyze_query'
+  description: 'code2llm reports `God Function: analyze_query` in `tellm/bot.py:2645`.
+
+
+    Function ''analyze_query'' is oversized: CC=13, fan-out=15, mutations=0.
+
+
+    Make the smallest refactor that removes the smell and run local tests.'
+  priority: normal
+  labels:
+  - llm-ready
+  - code2llm
+  - code-smell
+  - god-function
+  files:
+  - tellm/bot.py
+  dedupe_key: 'code2llm:smell:god_function:tellm/bot.py:2645:God Function: analyze_query'
+- signal: code2llm_smell_god_function
+  title: 'Address code smell: God Function: find'
+  description: 'code2llm reports `God Function: find` in `tellm/registry/core.py:779`.
+
+
+    Function ''find'' is oversized: CC=14, fan-out=1, mutations=0.
+
+
+    Make the smallest refactor that removes the smell and run local tests.'
+  priority: normal
+  labels:
+  - llm-ready
+  - code2llm
+  - code-smell
+  - god-function
+  files:
+  - tellm/registry/core.py
+  dedupe_key: 'code2llm:smell:god_function:tellm/registry/core.py:779:God Function:
+    find'
 - signal: code2llm_smell_god_function
   title: 'Address code smell: God Function: handle'
-  description: 'code2llm reports `God Function: handle` in `server.py:860`.
+  description: 'code2llm reports `God Function: handle` in `tellm/server.py:3454`.
 
 
-    Function ''handle'' is oversized: CC=10, fan-out=12, mutations=0.
-
-
-    Make the smallest refactor that removes the smell and run local tests.'
-  priority: normal
-  labels:
-  - llm-ready
-  - code2llm
-  - code-smell
-  - god-function
-  files:
-  - server.py
-  dedupe_key: 'code2llm:smell:god_function:server.py:860:God Function: handle'
-- signal: code2llm_smell_god_function
-  title: 'Address code smell: God Function: main'
-  description: 'code2llm reports `God Function: main` in `main.py:4`.
-
-
-    Function ''main'' is oversized: CC=3, fan-out=8, mutations=7.
+    Function ''handle'' is oversized: CC=10, fan-out=14, mutations=0.
 
 
     Make the smallest refactor that removes the smell and run local tests.'
@@ -167,8 +830,8 @@ tickets:
   - code-smell
   - god-function
   files:
-  - main.py
-  dedupe_key: 'code2llm:smell:god_function:main.py:4:God Function: main'
+  - tellm/server.py
+  dedupe_key: 'code2llm:smell:god_function:tellm/server.py:3454:God Function: handle'
 - signal: code2llm_smell_god_function
   title: 'Address code smell: God Function: main'
   description: 'code2llm reports `God Function: main` in `scripts/protocol_smoke.py:203`.
@@ -188,36 +851,155 @@ tickets:
   - scripts/protocol_smoke.py
   dedupe_key: 'code2llm:smell:god_function:scripts/protocol_smoke.py:203:God Function:
     main'
-- signal: slow_test_warning
-  title: 'Address slow test: tests.test_tellm.test_import'
-  description: 'Test `tests.test_tellm.test_import` took 2.27s to run.
+- signal: code2llm_smell_god_function
+  title: 'Address code smell: God Function: main'
+  description: 'code2llm reports `God Function: main` in `main.py:4`.
 
 
-    Optimize its setup, mock slow external dependencies, or refactor its logic to
-    reduce overall test suite execution time.'
-  priority: medium
+    Function ''main'' is oversized: CC=3, fan-out=8, mutations=7.
+
+
+    Make the smallest refactor that removes the smell and run local tests.'
+  priority: normal
   labels:
   - llm-ready
-  - test-optimization
-  - slow-test
+  - code2llm
+  - code-smell
+  - god-function
   files:
-  - tests/test_tellm.py
-  dedupe_key: test-optimization:tests.test_tellm:test_import
-- signal: slow_test_warning
-  title: 'Address slow test: tests.test_tellm.test_server_blocks_parallel_query_and_accepts_cancel'
-  description: 'Test `tests.test_tellm.test_server_blocks_parallel_query_and_accepts_cancel`
-    took 2.01s to run.
+  - main.py
+  dedupe_key: 'code2llm:smell:god_function:main.py:4:God Function: main'
+- signal: code2llm_smell_god_function
+  title: 'Address code smell: God Function: normalize_issue_list'
+  description: 'code2llm reports `God Function: normalize_issue_list` in `tellm/registry/core.py:201`.
 
 
-    Optimize its setup, mock slow external dependencies, or refactor its logic to
-    reduce overall test suite execution time.'
-  priority: medium
+    Function ''normalize_issue_list'' is oversized: CC=11, fan-out=8, mutations=10.
+
+
+    Make the smallest refactor that removes the smell and run local tests.'
+  priority: normal
   labels:
   - llm-ready
-  - test-optimization
-  - slow-test
+  - code2llm
+  - code-smell
+  - god-function
   files:
-  - tests/test_tellm.py
-  dedupe_key: test-optimization:tests.test_tellm:test_server_blocks_parallel_query_and_accepts_cancel
+  - tellm/registry/core.py
+  dedupe_key: 'code2llm:smell:god_function:tellm/registry/core.py:201:God Function:
+    normalize_issue_list'
+- signal: code2llm_smell_god_function
+  title: 'Address code smell: God Function: register_callable'
+  description: 'code2llm reports `God Function: register_callable` in `tellm/registry/core.py:681`.
+
+
+    Function ''register_callable'' is oversized: CC=14, fan-out=2, mutations=0.
+
+
+    Make the smallest refactor that removes the smell and run local tests.'
+  priority: normal
+  labels:
+  - llm-ready
+  - code2llm
+  - code-smell
+  - god-function
+  files:
+  - tellm/registry/core.py
+  dedupe_key: 'code2llm:smell:god_function:tellm/registry/core.py:681:God Function:
+    register_callable'
+- signal: code2llm_smell_god_function
+  title: 'Address code smell: God Function: register_value'
+  description: 'code2llm reports `God Function: register_value` in `tellm/registry/core.py:602`.
+
+
+    Function ''register_value'' is oversized: CC=14, fan-out=2, mutations=0.
+
+
+    Make the smallest refactor that removes the smell and run local tests.'
+  priority: normal
+  labels:
+  - llm-ready
+  - code2llm
+  - code-smell
+  - god-function
+  files:
+  - tellm/registry/core.py
+  dedupe_key: 'code2llm:smell:god_function:tellm/registry/core.py:602:God Function:
+    register_value'
+- signal: code2llm_smell_god_function
+  title: 'Address code smell: God Function: run'
+  description: 'code2llm reports `God Function: run` in `tellm/improvement/runner.py:416`.
+
+
+    Function ''run'' is oversized: CC=11, fan-out=16, mutations=0.
+
+
+    Make the smallest refactor that removes the smell and run local tests.'
+  priority: normal
+  labels:
+  - llm-ready
+  - code2llm
+  - code-smell
+  - god-function
+  files:
+  - tellm/improvement/runner.py
+  dedupe_key: 'code2llm:smell:god_function:tellm/improvement/runner.py:416:God Function:
+    run'
+- signal: code2llm_smell_god_function
+  title: 'Address code smell: God Function: save_autoimprovement_report'
+  description: 'code2llm reports `God Function: save_autoimprovement_report` in `tellm/bot.py:260`.
+
+
+    Function ''save_autoimprovement_report'' is oversized: CC=5, fan-out=14, mutations=0.
+
+
+    Make the smallest refactor that removes the smell and run local tests.'
+  priority: normal
+  labels:
+  - llm-ready
+  - code2llm
+  - code-smell
+  - god-function
+  files:
+  - tellm/bot.py
+  dedupe_key: 'code2llm:smell:god_function:tellm/bot.py:260:God Function: save_autoimprovement_report'
+- signal: code2llm_smell_god_function
+  title: 'Address code smell: God Module: tellm.bot'
+  description: 'code2llm reports `God Module: tellm.bot` in `tellm/bot.py:1`.
+
+
+    Module ''tellm.bot'' is too large (90 functions, 6 classes). Consider splitting
+    into sub-modules.
+
+
+    Make the smallest refactor that removes the smell and run local tests.'
+  priority: normal
+  labels:
+  - llm-ready
+  - code2llm
+  - code-smell
+  - god-function
+  files:
+  - tellm/bot.py
+  dedupe_key: 'code2llm:smell:god_function:tellm/bot.py:1:God Module: tellm.bot'
+- signal: code2llm_smell_god_function
+  title: 'Address code smell: God Module: tellm.server'
+  description: 'code2llm reports `God Module: tellm.server` in `tellm/server.py:1`.
+
+
+    Module ''tellm.server'' is too large (50 functions, 1 classes). Consider splitting
+    into sub-modules.
+
+
+    Make the smallest refactor that removes the smell and run local tests.'
+  priority: normal
+  labels:
+  - llm-ready
+  - code2llm
+  - code-smell
+  - god-function
+  files:
+  - tellm/server.py
+  dedupe_key: 'code2llm:smell:god_function:tellm/server.py:1:God Module: tellm.server'
 applied: []
 skipped: []

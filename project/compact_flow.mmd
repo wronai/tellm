@@ -1,11 +1,14 @@
 flowchart TD
 %% generated in 0.00s
-    bot__TellmBot["bot.TellmBot<br/>24 funcs"]
     config["config<br/>1 funcs"]
     main["main<br/>1 funcs"]
-    server["server<br/>3 funcs"]
-    server__TellmServer["server.TellmServer<br/>12 funcs"]
-    server__TellmServer -->|3| server
-    server__TellmServer -->|1| config
-    bot__TellmBot -->|1| config
+    tellm__bot["tellm.bot<br/>90 funcs"]
+    tellm__improvement["tellm.improvement<br/>21 funcs"]
+    tellm__registry["tellm.registry<br/>39 funcs"]
+    tellm__server["tellm.server<br/>50 funcs"]
+    tellm__bot ==>|10| tellm__registry
+    tellm__server ==>|5| tellm__registry
+    tellm__improvement -->|3| tellm__registry
+    tellm__server -->|1| config
+    tellm__bot -->|1| config
     main -->|1| config

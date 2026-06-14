@@ -1,8 +1,5 @@
 flowchart LR
 %% generated in 0.00s
-    subgraph bot__TellmBot
-        bot__TellmBot____init__["__init__"]
-    end
     subgraph config
         config__load_config["load_config"]
     end
@@ -10,33 +7,60 @@ flowchart LR
         main__main["main"]
     end
     subgraph scripts__generate_test_audio
-        scripts__generate_test_audio__main["main"]
-        scripts__generate_test_audio__run["run"]
-        scripts__generate_test_audio__generate_fixture["generate_fixture"]
         scripts__generate_test_audio__require_tool["require_tool"]
+        scripts__generate_test_audio__main["main"]
+        scripts__generate_test_audio__generate_fixture["generate_fixture"]
+        scripts__generate_test_audio__run["run"]
     end
     subgraph scripts__protocol_smoke
-        scripts__protocol_smoke__audio_data_url["audio_data_url"]
         scripts__protocol_smoke__mime_for_audio["mime_for_audio"]
-        scripts__protocol_smoke__check_ws_text["check_ws_text"]
-        scripts__protocol_smoke__check_http["check_http"]
-        scripts__protocol_smoke__ws_ssl_context["ws_ssl_context"]
-        scripts__protocol_smoke__check_ws_audio["check_ws_audio"]
-        scripts__protocol_smoke__get_url["get_url"]
-        scripts__protocol_smoke__async_main["async_main"]
         scripts__protocol_smoke__send_ws_payload["send_ws_payload"]
+        scripts__protocol_smoke__async_main["async_main"]
+        scripts__protocol_smoke__check_http["check_http"]
+        scripts__protocol_smoke__get_url["get_url"]
+        scripts__protocol_smoke__check_ws_text["check_ws_text"]
+        scripts__protocol_smoke__check_ws_audio["check_ws_audio"]
+        scripts__protocol_smoke__ws_ssl_context["ws_ssl_context"]
+        scripts__protocol_smoke__audio_data_url["audio_data_url"]
     end
-    subgraph server
-        server___websocket_logger["_websocket_logger"]
+    subgraph tellm__bot
+        tellm__bot__TellmBot___registry_now["_registry_now"]
+        tellm__bot__TellmBot____init__["__init__"]
+        tellm__bot__TellmBot___price_error_result["_price_error_result"]
+        tellm__bot__TellmBot___registry_domain_check["_registry_domain_check"]
+        tellm__bot__TellmBot___registry_echo["_registry_echo"]
+        tellm__bot__TellmBot___price_relevance_tokens["_price_relevance_tokens"]
     end
-    subgraph server__TellmServer
-        server__TellmServer__serve_forever["serve_forever"]
-        server__TellmServer___handle_transcription["_handle_transcription"]
+    subgraph tellm__registry
+        tellm__registry__core__registry_manifest_schema["registry_manifest_schema"]
+        tellm__registry__core__ResourceRegistry__read["read"]
+        tellm__registry__core__uri_domain["uri_domain"]
+        tellm__registry__core__ResourceRegistry___call["_call"]
+        tellm__registry__core__uri_name["uri_name"]
+        tellm__registry__core__ResourceRegistry__manifest["manifest"]
+        tellm__registry__core__service_result_schema["service_result_schema"]
+        tellm__registry__core___schema_types["_schema_types"]
+        tellm__registry__core__ResourceRegistry__register_alias["register_alias"]
+        tellm__registry__core__uri_parts["uri_parts"]
+        tellm__registry__core__service_result["service_result"]
+        tellm__registry__core__normalize_issue_list["normalize_issue_list"]
+        tellm__registry__core__validate_tellm_uri["validate_tellm_uri"]
+        tellm__registry__core__validate_schema["validate_schema"]
+        tellm__registry__core__ResourceRegistry__execute["execute"]
+        tellm__registry__core__ResourceRegistry__list["list"]
+        tellm__registry__core__json_like["json_like"]
+        tellm__registry__core__RegistryEntry____post_init__["__post_init__"]
+        tellm__registry__core__normalize_schema["normalize_schema"]
     end
-    server__TellmServer___handle_transcription --> config__load_config
-    server__TellmServer__serve_forever --> server___websocket_logger
-    bot__TellmBot____init__ --> config__load_config
-    main__main --> config__load_config
+    subgraph tellm__server
+        tellm__server___asyncapi_document["_asyncapi_document"]
+        tellm__server__TellmServer___validate_payload["_validate_payload"]
+        tellm__server__TellmServer___local_validation_verdict["_local_validation_verdict"]
+        tellm__server___websocket_logger["_websocket_logger"]
+        tellm__server___openapi_document["_openapi_document"]
+        tellm__server__TellmServer___validate_and_repair["_validate_and_repair"]
+        tellm__server__TellmServer__serve_forever["serve_forever"]
+    end
     scripts__generate_test_audio__generate_fixture --> scripts__generate_test_audio__run
     scripts__generate_test_audio__generate_fixture --> scripts__generate_test_audio__require_tool
     scripts__generate_test_audio__main --> scripts__generate_test_audio__generate_fixture
@@ -48,3 +72,31 @@ flowchart LR
     scripts__protocol_smoke__check_ws_audio --> scripts__protocol_smoke__send_ws_payload
     scripts__protocol_smoke__async_main --> scripts__protocol_smoke__check_ws_text
     scripts__protocol_smoke__async_main --> scripts__protocol_smoke__check_ws_audio
+    tellm__server___openapi_document --> tellm__registry__core__registry_manifest_schema
+    tellm__server___openapi_document --> tellm__registry__core__service_result_schema
+    tellm__server___asyncapi_document --> tellm__registry__core__registry_manifest_schema
+    tellm__server__TellmServer___validate_payload --> tellm__registry__core__validate_schema
+    tellm__server__TellmServer___local_validation_verdict --> tellm__registry__core__validate_schema
+    tellm__server__TellmServer___validate_and_repair --> config__load_config
+    tellm__server__TellmServer__serve_forever --> tellm__server___websocket_logger
+    tellm__bot__TellmBot____init__ --> config__load_config
+    tellm__bot__TellmBot___registry_now --> tellm__registry__core__service_result
+    tellm__bot__TellmBot___registry_echo --> tellm__registry__core__service_result
+    tellm__bot__TellmBot___registry_domain_check --> tellm__registry__core__service_result
+    tellm__bot__TellmBot___price_relevance_tokens --> tellm__registry__core__ResourceRegistry__list
+    tellm__bot__TellmBot___price_error_result --> tellm__registry__core__service_result
+    main__main --> config__load_config
+    tellm__registry__core__uri_domain --> tellm__registry__core__uri_parts
+    tellm__registry__core__uri_name --> tellm__registry__core__uri_parts
+    tellm__registry__core__validate_schema --> tellm__registry__core___schema_types
+    tellm__registry__core__normalize_issue_list --> tellm__registry__core__json_like
+    tellm__registry__core__service_result --> tellm__registry__core__normalize_issue_list
+    tellm__registry__core__RegistryEntry____post_init__ --> tellm__registry__core__normalize_schema
+    tellm__registry__core__RegistryEntry____post_init__ --> tellm__registry__core__validate_tellm_uri
+    tellm__registry__core__RegistryEntry____post_init__ --> tellm__registry__core__uri_domain
+    tellm__registry__core__ResourceRegistry__register_alias --> tellm__registry__core__uri_name
+    tellm__registry__core__ResourceRegistry__manifest --> tellm__registry__core__registry_manifest_schema
+    tellm__registry__core__ResourceRegistry__manifest --> tellm__registry__core__service_result_schema
+    tellm__registry__core__ResourceRegistry__read --> tellm__registry__core__validate_schema
+    tellm__registry__core__ResourceRegistry__execute --> tellm__registry__core__validate_schema
+    tellm__registry__core__ResourceRegistry___call --> tellm__registry__core__ResourceRegistry__list
